@@ -96,15 +96,13 @@ func keybindings(g *gocui.Gui) error {
 }
 
 func changes() ([]string, error) {
-	var (
-		cmdOut  []byte
-		err     error
-		results = make([]string, 1)
-	)
+	var results = make([]string, 1)
 
-	if cmdOut, err = exec.Command("git", "status", "--porcelain").Output(); err != nil {
+	cmdOut, err := exec.Command("git", "status", "--porcelain").Output()
+	if err != nil {
 		return nil, err
 	}
+
 	output := strings.Split(string(cmdOut), "\n")
 	for _, change := range output {
 		if len(change) > 0 {
