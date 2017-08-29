@@ -4,6 +4,56 @@ import "log"
 import "github.com/jroimartin/gocui"
 import "fmt"
 import "os/exec"
+import "time"
+
+var (
+	done = make(chan struct{})
+)
+
+func main() {
+	g, err := gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
+		log.Panicln(err)
+	}
+	defer g.Close()
+
+	g.SetManagerFunc(layout)
+
+	if err := keybindings(g); err != nil {
+		log.Panicln(err)
+	}
+
+	go update(g)
+
+	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
+		log.Panicln(err)
+	}
+}
+
+func layout(g *gocui.Gui) error {
+	maxX, maxY := g.Size()
+
+	x1 := int(0.0 * float64(maxX))
+	y1 := int(0.0 * float64(maxY))
+	x2 := int(0.1*float64(maxX)) - 1
+	y2 := int(0.3*float64(maxY)) - 1
+
+	if v, err := g.SetView("side", x1, y1, x2, y2); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "Changes"
+		v.Highlight = true
+		v.SelBgColor = gocui.ColorCyan
+		v.SelFgColor = gocui.ColorBlack
+	}
+
+	if _, err := g.SetCurrentView("side"); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
@@ -57,7 +107,7 @@ func changes() (string, error) {
 	return output[3:len(output)], nil
 }
 
-func update(g *gocui.Gui) error {
+func updateChanges(g *gocui.Gui) error {
 	var (
 		changed string
 		err     error
@@ -80,51 +130,19 @@ func update(g *gocui.Gui) error {
 	return nil
 }
 
-func layout(g *gocui.Gui) error {
-	maxX, maxY := g.Size()
-
-	x1 := int(0.0 * float64(maxX))
-	y1 := int(0.0 * float64(maxY))
-	x2 := int(0.1*float64(maxX)) - 1
-	y2 := int(0.3*float64(maxY)) - 1
-
-	if v, err := g.SetView("side", x1, y1, x2, y2); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
+func update(g *gocui.Gui) {
+	for {
+		select {
+		case <-done:
+			return
+		case <-time.After(10 * time.Second):
+			updateChanges(g)
 		}
-		v.Title = "Changes"
-		v.Highlight = true
-		v.SelBgColor = gocui.ColorCyan
-		v.SelFgColor = gocui.ColorBlack
 	}
 
-	if _, err := g.SetCurrentView("side"); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {
+	close(done)
 	return gocui.ErrQuit
-}
-
-func main() {
-	g, err := gocui.NewGui(gocui.OutputNormal)
-	if err != nil {
-		log.Panicln(err)
-	}
-	defer g.Close()
-
-	g.SetManagerFunc(layout)
-
-	if err := keybindings(g); err != nil {
-		log.Panicln(err)
-	}
-
-	update(g)
-
-	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
-		log.Panicln(err)
-	}
 }
