@@ -3,6 +3,7 @@ package main
 import "log"
 import "github.com/jroimartin/gocui"
 import "fmt"
+import "os/exec"
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
@@ -43,6 +44,42 @@ func keybindings(g *gocui.Gui) error {
 	return nil
 }
 
+func changes() (string, error) {
+	var (
+		cmdOut []byte
+		err    error
+	)
+
+	if cmdOut, err = exec.Command("git", "status", "--porcelain").Output(); err != nil {
+		return "", err
+	}
+	output := string(cmdOut)
+	return output[3:len(output)], nil
+}
+
+func update(g *gocui.Gui) error {
+	var (
+		changed string
+		err     error
+	)
+
+	if changed, err = changes(); err != nil {
+		return err
+	}
+
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View("side")
+		if err != nil {
+			return nil
+		}
+		v.Clear()
+		fmt.Fprint(v, changed)
+		return nil
+	})
+
+	return nil
+}
+
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
@@ -59,8 +96,6 @@ func layout(g *gocui.Gui) error {
 		v.Highlight = true
 		v.SelBgColor = gocui.ColorCyan
 		v.SelFgColor = gocui.ColorBlack
-		fmt.Fprintln(v, "Item 1")
-		fmt.Fprintln(v, "Item 2")
 	}
 
 	if _, err := g.SetCurrentView("side"); err != nil {
@@ -86,6 +121,8 @@ func main() {
 	if err := keybindings(g); err != nil {
 		log.Panicln(err)
 	}
+
+	update(g)
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
