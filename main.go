@@ -5,6 +5,7 @@ import "github.com/jroimartin/gocui"
 import "fmt"
 import "os/exec"
 import "time"
+import "strings"
 
 var (
 	done = make(chan struct{})
@@ -94,22 +95,29 @@ func keybindings(g *gocui.Gui) error {
 	return nil
 }
 
-func changes() (string, error) {
+func changes() ([]string, error) {
 	var (
-		cmdOut []byte
-		err    error
+		cmdOut  []byte
+		err     error
+		results = make([]string, 1)
 	)
 
 	if cmdOut, err = exec.Command("git", "status", "--porcelain").Output(); err != nil {
-		return "", err
+		return nil, err
 	}
-	output := string(cmdOut)
-	return output[3:len(output)], nil
+	output := strings.Split(string(cmdOut), "\n")
+	for _, change := range output {
+		if len(change) > 0 {
+			results = append(results, change[3:len(change)])
+		}
+	}
+
+	return results, nil
 }
 
 func updateChanges(g *gocui.Gui) error {
 	var (
-		changed string
+		changed []string
 		err     error
 	)
 
@@ -123,7 +131,9 @@ func updateChanges(g *gocui.Gui) error {
 			return nil
 		}
 		v.Clear()
-		fmt.Fprint(v, changed)
+		for _, change := range changed {
+			fmt.Fprintln(v, change)
+		}
 		return nil
 	})
 
