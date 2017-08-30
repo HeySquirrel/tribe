@@ -20,13 +20,15 @@ func main() {
 
 	g.SetManagerFunc(layout)
 
-	if err := keybindings(g); err != nil {
+	err = keybindings(g)
+	if err != nil {
 		log.Panicln(err)
 	}
 
 	go update(g)
 
-	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
+	err = g.MainLoop()
+	if err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
 }
@@ -83,13 +85,18 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 }
 
 func keybindings(g *gocui.Gui) error {
-	if err := g.SetKeybinding("side", gocui.KeyArrowDown, gocui.ModNone, cursorDown); err != nil {
+	err := g.SetKeybinding("side", gocui.KeyArrowDown, gocui.ModNone, cursorDown)
+	if err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("side", gocui.KeyArrowUp, gocui.ModNone, cursorUp); err != nil {
+
+	err = g.SetKeybinding("side", gocui.KeyArrowUp, gocui.ModNone, cursorUp)
+	if err != nil {
 		return err
 	}
-	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
+
+	err = g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
+	if err != nil {
 		log.Panicln(err)
 	}
 	return nil
@@ -114,12 +121,8 @@ func changes() ([]string, error) {
 }
 
 func updateChanges(g *gocui.Gui) error {
-	var (
-		changed []string
-		err     error
-	)
-
-	if changed, err = changes(); err != nil {
+	changed, err := changes()
+	if err != nil {
 		return err
 	}
 
