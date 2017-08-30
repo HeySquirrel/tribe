@@ -18,6 +18,8 @@ func New() *App {
 		log.Panicln(err)
 	}
 
+	a.Gui.SetManagerFunc(a.Layout)
+
 	return a
 }
 

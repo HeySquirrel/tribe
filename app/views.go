@@ -105,7 +105,7 @@ var defaultViews = []string{
 	legendView,
 }
 
-func Layout(g *gocui.Gui) error {
+func (a *App) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
 	for _, name := range defaultViews {

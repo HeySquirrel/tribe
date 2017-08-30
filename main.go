@@ -16,8 +16,6 @@ func main() {
 	a := app.New()
 	defer a.Close()
 
-	a.Gui.SetManagerFunc(app.Layout)
-
 	err := keybindings(a.Gui)
 	if err != nil {
 		log.Panicln(err)
