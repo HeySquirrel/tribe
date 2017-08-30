@@ -6,6 +6,7 @@ import "fmt"
 import "os/exec"
 import "time"
 import "strings"
+import "github.com/heysquirrel/tribe/app"
 
 var (
 	done = make(chan struct{})
@@ -18,7 +19,7 @@ func main() {
 	}
 	defer g.Close()
 
-	g.SetManagerFunc(layout)
+	g.SetManagerFunc(app.Layout)
 
 	err = keybindings(g)
 	if err != nil {
@@ -31,31 +32,6 @@ func main() {
 	if err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
-}
-
-func layout(g *gocui.Gui) error {
-	maxX, maxY := g.Size()
-
-	x1 := int(0.0 * float64(maxX))
-	y1 := int(0.0 * float64(maxY))
-	x2 := int(0.3*float64(maxX)) - 1
-	y2 := int(0.2*float64(maxY)) - 1
-
-	if v, err := g.SetView("changed", x1, y1, x2, y2); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Title = "Last Changed"
-		v.Highlight = true
-		v.SelBgColor = gocui.ColorCyan
-		v.SelFgColor = gocui.ColorBlack
-	}
-
-	if _, err := g.SetCurrentView("changed"); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
@@ -85,12 +61,12 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 }
 
 func keybindings(g *gocui.Gui) error {
-	err := g.SetKeybinding("changed", gocui.KeyArrowDown, gocui.ModNone, cursorDown)
+	err := g.SetKeybinding("changes", gocui.KeyArrowDown, gocui.ModNone, cursorDown)
 	if err != nil {
 		return err
 	}
 
-	err = g.SetKeybinding("changed", gocui.KeyArrowUp, gocui.ModNone, cursorUp)
+	err = g.SetKeybinding("changes", gocui.KeyArrowUp, gocui.ModNone, cursorUp)
 	if err != nil {
 		return err
 	}
@@ -127,7 +103,7 @@ func updateChanges(g *gocui.Gui) error {
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("changed")
+		v, err := g.View("changes")
 		if err != nil {
 			return nil
 		}
