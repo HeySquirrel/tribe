@@ -155,29 +155,29 @@ func (a *App) currentFileSelection() string {
 }
 
 func (a *App) updateLogs(logs string) {
-	a.Gui.Update(func(g *gocui.Gui) error {
-		v, err := a.Gui.View(logsView)
-		if err != nil {
-			log.Panicln(err)
-		}
-		v.Clear()
-
+	a.updateView(logsView, func(v *gocui.View) {
 		fmt.Fprint(v, logs)
-
-		return nil
 	})
 }
 
 func (a *App) UpdateChanges(files []string) {
-	a.Gui.Update(func(g *gocui.Gui) error {
-		v, err := g.View(changesView)
-		if err != nil {
-			return nil
-		}
-		v.Clear()
+	a.updateView(changesView, func(v *gocui.View) {
 		for _, file := range files {
 			fmt.Fprintln(v, file)
 		}
+	})
+}
+
+func (a *App) updateView(view string, fn func(*gocui.View)) {
+	a.Gui.Update(func(g *gocui.Gui) error {
+		v, err := g.View(view)
+		if err != nil {
+			return err
+		}
+		v.Clear()
+
+		fn(v)
+
 		return nil
 	})
 }
