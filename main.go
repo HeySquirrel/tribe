@@ -13,25 +13,19 @@ var (
 )
 
 func main() {
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	a := app.New()
+	defer a.Close()
+
+	a.Gui.SetManagerFunc(app.Layout)
+
+	err := keybindings(a.Gui)
 	if err != nil {
 		log.Panicln(err)
 	}
-	defer g.Close()
 
-	g.SetManagerFunc(app.Layout)
+	go update(a.Gui)
 
-	err = keybindings(g)
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	go update(g)
-
-	err = g.MainLoop()
-	if err != nil && err != gocui.ErrQuit {
-		log.Panicln(err)
-	}
+	a.Loop()
 }
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
