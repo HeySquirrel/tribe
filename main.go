@@ -34,18 +34,6 @@ func changes() ([]string, error) {
 	return results, nil
 }
 
-func updateView(g *gocui.Gui, view string, value string) {
-	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View(view)
-		if err != nil {
-			return nil
-		}
-		v.Clear()
-		fmt.Fprintln(v, value)
-		return nil
-	})
-}
-
 func updateChanges(g *gocui.Gui) error {
 	changed, err := changes()
 	if err != nil {
