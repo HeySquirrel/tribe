@@ -142,6 +142,7 @@ func updateChanges(g *gocui.Gui) error {
 }
 
 func update(g *gocui.Gui) {
+	updateChanges(g)
 	for {
 		select {
 		case <-done:
