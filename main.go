@@ -43,6 +43,13 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
+
+		_, cy = v.Cursor()
+		l, err := v.Line(cy)
+		if err != nil {
+			l = ""
+		}
+		updateView(g, "logs", l)
 	}
 	return nil
 }
@@ -56,6 +63,13 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 				return err
 			}
 		}
+
+		_, cy = v.Cursor()
+		l, err := v.Line(cy)
+		if err != nil {
+			l = ""
+		}
+		updateView(g, "logs", l)
 	}
 	return nil
 }
@@ -94,6 +108,18 @@ func changes() ([]string, error) {
 	}
 
 	return results, nil
+}
+
+func updateView(g *gocui.Gui, view string, value string) {
+	g.Update(func(g *gocui.Gui) error {
+		v, err := g.View(view)
+		if err != nil {
+			return nil
+		}
+		v.Clear()
+		fmt.Fprintln(v, value)
+		return nil
+	})
 }
 
 func updateChanges(g *gocui.Gui) error {
