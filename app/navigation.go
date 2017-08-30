@@ -35,6 +35,5 @@ func (a *App) PreviousFile(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (a *App) quit(g *gocui.Gui, v *gocui.View) error {
-	close(a.Done)
 	return gocui.ErrQuit
 }

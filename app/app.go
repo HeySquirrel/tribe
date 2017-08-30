@@ -34,6 +34,7 @@ func (a *App) Loop() {
 }
 
 func (a *App) Close() {
+	close(a.Done)
 	a.Gui.Close()
 }
 
