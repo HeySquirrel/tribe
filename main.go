@@ -1,7 +1,5 @@
 package main
 
-import "github.com/jroimartin/gocui"
-import "fmt"
 import "os/exec"
 import "time"
 import "strings"
@@ -34,35 +32,25 @@ func changes() ([]string, error) {
 	return results, nil
 }
 
-func updateChanges(g *gocui.Gui) error {
+func updateChanges(a *app.App) error {
 	changed, err := changes()
 	if err != nil {
 		return err
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("changes")
-		if err != nil {
-			return nil
-		}
-		v.Clear()
-		for _, change := range changed {
-			fmt.Fprintln(v, change)
-		}
-		return nil
-	})
+	a.UpdateChanges(changed)
 
 	return nil
 }
 
 func update(a *app.App) {
-	updateChanges(a.Gui)
+	updateChanges(a)
 	for {
 		select {
 		case <-a.Done:
 			return
 		case <-time.After(10 * time.Second):
-			updateChanges(a.Gui)
+			updateChanges(a)
 		}
 	}
 
