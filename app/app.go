@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
 	"log"
 )
@@ -41,4 +42,5 @@ func (a *App) Close() {
 func (a *App) updateCurrentFile() {
 	file := a.currentFileSelection()
 	a.updateLogs(file)
+	a.updateContributors(git.FrequentContributors(file))
 }

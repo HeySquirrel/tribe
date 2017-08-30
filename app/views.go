@@ -169,6 +169,14 @@ func (a *App) UpdateChanges(files []string) {
 	})
 }
 
+func (a *App) updateContributors(contributors []string) {
+	a.updateView(contributorsView, func(v *gocui.View) {
+		for _, contributor := range contributors {
+			fmt.Fprintln(v, contributor)
+		}
+	})
+}
+
 func (a *App) updateView(view string, fn func(*gocui.View)) {
 	a.Gui.Update(func(g *gocui.Gui) error {
 		v, err := g.View(view)
