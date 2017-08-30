@@ -6,11 +6,13 @@ import (
 )
 
 type App struct {
-	Gui *gocui.Gui
+	Gui  *gocui.Gui
+	Done chan struct{}
 }
 
 func New() *App {
 	a := new(App)
+	a.Done = make(chan struct{})
 
 	var err error
 	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
@@ -19,6 +21,7 @@ func New() *App {
 	}
 
 	a.Gui.SetManagerFunc(a.Layout)
+	a.setKeyBindings()
 
 	return a
 }
@@ -32,4 +35,9 @@ func (a *App) Loop() {
 
 func (a *App) Close() {
 	a.Gui.Close()
+}
+
+func (a *App) updateCurrentFile() {
+	file := a.currentFileSelection()
+	a.updateLogs(file)
 }

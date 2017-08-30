@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/jroimartin/gocui"
+	"log"
 )
 
 const (
@@ -136,4 +137,29 @@ func (a *App) Layout(g *gocui.Gui) error {
 	}
 
 	return nil
+}
+
+func (a *App) currentFileSelection() string {
+	v, err := a.Gui.View(changesView)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	_, cy := v.Cursor()
+	file, err := v.Line(cy)
+	if err != nil {
+		file = ""
+	}
+
+	return file
+}
+
+func (a *App) updateLogs(logs string) {
+	v, err := a.Gui.View(logsView)
+	if err != nil {
+		log.Panicln(err)
+	}
+	v.Clear()
+
+	fmt.Fprint(v, logs)
 }

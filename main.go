@@ -1,6 +1,5 @@
 package main
 
-import "log"
 import "github.com/jroimartin/gocui"
 import "fmt"
 import "os/exec"
@@ -8,80 +7,13 @@ import "time"
 import "strings"
 import "github.com/heysquirrel/tribe/app"
 
-var (
-	done = make(chan struct{})
-)
-
 func main() {
 	a := app.New()
 	defer a.Close()
 
-	err := keybindings(a.Gui)
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	go update(a.Gui)
+	go update(a)
 
 	a.Loop()
-}
-
-func cursorDown(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy+1); err != nil {
-			ox, oy := v.Origin()
-			if err := v.SetOrigin(ox, oy+1); err != nil {
-				return err
-			}
-		}
-
-		_, cy = v.Cursor()
-		l, err := v.Line(cy)
-		if err != nil {
-			l = ""
-		}
-		updateView(g, "logs", l)
-	}
-	return nil
-}
-
-func cursorUp(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		ox, oy := v.Origin()
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
-			if err := v.SetOrigin(ox, oy-1); err != nil {
-				return err
-			}
-		}
-
-		_, cy = v.Cursor()
-		l, err := v.Line(cy)
-		if err != nil {
-			l = ""
-		}
-		updateView(g, "logs", l)
-	}
-	return nil
-}
-
-func keybindings(g *gocui.Gui) error {
-	err := g.SetKeybinding("changes", gocui.KeyArrowDown, gocui.ModNone, cursorDown)
-	if err != nil {
-		return err
-	}
-
-	err = g.SetKeybinding("changes", gocui.KeyArrowUp, gocui.ModNone, cursorUp)
-	if err != nil {
-		return err
-	}
-
-	err = g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
-	if err != nil {
-		log.Panicln(err)
-	}
-	return nil
 }
 
 func changes() ([]string, error) {
@@ -135,20 +67,15 @@ func updateChanges(g *gocui.Gui) error {
 	return nil
 }
 
-func update(g *gocui.Gui) {
-	updateChanges(g)
+func update(a *app.App) {
+	updateChanges(a.Gui)
 	for {
 		select {
-		case <-done:
+		case <-a.Done:
 			return
 		case <-time.After(10 * time.Second):
-			updateChanges(g)
+			updateChanges(a.Gui)
 		}
 	}
 
-}
-
-func quit(g *gocui.Gui, v *gocui.View) error {
-	close(done)
-	return gocui.ErrQuit
 }
