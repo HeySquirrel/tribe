@@ -165,6 +165,7 @@ func (a *App) UpdateChanges(files []string) {
 		for _, file := range files {
 			fmt.Fprintln(v, file)
 		}
+		a.updateCurrentFile()
 	})
 }
 
