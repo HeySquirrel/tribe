@@ -72,7 +72,7 @@ var views = map[string]View{
 		x1:        0.0,
 		y1:        0.4,
 		x2:        0.3,
-		y2:        1.0,
+		y2:        0.99,
 		highlight: false,
 	},
 	relevantWorkView: {
@@ -90,7 +90,7 @@ var views = map[string]View{
 		x1:        0.3,
 		y1:        0.9,
 		x2:        1.0,
-		y2:        1.0,
+		y2:        0.99,
 		highlight: false,
 	},
 }
