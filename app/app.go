@@ -24,8 +24,7 @@ func New() *App {
 		log.Panicln(err)
 	}
 
-	a.Gui.SetManagerFunc(a.Layout)
-	a.setKeyBindings()
+	a.Gui.SetManager(a)
 
 	return a
 }

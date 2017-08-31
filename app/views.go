@@ -137,7 +137,7 @@ func (a *App) Layout(g *gocui.Gui) error {
 		return err
 	}
 
-	return nil
+	return a.setKeyBindings()
 }
 
 func (a *App) currentFileSelection() string {
