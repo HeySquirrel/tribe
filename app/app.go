@@ -1,11 +1,12 @@
 package app
 
 import (
-	"fmt"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
+	"github.com/olekukonko/tablewriter"
 	"io"
 	"log"
+	"strconv"
 )
 
 type App struct {
@@ -48,10 +49,14 @@ func (a *App) currentFileChanged() {
 
 func (a *App) setFrequentContributors(contributors []*git.Contributor) {
 	a.updateContributors(func(w io.ReadWriter) {
-		for _, contributor := range contributors {
-			fmt.Fprintf(w, "%s\t\t\t\t---\t%d commit(s)\tlast commit: %s\n",
-				contributor.Name, contributor.Count, contributor.RelativeDate)
+		table := tablewriter.NewWriter(w)
+		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
+		table.SetBorder(false)
 
+		for _, contributor := range contributors {
+			table.Append([]string{contributor.Name, strconv.Itoa(contributor.Count), contributor.RelativeDate})
 		}
+
+		table.Render()
 	})
 }
