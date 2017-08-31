@@ -1,10 +1,20 @@
 package git
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
 )
+
+type Contributor struct {
+	Name         string
+	Count        int
+	RelativeDate string
+	UnixTime     int
+}
 
 func Changes() []string {
 	var results = make([]string, 1)
@@ -24,22 +34,49 @@ func Changes() []string {
 	return results
 }
 
-func FrequentContributors(filename string) []string {
-	var results = make([]string, 1)
+func FrequentContributors(filename string) []*Contributor {
+	contributors := make([]*Contributor, 0)
+	namedContributors := make(map[string]*Contributor)
 
-	command := "git log --pretty=format:'%aN' --follow " + filename + " | sort | uniq -c | sort -rg"
-	cmdOut, err := exec.Command("sh", "-c", command).Output()
+	var (
+		out    bytes.Buffer
+		stderr bytes.Buffer
+	)
 
+	command := exec.Command("git", "log", "--pretty=format:%aN%m%ar%m%at", "--follow", filename)
+	command.Stdout = &out
+	command.Stderr = &stderr
+
+	err := command.Run()
 	if err != nil {
-		log.Panicln(err)
+		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+		return contributors
 	}
 
-	output := strings.Split(string(cmdOut), "\n")
-	for _, contributor := range output {
-		if len(contributor) > 0 {
-			results = append(results, contributor)
+	output := strings.Split(out.String(), "\n")
+	for _, line := range output {
+		if len(line) > 0 {
+			contributorData := strings.Split(line, ">")
+			name := strings.TrimSpace(contributorData[0])
+
+			contributor, ok := namedContributors[name]
+			if ok {
+				contributor.Count += 1
+			} else {
+				contributor := new(Contributor)
+				contributor.Name = name
+				contributor.Count = 1
+				contributor.RelativeDate = contributorData[1]
+				contributor.UnixTime, err = strconv.Atoi(contributorData[2])
+				if err != nil {
+					log.Panicln(err)
+				}
+
+				namedContributors[name] = contributor
+				contributors = append(contributors, contributor)
+			}
 		}
 	}
 
-	return results
+	return contributors
 }

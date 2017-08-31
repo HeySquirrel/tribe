@@ -1,8 +1,10 @@
 package app
 
 import (
+	"fmt"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
+	"io"
 	"log"
 )
 
@@ -39,8 +41,17 @@ func (a *App) Close() {
 	a.Gui.Close()
 }
 
-func (a *App) updateCurrentFile() {
+func (a *App) currentFileChanged() {
 	file := a.currentFileSelection()
-	a.updateLogs(file)
-	a.updateContributors(git.FrequentContributors(file))
+	a.setFrequentContributors(git.FrequentContributors(file))
+}
+
+func (a *App) setFrequentContributors(contributors []*git.Contributor) {
+	a.updateContributors(func(w io.ReadWriter) {
+		for _, contributor := range contributors {
+			fmt.Fprintf(w, "%s\t\t\t\t---\t%d commit(s)\tlast commit: %s\n",
+				contributor.Name, contributor.Count, contributor.RelativeDate)
+
+		}
+	})
 }

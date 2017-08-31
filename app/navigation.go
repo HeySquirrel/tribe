@@ -14,7 +14,7 @@ func (a *App) NextFile(g *gocui.Gui, v *gocui.View) error {
 			}
 		}
 
-		a.updateCurrentFile()
+		a.currentFileChanged()
 	}
 	return nil
 }
@@ -29,7 +29,7 @@ func (a *App) PreviousFile(g *gocui.Gui, v *gocui.View) error {
 			}
 		}
 
-		a.updateCurrentFile()
+		a.currentFileChanged()
 	}
 	return nil
 }

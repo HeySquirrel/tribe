@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/jroimartin/gocui"
+	"io"
 	"log"
 )
 
@@ -165,15 +166,13 @@ func (a *App) UpdateChanges(files []string) {
 		for _, file := range files {
 			fmt.Fprintln(v, file)
 		}
-		a.updateCurrentFile()
+		a.currentFileChanged()
 	})
 }
 
-func (a *App) updateContributors(contributors []string) {
+func (a *App) updateContributors(writer func(v io.ReadWriter)) {
 	a.updateView(contributorsView, func(v *gocui.View) {
-		for _, contributor := range contributors {
-			fmt.Fprintln(v, contributor)
-		}
+		writer(v)
 	})
 }
 
