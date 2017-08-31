@@ -4,10 +4,7 @@ import (
 	"github.com/heysquirrel/tribe/git"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
-	"github.com/olekukonko/tablewriter"
-	"io"
 	"log"
-	"strconv"
 )
 
 type App struct {
@@ -51,23 +48,5 @@ func (a *App) Close() {
 
 func (a *App) currentFileChanged() {
 	file := a.currentFileSelection()
-	a.setRecentContributors(git.RecentContributors(file))
-}
-
-func (a *App) setRecentContributors(contributors []*git.Contributor) {
-	if len(contributors) == 0 {
-		return
-	}
-
-	a.updateContributors(func(w io.ReadWriter) {
-		table := tablewriter.NewWriter(w)
-		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
-		table.SetBorder(false)
-
-		for _, contributor := range contributors {
-			table.Append([]string{contributor.Name, strconv.Itoa(contributor.Count), contributor.RelativeDate})
-		}
-
-		table.Render()
-	})
+	a.UpdateContributors(git.RecentContributors(file))
 }

@@ -2,10 +2,12 @@ package app
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/git"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
-	"io"
+	"github.com/olekukonko/tablewriter"
 	"log"
+	"strconv"
 )
 
 const (
@@ -166,12 +168,6 @@ func (a *App) currentFileSelection() string {
 	return file
 }
 
-func (a *App) updateLogs(logs string) {
-	a.updateView(logsView, func(v *gocui.View) {
-		fmt.Fprint(v, logs)
-	})
-}
-
 func (a *App) UpdateChanges(files []string) {
 	a.updateView(changesView, func(v *gocui.View) {
 		for _, file := range files {
@@ -189,9 +185,17 @@ func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
 	})
 }
 
-func (a *App) updateContributors(writer func(v io.ReadWriter)) {
+func (a *App) UpdateContributors(contributors []*git.Contributor) {
 	a.updateView(contributorsView, func(v *gocui.View) {
-		writer(v)
+		table := tablewriter.NewWriter(v)
+		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
+		table.SetBorder(false)
+
+		for _, contributor := range contributors {
+			table.Append([]string{contributor.Name, strconv.Itoa(contributor.Count), contributor.RelativeDate})
+		}
+
+		table.Render()
 	})
 }
 
