@@ -100,8 +100,8 @@ var views = map[string]View{
 		text:   "",
 		x1:     0.25,
 		y1:     0.25,
-		x2:     0.7,
-		y2:     0.7,
+		x2:     0.8,
+		y2:     0.8,
 		hidden: true,
 	},
 }
