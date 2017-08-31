@@ -1,10 +1,9 @@
 package git
 
 import (
-	"bytes"
-	"fmt"
+	tlog "github.com/heysquirrel/tribe/log"
+	"github.com/heysquirrel/tribe/shell"
 	"log"
-	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -16,12 +15,36 @@ type Contributor struct {
 	UnixTime     int
 }
 
-func Changes() []string {
+type Repo struct {
+	shell  *shell.Shell
+	logger *tlog.Log
+}
+
+func New(dir string, logger *tlog.Log) (*Repo, error) {
+	temp := shell.New(dir, logger)
+	out, err := temp.Exec("git", "rev-parse", "--show-toplevel")
+	if err != nil {
+		return nil, err
+	}
+
+	repo := new(Repo)
+	repo.shell = shell.New(strings.TrimSpace(out), logger)
+	repo.logger = logger
+
+	return repo, err
+}
+
+func (repo *Repo) git(args ...string) (string, error) {
+	return repo.shell.Exec("git", args...)
+}
+
+func (repo *Repo) Changes() []string {
 	var results = make([]string, 1)
 
-	cmdOut, err := exec.Command("git", "status", "--porcelain").Output()
+	cmdOut, err := repo.git("status", "--porcelain")
 	if err != nil {
-		log.Panicln(err)
+		repo.logger.Add(err.Error())
+		return results
 	}
 
 	output := strings.Split(string(cmdOut), "\n")
@@ -34,7 +57,7 @@ func Changes() []string {
 	return results
 }
 
-func RecentContributors(filename string) []*Contributor {
+func (repo *Repo) RecentContributors(filename string) []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)
 
@@ -42,22 +65,12 @@ func RecentContributors(filename string) []*Contributor {
 		return contributors
 	}
 
-	var (
-		out    bytes.Buffer
-		stderr bytes.Buffer
-	)
-
-	command := exec.Command("git", "log", "--pretty=format:%aN%m%ar%m%at", "--follow", filename)
-	command.Stdout = &out
-	command.Stderr = &stderr
-
-	err := command.Run()
+	out, err := repo.git("log", "--pretty=format:%aN%m%ar%m%at", "--follow", filename)
 	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		return contributors
+		repo.logger.Add(err.Error())
 	}
 
-	output := strings.Split(out.String(), "\n")
+	output := strings.Split(out, "\n")
 	for _, line := range output {
 		if len(line) > 0 {
 			contributorData := strings.Split(line, ">")

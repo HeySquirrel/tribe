@@ -2,7 +2,6 @@ package main
 
 import "time"
 import "github.com/heysquirrel/tribe/app"
-import "github.com/heysquirrel/tribe/git"
 
 func main() {
 	a := app.New()
@@ -14,14 +13,14 @@ func main() {
 }
 
 func update(a *app.App) {
-	a.UpdateChanges(git.Changes())
+	a.UpdateChanges(a.Git.Changes())
 	for {
 		select {
 		case <-a.Done:
 			return
 		case <-time.After(10 * time.Second):
 			a.Debug("Checking for changes")
-			a.UpdateChanges(git.Changes())
+			a.UpdateChanges(a.Git.Changes())
 		}
 	}
 

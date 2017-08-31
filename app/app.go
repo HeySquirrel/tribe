@@ -5,25 +5,35 @@ import (
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
 	"log"
+	"os"
 )
 
 type App struct {
 	Gui  *gocui.Gui
 	Done chan struct{}
 	Log  *tlog.Log
+	Git  *git.Repo
 }
 
 func New() *App {
-	a := new(App)
-	a.Done = make(chan struct{})
-	a.Log = tlog.New()
-
-	var err error
-	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
+	pwd, err := os.Getwd()
 	if err != nil {
 		log.Panicln(err)
 	}
 
+	a := new(App)
+	a.Done = make(chan struct{})
+	a.Log = tlog.New()
+
+	a.Git, err = git.New(pwd, a.Log)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
+		log.Panicln(err)
+	}
 	a.Gui.SetManager(a)
 
 	return a
@@ -50,6 +60,6 @@ func (a *App) currentFileChanged() {
 	file := a.currentFileSelection()
 
 	go func(app *App, file string) {
-		app.UpdateContributors(git.RecentContributors(file))
+		app.UpdateContributors(app.Git.RecentContributors(file))
 	}(a, file)
 }
