@@ -15,6 +15,7 @@ const (
 	feedView            = "feed"
 	relevantWorkView    = "relevantwork"
 	legendView          = "legend"
+	debugView           = "debug"
 )
 
 type View struct {
@@ -25,6 +26,7 @@ type View struct {
 	x2         float64
 	y2         float64
 	highlight  bool
+	hidden     bool
 	selBgColor gocui.Attribute
 	selFgColor gocui.Attribute
 }
@@ -42,58 +44,61 @@ var views = map[string]View{
 		selFgColor: gocui.ColorBlack,
 	},
 	contributorsView: {
-		title:     "Recent Contributors",
-		text:      "",
-		x1:        0.3,
-		y1:        0.0,
-		x2:        1.0,
-		y2:        0.2,
-		highlight: false,
+		title: "Recent Contributors",
+		text:  "",
+		x1:    0.3,
+		y1:    0.0,
+		x2:    1.0,
+		y2:    0.2,
 	},
 	associatedFilesView: {
-		title:     "Associated Files",
-		text:      "",
-		x1:        0.0,
-		y1:        0.2,
-		x2:        0.3,
-		y2:        0.4,
-		highlight: false,
+		title: "Associated Files",
+		text:  "",
+		x1:    0.0,
+		y1:    0.2,
+		x2:    0.3,
+		y2:    0.4,
 	},
 	logsView: {
-		title:     "Logs",
-		text:      "",
-		x1:        0.3,
-		y1:        0.2,
-		x2:        1.0,
-		y2:        0.45,
-		highlight: false,
+		title: "Logs",
+		text:  "",
+		x1:    0.3,
+		y1:    0.2,
+		x2:    1.0,
+		y2:    0.45,
 	},
 	feedView: {
-		title:     "Feed",
-		text:      "",
-		x1:        0.0,
-		y1:        0.4,
-		x2:        0.3,
-		y2:        0.99,
-		highlight: false,
+		title: "Feed",
+		text:  "",
+		x1:    0.0,
+		y1:    0.4,
+		x2:    0.3,
+		y2:    0.99,
 	},
 	relevantWorkView: {
-		title:     "Relevant Work Items",
-		text:      "",
-		x1:        0.3,
-		y1:        0.45,
-		x2:        1.0,
-		y2:        0.9,
-		highlight: false,
+		title: "Relevant Work Items",
+		text:  "",
+		x1:    0.3,
+		y1:    0.45,
+		x2:    1.0,
+		y2:    0.9,
 	},
 	legendView: {
-		title:     "Legend",
-		text:      "",
-		x1:        0.3,
-		y1:        0.9,
-		x2:        1.0,
-		y2:        0.99,
-		highlight: false,
+		title: "Legend",
+		text:  "",
+		x1:    0.3,
+		y1:    0.9,
+		x2:    1.0,
+		y2:    0.99,
+	},
+	debugView: {
+		title:  "Debug",
+		text:   "debug debug",
+		x1:     0.1,
+		y1:     0.1,
+		x2:     0.9,
+		y2:     0.9,
+		hidden: true,
 	},
 }
 
@@ -105,6 +110,7 @@ var defaultViews = []string{
 	feedView,
 	relevantWorkView,
 	legendView,
+	debugView,
 }
 
 func (a *App) Layout(g *gocui.Gui) error {
@@ -130,6 +136,10 @@ func (a *App) Layout(g *gocui.Gui) error {
 			v.SelFgColor = view.selFgColor
 		}
 		fmt.Fprint(v, view.text)
+
+		if view.hidden {
+			g.SetViewOnBottom(name)
+		}
 	}
 
 	_, err := g.SetCurrentView(changesView)

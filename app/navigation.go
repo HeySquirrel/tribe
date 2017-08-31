@@ -34,6 +34,18 @@ func (a *App) PreviousFile(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func (a *App) ShowDebug(g *gocui.Gui, v *gocui.View) error {
+	g.SetViewOnTop(debugView)
+	g.SetCurrentView(debugView)
+	return nil
+}
+
+func (a *App) HideDebug(g *gocui.Gui, v *gocui.View) error {
+	g.SetViewOnBottom(debugView)
+	g.SetCurrentView(changesView)
+	return nil
+}
+
 func (a *App) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
