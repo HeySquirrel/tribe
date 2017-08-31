@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/heysquirrel/tribe/git"
+	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
 	"github.com/olekukonko/tablewriter"
 	"io"
@@ -12,11 +13,13 @@ import (
 type App struct {
 	Gui  *gocui.Gui
 	Done chan struct{}
+	Log  *tlog.Log
 }
 
 func New() *App {
 	a := new(App)
 	a.Done = make(chan struct{})
+	a.Log = tlog.New()
 
 	var err error
 	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
@@ -27,6 +30,11 @@ func New() *App {
 	a.Gui.SetManager(a)
 
 	return a
+}
+
+func (a *App) Debug(message string) {
+	a.Log.Add(message)
+	a.UpdateDebug(a.Log.Entries())
 }
 
 func (a *App) Loop() {

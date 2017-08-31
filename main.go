@@ -20,6 +20,7 @@ func update(a *app.App) {
 		case <-a.Done:
 			return
 		case <-time.After(10 * time.Second):
+			a.Debug("Checking for changes")
 			a.UpdateChanges(git.Changes())
 		}
 	}

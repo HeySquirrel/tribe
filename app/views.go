@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
 	"io"
 	"log"
@@ -177,6 +178,14 @@ func (a *App) UpdateChanges(files []string) {
 			fmt.Fprintln(v, file)
 		}
 		a.currentFileChanged()
+	})
+}
+
+func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
+	a.updateView(debugView, func(v *gocui.View) {
+		for _, entry := range entries {
+			fmt.Fprintln(v, entry)
+		}
 	})
 }
 
