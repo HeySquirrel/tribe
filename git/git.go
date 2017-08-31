@@ -38,6 +38,10 @@ func RecentContributors(filename string) []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)
 
+	if len(filename) == 0 {
+		return contributors
+	}
+
 	var (
 		out    bytes.Buffer
 		stderr bytes.Buffer

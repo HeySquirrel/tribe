@@ -48,6 +48,10 @@ func (a *App) currentFileChanged() {
 }
 
 func (a *App) setRecentContributors(contributors []*git.Contributor) {
+	if len(contributors) == 0 {
+		return
+	}
+
 	a.updateContributors(func(w io.ReadWriter) {
 		table := tablewriter.NewWriter(w)
 		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
