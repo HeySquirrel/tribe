@@ -48,5 +48,8 @@ func (a *App) Close() {
 
 func (a *App) currentFileChanged() {
 	file := a.currentFileSelection()
-	a.UpdateContributors(git.RecentContributors(file))
+
+	go func(app *App, file string) {
+		app.UpdateContributors(git.RecentContributors(file))
+	}(a, file)
 }

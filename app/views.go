@@ -8,6 +8,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"log"
 	"strconv"
+	"time"
 )
 
 const (
@@ -96,11 +97,11 @@ var views = map[string]View{
 	},
 	debugView: {
 		title:  "Debug",
-		text:   "debug debug",
-		x1:     0.1,
-		y1:     0.1,
-		x2:     0.9,
-		y2:     0.9,
+		text:   "",
+		x1:     0.25,
+		y1:     0.25,
+		x2:     0.7,
+		y2:     0.7,
 		hidden: true,
 	},
 }
@@ -179,9 +180,16 @@ func (a *App) UpdateChanges(files []string) {
 
 func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
 	a.updateView(debugView, func(v *gocui.View) {
+		table := tablewriter.NewWriter(v)
+		table.SetHeader([]string{"Created At", "Message"})
+		table.SetBorder(false)
+
 		for _, entry := range entries {
-			fmt.Fprintln(v, entry)
+			createdAt := entry.CreatedAt.UTC().Format(time.UnixDate)
+			table.Append([]string{createdAt, entry.Message})
 		}
+
+		table.Render()
 	})
 }
 
