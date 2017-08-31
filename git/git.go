@@ -34,7 +34,7 @@ func Changes() []string {
 	return results
 }
 
-func FrequentContributors(filename string) []*Contributor {
+func RecentContributors(filename string) []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)
 

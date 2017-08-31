@@ -44,10 +44,10 @@ func (a *App) Close() {
 
 func (a *App) currentFileChanged() {
 	file := a.currentFileSelection()
-	a.setFrequentContributors(git.FrequentContributors(file))
+	a.setRecentContributors(git.RecentContributors(file))
 }
 
-func (a *App) setFrequentContributors(contributors []*git.Contributor) {
+func (a *App) setRecentContributors(contributors []*git.Contributor) {
 	a.updateContributors(func(w io.ReadWriter) {
 		table := tablewriter.NewWriter(w)
 		table.SetHeader([]string{"Name", "Commits", "Last Commit"})

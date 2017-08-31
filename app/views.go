@@ -42,7 +42,7 @@ var views = map[string]View{
 		selFgColor: gocui.ColorBlack,
 	},
 	contributorsView: {
-		title:     "Frequent Contributors",
+		title:     "Recent Contributors",
 		text:      "",
 		x1:        0.3,
 		y1:        0.0,
