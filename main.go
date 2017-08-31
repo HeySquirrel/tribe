@@ -8,13 +8,13 @@ func main() {
 	a := app.New()
 	defer a.Close()
 
-	a.UpdateChanges(git.Changes())
-	// go update(a)
+	go update(a)
 
 	a.Loop()
 }
 
 func update(a *app.App) {
+	a.UpdateChanges(git.Changes())
 	for {
 		select {
 		case <-a.Done:
