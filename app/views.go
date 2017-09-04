@@ -180,7 +180,10 @@ func (a *App) UpdateChanges(files []string) {
 
 func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
 	a.updateView(debugView, func(v *gocui.View) {
+		maxX, _ := v.Size()
+
 		table := tablewriter.NewWriter(v)
+		table.SetColWidth(maxX)
 		table.SetHeader([]string{"Created At", "Message"})
 		table.SetBorder(false)
 
