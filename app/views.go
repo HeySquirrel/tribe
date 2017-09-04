@@ -47,16 +47,16 @@ var views = map[string]View{
 		selBgColor: gocui.ColorCyan,
 		selFgColor: gocui.ColorBlack,
 	},
-	contributorsView: {
-		title: "Recent Contributors",
+	associatedFilesView: {
+		title: "Associated Files",
 		text:  "",
 		x1:    0.3,
 		y1:    0.0,
 		x2:    1.0,
 		y2:    0.2,
 	},
-	associatedFilesView: {
-		title: "Associated Files",
+	contributorsView: {
+		title: "Recent Contributors",
 		text:  "",
 		x1:    0.0,
 		y1:    0.2,
@@ -198,7 +198,10 @@ func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
 
 func (a *App) UpdateContributors(contributors []*git.Contributor) {
 	a.updateView(contributorsView, func(v *gocui.View) {
+		maxX, _ := v.Size()
+
 		table := tablewriter.NewWriter(v)
+		table.SetColWidth(maxX)
 		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
 		table.SetBorder(false)
 
