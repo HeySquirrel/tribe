@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Contributor struct {
@@ -43,6 +45,22 @@ type Repo struct {
 
 func (repo *Repo) git(args ...string) (string, error) {
 	return repo.shell.Exec("git", args...)
+}
+
+func (repo *Repo) log(args ...string) (string, error) {
+	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+	after := fmt.Sprintf("--after=%s", sixMonthsAgo.Format("2012/01/30"))
+
+	logCommand := make([]string, 0)
+	logCommand = append(logCommand, "log", "--no-merges", after)
+	logCommand = append(logCommand, args...)
+
+	results, err := repo.git(logCommand...)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(results), nil
 }
 
 func New(dir string, logger *tlog.Log) (*Repo, error) {
@@ -86,13 +104,18 @@ func (repo *Repo) RelatedFiles(filename string) []*RelatedFile {
 		return files
 	}
 
-	out, err := repo.git("log", "--pretty=format:%H", "--follow", filename)
+	out, err := repo.log("--pretty=format:%H", "--follow", filename)
 	if err != nil {
 		repo.logger.Add(err.Error())
 	}
 
 	output := strings.Split(out, "\n")
+
 	for _, sha := range output {
+		if len(sha) == 0 {
+			continue
+		}
+
 		out, err = repo.git("show", "--pretty=format:%ar%m%at", "--name-only", sha)
 		if err != nil {
 			repo.logger.Add(err.Error())
@@ -135,7 +158,7 @@ func (repo *Repo) RelevantWorkItems(filename string) []string {
 		return workItems
 	}
 
-	out, err := repo.git("log", "--pretty=format:%s", "--follow", filename)
+	out, err := repo.log("--pretty=format:%s", "--follow", filename)
 	if err != nil {
 		repo.logger.Add(err.Error())
 	}
@@ -161,7 +184,7 @@ func (repo *Repo) RecentContributors(filename string) []*Contributor {
 		return contributors
 	}
 
-	out, err := repo.git("log", "--pretty=format:%aN%m%ar%m%at", "--follow", filename)
+	out, err := repo.log("--pretty=format:%aN%m%ar%m%at", "--follow", filename)
 	if err != nil {
 		repo.logger.Add(err.Error())
 	}
