@@ -4,6 +4,7 @@ import (
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,18 @@ type RelatedFile struct {
 	Count        int
 	RelativeDate string
 	UnixTime     int
+}
+
+type byRelevance []*RelatedFile
+
+func (a byRelevance) Len() int      { return len(a) }
+func (a byRelevance) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byRelevance) Less(i, j int) bool {
+	if a[i].UnixTime == a[j].UnixTime {
+		return a[i].Count < a[j].Count
+	}
+
+	return a[i].UnixTime < a[j].UnixTime
 }
 
 type Repo struct {
@@ -110,6 +123,7 @@ func (repo *Repo) RelatedFiles(filename string) []*RelatedFile {
 		}
 	}
 
+	sort.Sort(sort.Reverse(byRelevance(files)))
 	return files
 }
 
