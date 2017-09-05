@@ -96,7 +96,11 @@ func (repo *Repo) Changes() []string {
 	return results
 }
 
-func (repo *Repo) RelatedFiles(filename string) []*RelatedFile {
+func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contributor) {
+	return repo.relatedFiles(filename), repo.relatedWorkItems(filename), repo.relatedContributors(filename)
+}
+
+func (repo *Repo) relatedFiles(filename string) []*RelatedFile {
 	files := make([]*RelatedFile, 0)
 	namedFiles := make(map[string]*RelatedFile)
 
@@ -151,7 +155,7 @@ func (repo *Repo) RelatedFiles(filename string) []*RelatedFile {
 	return files
 }
 
-func (repo *Repo) RelevantWorkItems(filename string) []string {
+func (repo *Repo) relatedWorkItems(filename string) []string {
 	workItems := make([]string, 0)
 
 	if len(filename) == 0 {
@@ -176,7 +180,7 @@ func (repo *Repo) RelevantWorkItems(filename string) []string {
 	return workItems
 }
 
-func (repo *Repo) RecentContributors(filename string) []*Contributor {
+func (repo *Repo) relatedContributors(filename string) []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)
 
