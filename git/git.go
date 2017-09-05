@@ -4,6 +4,7 @@ import (
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -125,6 +126,31 @@ func (repo *Repo) RelatedFiles(filename string) []*RelatedFile {
 
 	sort.Sort(sort.Reverse(byRelevance(files)))
 	return files
+}
+
+func (repo *Repo) RelevantWorkItems(filename string) []string {
+	workItems := make([]string, 0)
+
+	if len(filename) == 0 {
+		return workItems
+	}
+
+	out, err := repo.git("log", "--pretty=format:%s", "--follow", filename)
+	if err != nil {
+		repo.logger.Add(err.Error())
+	}
+
+	subjects := strings.Split(out, "\n")
+	re := regexp.MustCompile("(S|DE)[0-9]+")
+
+	for _, subjects := range subjects {
+		found := re.FindString(subjects)
+		if len(found) > 0 {
+			workItems = append(workItems, found)
+		}
+	}
+
+	return workItems
 }
 
 func (repo *Repo) RecentContributors(filename string) []*Contributor {
