@@ -213,11 +213,20 @@ func (a *App) UpdateContributors(contributors []*git.Contributor) {
 	})
 }
 
-func (a *App) UpdateRelatedFiles(files []string) {
+func (a *App) UpdateRelatedFiles(files []*git.RelatedFile) {
 	a.updateView(associatedFilesView, func(v *gocui.View) {
+		maxX, _ := v.Size()
+
+		table := tablewriter.NewWriter(v)
+		table.SetColWidth(maxX)
+		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
+		table.SetBorder(false)
+
 		for _, file := range files {
-			fmt.Fprintln(v, file)
+			table.Append([]string{file.Name, strconv.Itoa(file.Count), file.RelativeDate})
 		}
+
+		table.Render()
 	})
 }
 

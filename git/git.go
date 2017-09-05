@@ -15,9 +15,20 @@ type Contributor struct {
 	UnixTime     int
 }
 
+type RelatedFile struct {
+	Name         string
+	Count        int
+	RelativeDate string
+	UnixTime     int
+}
+
 type Repo struct {
 	shell  *shell.Shell
 	logger *tlog.Log
+}
+
+func (repo *Repo) git(args ...string) (string, error) {
+	return repo.shell.Exec("git", args...)
 }
 
 func New(dir string, logger *tlog.Log) (*Repo, error) {
@@ -32,10 +43,6 @@ func New(dir string, logger *tlog.Log) (*Repo, error) {
 	repo.logger = logger
 
 	return repo, err
-}
-
-func (repo *Repo) git(args ...string) (string, error) {
-	return repo.shell.Exec("git", args...)
 }
 
 func (repo *Repo) Changes() []string {
@@ -57,8 +64,14 @@ func (repo *Repo) Changes() []string {
 	return results
 }
 
-func (repo *Repo) RelatedFiles(filename string) []string {
-	files := make([]string, 0)
+func (repo *Repo) RelatedFiles(filename string) []*RelatedFile {
+	files := make([]*RelatedFile, 0)
+	namedFiles := make(map[string]*RelatedFile)
+
+	if len(filename) == 0 {
+		return files
+	}
+
 	out, err := repo.git("log", "--pretty=format:%H", "--follow", filename)
 	if err != nil {
 		repo.logger.Add(err.Error())
@@ -66,8 +79,35 @@ func (repo *Repo) RelatedFiles(filename string) []string {
 
 	output := strings.Split(out, "\n")
 	for _, sha := range output {
-		out, err = repo.git("show", "--pretty=format:", "--name-only", sha)
-		files = append(files, strings.Split(out, "\n")...)
+		out, err = repo.git("show", "--pretty=format:%ar%m%at", "--name-only", sha)
+		if err != nil {
+			repo.logger.Add(err.Error())
+		}
+		lines := strings.Split(out, "\n")
+		dateData := strings.Split(lines[0], ">")
+
+		for _, file := range lines[1:] {
+			if len(strings.TrimSpace(file)) == 0 || file == filename {
+				continue
+			}
+
+			relatedFile, ok := namedFiles[file]
+			if ok {
+				relatedFile.Count += 1
+			} else {
+				relatedFile := new(RelatedFile)
+				relatedFile.Name = file
+				relatedFile.Count = 1
+				relatedFile.RelativeDate = dateData[0]
+				relatedFile.UnixTime, err = strconv.Atoi(dateData[1])
+				if err != nil {
+					repo.logger.Add(err.Error())
+				}
+
+				namedFiles[file] = relatedFile
+				files = append(files, relatedFile)
+			}
+		}
 	}
 
 	return files
