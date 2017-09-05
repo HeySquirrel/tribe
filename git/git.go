@@ -57,6 +57,15 @@ func (repo *Repo) Changes() []string {
 	return results
 }
 
+func (repo *Repo) RelatedFiles(filename string) []string {
+	out, err := repo.git("log", "--pretty=format:%H", "--follow", filename)
+	if err != nil {
+		repo.logger.Add(err.Error())
+	}
+
+	return strings.Split(out, "\n")
+}
+
 func (repo *Repo) RecentContributors(filename string) []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)

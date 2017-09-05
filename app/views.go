@@ -213,6 +213,14 @@ func (a *App) UpdateContributors(contributors []*git.Contributor) {
 	})
 }
 
+func (a *App) UpdateRelatedFiles(files []string) {
+	a.updateView(associatedFilesView, func(v *gocui.View) {
+		for _, file := range files {
+			fmt.Fprintln(v, file)
+		}
+	})
+}
+
 func (a *App) updateView(view string, fn func(*gocui.View)) {
 	a.Gui.Update(func(g *gocui.Gui) error {
 		v, err := g.View(view)
