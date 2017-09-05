@@ -4,7 +4,6 @@ import (
 	"fmt"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
-	"log"
 	"regexp"
 	"sort"
 	"strconv"
@@ -96,31 +95,52 @@ func (repo *Repo) Changes() []string {
 	return results
 }
 
-func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contributor) {
-	return repo.relatedFiles(filename), repo.relatedWorkItems(filename), repo.relatedContributors(filename)
+type LogEntry struct {
+	Sha          string
+	Subject      string
+	Author       string
+	RelativeDate string
+	UnixTime     int
 }
 
-func (repo *Repo) relatedFiles(filename string) []*RelatedFile {
-	files := make([]*RelatedFile, 0)
-	namedFiles := make(map[string]*RelatedFile)
-
-	if len(filename) == 0 {
-		return files
-	}
-
-	out, err := repo.log("--pretty=format:%H", "--follow", filename)
+func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contributor) {
+	logEntries := make([]*LogEntry, 0)
+	out, err := repo.log("--pretty=format:%H%m%s%m%aN%m%ar%m%at", "--follow", filename)
 	if err != nil {
 		repo.logger.Add(err.Error())
 	}
 
-	output := strings.Split(out, "\n")
-
-	for _, sha := range output {
-		if len(sha) == 0 {
+	logs := strings.Split(out, "\n")
+	for _, log := range logs {
+		if len(log) == 0 {
 			continue
 		}
 
-		out, err = repo.git("show", "--pretty=format:%ar%m%at", "--name-only", sha)
+		parts := strings.Split(log, ">")
+		entry := new(LogEntry)
+		entry.Sha = parts[0]
+		entry.Subject = parts[1]
+		entry.Author = strings.TrimSpace(parts[2])
+		entry.RelativeDate = parts[3]
+		entry.UnixTime, err = strconv.Atoi(parts[4])
+		if err != nil {
+			repo.logger.Add(err.Error())
+		}
+
+		logEntries = append(logEntries, entry)
+	}
+
+	return repo.relatedFiles(logEntries, filename),
+		repo.relatedWorkItems(logEntries),
+		repo.relatedContributors(logEntries)
+}
+
+func (repo *Repo) relatedFiles(entries []*LogEntry, filename string) []*RelatedFile {
+	files := make([]*RelatedFile, 0)
+	namedFiles := make(map[string]*RelatedFile)
+
+	for _, entry := range entries {
+		out, err := repo.git("show", "--pretty=format:%ar%m%at", "--name-only", entry.Sha)
 		if err != nil {
 			repo.logger.Add(err.Error())
 		}
@@ -155,23 +175,13 @@ func (repo *Repo) relatedFiles(filename string) []*RelatedFile {
 	return files
 }
 
-func (repo *Repo) relatedWorkItems(filename string) []string {
+func (repo *Repo) relatedWorkItems(entries []*LogEntry) []string {
 	workItems := make([]string, 0)
 
-	if len(filename) == 0 {
-		return workItems
-	}
-
-	out, err := repo.log("--pretty=format:%s", "--follow", filename)
-	if err != nil {
-		repo.logger.Add(err.Error())
-	}
-
-	subjects := strings.Split(out, "\n")
 	re := regexp.MustCompile("(S|DE)[0-9][0-9]+")
 
-	for _, subjects := range subjects {
-		found := re.FindString(subjects)
+	for _, entry := range entries {
+		found := re.FindString(entry.Subject)
 		if len(found) > 0 {
 			workItems = append(workItems, found)
 		}
@@ -180,41 +190,25 @@ func (repo *Repo) relatedWorkItems(filename string) []string {
 	return workItems
 }
 
-func (repo *Repo) relatedContributors(filename string) []*Contributor {
+func (repo *Repo) relatedContributors(entries []*LogEntry) []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)
 
-	if len(filename) == 0 {
-		return contributors
-	}
+	for _, entry := range entries {
+		name := entry.Author
 
-	out, err := repo.log("--pretty=format:%aN%m%ar%m%at", "--follow", filename)
-	if err != nil {
-		repo.logger.Add(err.Error())
-	}
+		contributor, ok := namedContributors[name]
+		if ok {
+			contributor.Count += 1
+		} else {
+			contributor := new(Contributor)
+			contributor.Name = name
+			contributor.Count = 1
+			contributor.RelativeDate = entry.RelativeDate
+			contributor.UnixTime = entry.UnixTime
 
-	output := strings.Split(out, "\n")
-	for _, line := range output {
-		if len(line) > 0 {
-			contributorData := strings.Split(line, ">")
-			name := strings.TrimSpace(contributorData[0])
-
-			contributor, ok := namedContributors[name]
-			if ok {
-				contributor.Count += 1
-			} else {
-				contributor := new(Contributor)
-				contributor.Name = name
-				contributor.Count = 1
-				contributor.RelativeDate = contributorData[1]
-				contributor.UnixTime, err = strconv.Atoi(contributorData[2])
-				if err != nil {
-					log.Panicln(err)
-				}
-
-				namedContributors[name] = contributor
-				contributors = append(contributors, contributor)
-			}
+			namedContributors[name] = contributor
+			contributors = append(contributors, contributor)
 		}
 	}
 
