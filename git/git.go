@@ -47,7 +47,7 @@ func (repo *Repo) Changes() []string {
 		return results
 	}
 
-	output := strings.Split(string(cmdOut), "\n")
+	output := strings.Split(cmdOut, "\n")
 	for _, change := range output {
 		if len(change) > 0 {
 			results = append(results, change[3:len(change)])
@@ -58,12 +58,19 @@ func (repo *Repo) Changes() []string {
 }
 
 func (repo *Repo) RelatedFiles(filename string) []string {
+	files := make([]string, 0)
 	out, err := repo.git("log", "--pretty=format:%H", "--follow", filename)
 	if err != nil {
 		repo.logger.Add(err.Error())
 	}
 
-	return strings.Split(out, "\n")
+	output := strings.Split(out, "\n")
+	for _, sha := range output {
+		out, err = repo.git("show", "--pretty=format:", "--name-only", sha)
+		files = append(files, strings.Split(out, "\n")...)
+	}
+
+	return files
 }
 
 func (repo *Repo) RecentContributors(filename string) []*Contributor {
