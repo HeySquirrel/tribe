@@ -141,7 +141,7 @@ func (repo *Repo) RelevantWorkItems(filename string) []string {
 	}
 
 	subjects := strings.Split(out, "\n")
-	re := regexp.MustCompile("(S|DE)[0-9]+")
+	re := regexp.MustCompile("(S|DE)[0-9][0-9]+")
 
 	for _, subjects := range subjects {
 		found := re.FindString(subjects)
