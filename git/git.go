@@ -15,14 +15,14 @@ type Contributor struct {
 	Name         string
 	Count        int
 	RelativeDate string
-	UnixTime     int
+	UnixTime     int64
 }
 
 type RelatedFile struct {
 	Name         string
 	Count        int
 	RelativeDate string
-	UnixTime     int
+	UnixTime     int64
 }
 
 type byRelevance []*RelatedFile
@@ -95,14 +95,6 @@ func (repo *Repo) Changes() []string {
 	return results
 }
 
-type LogEntry struct {
-	Sha          string
-	Subject      string
-	Author       string
-	RelativeDate string
-	UnixTime     int
-}
-
 func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contributor) {
 	logEntries := make([]*LogEntry, 0)
 	out, err := repo.log("--pretty=format:%H%m%s%m%aN%m%ar%m%at", "--follow", filename)
@@ -122,7 +114,7 @@ func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contrib
 		entry.Subject = parts[1]
 		entry.Author = strings.TrimSpace(parts[2])
 		entry.RelativeDate = parts[3]
-		entry.UnixTime, err = strconv.Atoi(parts[4])
+		entry.UnixTime, err = strconv.ParseInt(parts[4], 10, 64)
 		if err != nil {
 			repo.logger.Add(err.Error())
 		}
@@ -160,7 +152,7 @@ func (repo *Repo) relatedFiles(entries []*LogEntry, filename string) []*RelatedF
 				relatedFile.Name = file
 				relatedFile.Count = 1
 				relatedFile.RelativeDate = dateData[0]
-				relatedFile.UnixTime, err = strconv.Atoi(dateData[1])
+				relatedFile.UnixTime, err = strconv.ParseInt(dateData[1], 10, 64)
 				if err != nil {
 					repo.logger.Add(err.Error())
 				}

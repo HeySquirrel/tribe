@@ -1,0 +1,16 @@
+commit e56d2b9c385602723014bfb26be50d40f9e78c47
+Author: Burns <burns@simpsons.com>
+Date:   1504645094
+
+    Only execute one log query per file change
+
+:100644 100644 e1050c6... f54f1e0... M  log/log.go
+
+commit 2e5b3562405bb187a10f516c64a04c9b70a9a27e
+Author: Smithers <smithers@simpsons.com>
+Date:   1504643675
+
+    Moving all Related(file) functions into one function.
+
+:100644 100644 7ab43c8... f903905... M  logger/logger.go
+:100644 100644 dba993f... e1050c6... M  log/log.go

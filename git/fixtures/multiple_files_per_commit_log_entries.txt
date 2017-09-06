@@ -1,0 +1,71 @@
+commit 787d3dbfef8220fca7732a67282deb2c83347c3b
+Author: Jane Developer <jd@test.com>
+Date:   1504125606 -0600
+
+    DE2873: User receives a 500 internal server error when navigating to home page
+
+:100644 100644 8324990ff7... e5f6131686... M    app/helpers/navigation_helper.rb
+
+commit 028ab42e54624b9bd06aa1545b45feb6f46c4eec
+Author: Bart Developer <bartd@test.com>
+Date:   1504114799 -0600
+
+    DE123: Fix for users/:org/:user API call
+
+:100644 100644 669315c9c9... ad82c48235... M    app/serializers/users_serializer.rb
+:100644 100644 d9896b6a10... 69e68fe3e2... M    spec/serializers/user_serializer_spec.rb
+
+commit 58afbdf9e558edfa520b39bc743c2ecd822d5634
+Author: Lisa Simpson <lisa.simpson@test.com>
+Date:   1504015809 -0400
+
+    S141515: Dropping a 'isNewUser' cookie
+
+:100644 100644 2857a15505... 27af2c9bd1... M    app/controllers/new_user_controller.rb
+
+commit 306f80d5edba8d9e6dd391916604ff9441898dab
+Author: Marge Simpson <marge@test.com>
+Date:   1503700772 -0600
+
+    DE18982: Bugsnag Defects: Wsapi::AuthorizationError
+
+:100644 100644 0306b07293... f9d4a11c10... M    app/jobs/update_organization_users.rb
+:100644 100644 366d5eb7c5... 6fbdb765d0... M    app/models/concerns/new_organization.rb
+:100644 100644 3bccdb651e... 82fec92fd5... M    spec/controllers/api/organizations_controller_spec.rb
+:100644 100644 401b5675d4... cdfb0afa39... M    spec/controllers/application_controller_spec.rb
+:100644 100644 4553af5b4e... f5faed7a53... M    spec/controllers/signups_controller_spec.rb
+:100644 100644 044ed4e9f2... c72e581932... M    spec/jobs/update_organization_users_spec.rb
+:100644 100644 4df790ae5f... b1deca4511... M    spec/models/concerns/new_organization_spec.rb
+
+commit 3ea3aa3ff57f55cf5d5b16c7ab6c7ec26713dcf0
+Author: Homer Simpson <homer@test.com>
+Date:   1503955506 -0600
+
+    F6739_team_coolness- scope feature toggle
+
+:100644 100644 c28d879325... e31a861865... M    app/models/cool/cool.rb
+:100644 100644 eaee7b0b23... 3584a3e620... M    app/models/cool/push_cool_processor.rb
+
+commit 1e7000f4bc0715cfcba30b0e9a9d4c884fab6a15
+Author: Maggie Simpson <ms@test.com>
+Date:   1503687199 -0400
+
+    S1290834: New master key
+
+:100644 100644 62551026c5... 58009701b1... M    config/environments/production.rb
+
+commit b5078fee55ce7d1198baa798a3cc49b0ae8583b4
+Author: Mr. Burns <burns@test.com>
+Date:   1503616711 -0600
+
+    DE72634- fix NoMethodError on file.content
+
+:100644 100644 234d30c5cc... 44f2c3099e... M    app/models/attachment/file.rb
+
+commit 77b89482047654efa4310b04b692220abffd4618
+Author: BleedingGums <gums@test.com>
+Date:   1503606800 -0400
+
+    S829842 In Haml, you need a different check for undefined variables
+
+:100644 100644 aeb5fc8cea... e9b3b69e1d... M    app/views/layouts/master_layout.html.haml

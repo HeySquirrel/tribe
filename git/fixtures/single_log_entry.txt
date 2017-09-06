@@ -1,0 +1,12 @@
+commit 2366697ee5e9c56106a595fdc84c4218f7f9db04
+Author: Joe Developer <joe.d@test.com>
+Date:   1502491416 -0600
+
+    DE3456 - All logins should respect login bypass_login
+
+    /oauth/token wasn't respecting the organization.bypass_login
+    flag. Unlike the web login /oauth/token was being controlled by
+    User.authenticate. We changed User.authenticate to respect the
+    bypass_login flag.
+
+:100644 100644 5b09fc0a1c... f2725adf20... M    app/models/user.rb
