@@ -48,7 +48,7 @@ func (repo *Repo) git(args ...string) (string, error) {
 
 func (repo *Repo) log(args ...string) (string, error) {
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-	after := fmt.Sprintf("--after=%s", sixMonthsAgo.Format("2012/01/30"))
+	after := fmt.Sprintf("--after=%s", sixMonthsAgo.Format("2006/01/02"))
 
 	logCommand := make([]string, 0)
 	logCommand = append(logCommand, "log", "--no-merges", after)
