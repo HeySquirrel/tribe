@@ -2,11 +2,11 @@ package git
 
 import (
 	"fmt"
+	humanize "github.com/dustin/go-humanize"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -15,14 +15,14 @@ type Contributor struct {
 	Name         string
 	Count        int
 	RelativeDate string
-	UnixTime     int64
+	UnixTime     time.Time
 }
 
 type RelatedFile struct {
 	Name         string
 	Count        int
 	RelativeDate string
-	UnixTime     int64
+	UnixTime     time.Time
 }
 
 type byRelevance []*RelatedFile
@@ -34,7 +34,7 @@ func (a byRelevance) Less(i, j int) bool {
 		return a[i].Count < a[j].Count
 	}
 
-	return a[i].UnixTime < a[j].UnixTime
+	return a[i].UnixTime.Before(a[j].UnixTime)
 }
 
 type Repo struct {
@@ -96,51 +96,23 @@ func (repo *Repo) Changes() []string {
 }
 
 func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contributor) {
-	logEntries := make([]*LogEntry, 0)
-	out, err := repo.log("--pretty=format:%H%m%s%m%aN%m%ar%m%at", "--follow", filename)
+	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
+	logs, err := repo.LogsAfter(sixMonthsAgo)
 	if err != nil {
 		repo.logger.Add(err.Error())
 	}
+	relatedLogs := logs.ContainsFile(filename)
 
-	logs := strings.Split(out, "\n")
-	for _, log := range logs {
-		if len(log) == 0 {
-			continue
-		}
-
-		parts := strings.Split(log, ">")
-		entry := new(LogEntry)
-		entry.Sha = parts[0]
-		entry.Subject = parts[1]
-		entry.Author = strings.TrimSpace(parts[2])
-		entry.RelativeDate = parts[3]
-		entry.UnixTime, err = strconv.ParseInt(parts[4], 10, 64)
-		if err != nil {
-			repo.logger.Add(err.Error())
-		}
-
-		logEntries = append(logEntries, entry)
-	}
-
-	return repo.relatedFiles(logEntries, filename),
-		repo.relatedWorkItems(logEntries),
-		repo.relatedContributors(logEntries)
+	return relatedLogs.relatedFiles(filename), relatedLogs.relatedWorkItems(), relatedLogs.relatedContributors()
 }
 
-func (repo *Repo) relatedFiles(entries []*LogEntry, filename string) []*RelatedFile {
+func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
 	files := make([]*RelatedFile, 0)
 	namedFiles := make(map[string]*RelatedFile)
 
-	for _, entry := range entries {
-		out, err := repo.git("show", "--pretty=format:%ar%m%at", "--name-only", entry.Sha)
-		if err != nil {
-			repo.logger.Add(err.Error())
-		}
-		lines := strings.Split(out, "\n")
-		dateData := strings.Split(lines[0], ">")
-
-		for _, file := range lines[1:] {
-			if len(strings.TrimSpace(file)) == 0 || file == filename {
+	for _, entry := range *entries {
+		for _, file := range entry.Files {
+			if file == filename {
 				continue
 			}
 
@@ -151,11 +123,8 @@ func (repo *Repo) relatedFiles(entries []*LogEntry, filename string) []*RelatedF
 				relatedFile := new(RelatedFile)
 				relatedFile.Name = file
 				relatedFile.Count = 1
-				relatedFile.RelativeDate = dateData[0]
-				relatedFile.UnixTime, err = strconv.ParseInt(dateData[1], 10, 64)
-				if err != nil {
-					repo.logger.Add(err.Error())
-				}
+				relatedFile.UnixTime = entry.UnixTime
+				relatedFile.RelativeDate = humanize.Time(entry.UnixTime)
 
 				namedFiles[file] = relatedFile
 				files = append(files, relatedFile)
@@ -167,12 +136,12 @@ func (repo *Repo) relatedFiles(entries []*LogEntry, filename string) []*RelatedF
 	return files
 }
 
-func (repo *Repo) relatedWorkItems(entries []*LogEntry) []string {
+func (entries *Logs) relatedWorkItems() []string {
 	workItems := make([]string, 0)
 
 	re := regexp.MustCompile("(S|DE)[0-9][0-9]+")
 
-	for _, entry := range entries {
+	for _, entry := range *entries {
 		found := re.FindString(entry.Subject)
 		if len(found) > 0 {
 			workItems = append(workItems, found)
@@ -182,11 +151,11 @@ func (repo *Repo) relatedWorkItems(entries []*LogEntry) []string {
 	return workItems
 }
 
-func (repo *Repo) relatedContributors(entries []*LogEntry) []*Contributor {
+func (entries *Logs) relatedContributors() []*Contributor {
 	contributors := make([]*Contributor, 0)
 	namedContributors := make(map[string]*Contributor)
 
-	for _, entry := range entries {
+	for _, entry := range *entries {
 		name := entry.Author
 
 		contributor, ok := namedContributors[name]

@@ -23,7 +23,7 @@ type LogEntry struct {
 	Body         string
 	Author       string
 	RelativeDate string
-	UnixTime     int64
+	UnixTime     time.Time
 	Files        []string
 }
 
@@ -119,13 +119,13 @@ func parse(reader io.Reader) Logs {
 
 		if strings.HasPrefix(currentLine, date) {
 			dateLine := strings.TrimPrefix(currentLine, date)
-			time := strings.TrimSpace(strings.Split(dateLine, "-")[0])
+			timestr := strings.TrimSpace(strings.Split(dateLine, "-")[0])
 
-			unixTime, err := strconv.ParseInt(time, 10, 64)
+			unixTime, err := strconv.ParseInt(timestr, 10, 64)
 			if err != nil {
-				currentEntry.UnixTime = 0
+				currentEntry.UnixTime = time.Unix(0, 0)
 			} else {
-				currentEntry.UnixTime = unixTime
+				currentEntry.UnixTime = time.Unix(unixTime, 0)
 			}
 
 			continue
