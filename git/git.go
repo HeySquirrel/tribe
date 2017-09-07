@@ -10,13 +10,6 @@ import (
 	"time"
 )
 
-type Contributor struct {
-	Name         string
-	Count        int
-	RelativeDate string
-	UnixTime     time.Time
-}
-
 type RelatedFile struct {
 	Name         string
 	Count        int
@@ -133,29 +126,4 @@ func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
 
 	sort.Sort(sort.Reverse(byRelevance(files)))
 	return files
-}
-
-func (entries *Logs) relatedContributors() []*Contributor {
-	contributors := make([]*Contributor, 0)
-	namedContributors := make(map[string]*Contributor)
-
-	for _, entry := range *entries {
-		name := entry.Author
-
-		contributor, ok := namedContributors[name]
-		if ok {
-			contributor.Count += 1
-		} else {
-			contributor := new(Contributor)
-			contributor.Name = name
-			contributor.Count = 1
-			contributor.RelativeDate = entry.RelativeDate
-			contributor.UnixTime = entry.UnixTime
-
-			namedContributors[name] = contributor
-			contributors = append(contributors, contributor)
-		}
-	}
-
-	return contributors
 }
