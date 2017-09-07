@@ -3,8 +3,28 @@ package git
 import (
 	humanize "github.com/dustin/go-humanize"
 	"regexp"
+	"sort"
 	"time"
 )
+
+type RelatedFile struct {
+	Name         string
+	Count        int
+	RelativeDate string
+	UnixTime     time.Time
+}
+
+type byRelevance []*RelatedFile
+
+func (a byRelevance) Len() int      { return len(a) }
+func (a byRelevance) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byRelevance) Less(i, j int) bool {
+	if a[i].UnixTime == a[j].UnixTime {
+		return a[i].Count < a[j].Count
+	}
+
+	return a[i].UnixTime.Before(a[j].UnixTime)
+}
 
 type Contributor struct {
 	Name         string
@@ -68,4 +88,34 @@ func (entries *Logs) relatedContributors() Contributors {
 	}
 
 	return contributors
+}
+
+func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
+	files := make([]*RelatedFile, 0)
+	namedFiles := make(map[string]*RelatedFile)
+
+	for _, entry := range *entries {
+		for _, file := range entry.Files {
+			if file == filename {
+				continue
+			}
+
+			relatedFile, ok := namedFiles[file]
+			if ok {
+				relatedFile.Count += 1
+			} else {
+				relatedFile := new(RelatedFile)
+				relatedFile.Name = file
+				relatedFile.Count = 1
+				relatedFile.UnixTime = entry.UnixTime
+				relatedFile.RelativeDate = humanize.Time(entry.UnixTime)
+
+				namedFiles[file] = relatedFile
+				files = append(files, relatedFile)
+			}
+		}
+	}
+
+	sort.Sort(sort.Reverse(byRelevance(files)))
+	return files
 }
