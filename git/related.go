@@ -13,6 +13,16 @@ type Contributor struct {
 	UnixTime     time.Time
 }
 
+func NewContributor(name string, lastContribution time.Time) *Contributor {
+	contributor := new(Contributor)
+	contributor.Name = name
+	contributor.Count = 1
+	contributor.UnixTime = lastContribution
+	contributor.RelativeDate = humanize.Time(lastContribution)
+
+	return contributor
+}
+
 func (entries *Logs) relatedWorkItems() []string {
 	workItems := make([]string, 0)
 
@@ -39,11 +49,7 @@ func (entries *Logs) relatedContributors() []*Contributor {
 		if ok {
 			contributor.Count += 1
 		} else {
-			contributor := new(Contributor)
-			contributor.Name = name
-			contributor.Count = 1
-			contributor.UnixTime = entry.UnixTime
-			contributor.RelativeDate = humanize.Time(entry.UnixTime)
+			contributor := NewContributor(name, entry.UnixTime)
 
 			namedContributors[name] = contributor
 			contributors = append(contributors, contributor)
