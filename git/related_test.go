@@ -2,6 +2,7 @@ package git
 
 import (
 	"testing"
+	"time"
 )
 
 func TestRelatedWorkItems(t *testing.T) {
@@ -30,6 +31,42 @@ func TestRelatedWorkItems(t *testing.T) {
 		for i := range actual {
 			if actual[i] != c.Expected[i] {
 				t.Errorf("'%s' not equal '%s'", actual[i], c.Expected[i])
+			}
+		}
+	}
+}
+
+func TestRelatedContributors(t *testing.T) {
+	now := time.Now()
+	cases := []struct {
+		Author   string
+		Expected Contributors
+	}{
+		{"Bart Simpson", Contributors{NewContributor("Bart Simpson", now)}},
+		{"Bart Simpson <bart@simpsons.com>", Contributors{NewContributor("Bart Simpson", now)}},
+		{"Bart Simpson and Lisa Simpson",
+			Contributors{NewContributor("Bart Simpson", now), NewContributor("Lisa Simpson", now)}},
+		{"Homer Simpson, Lisa Simpson and Marge Simpson",
+			Contributors{NewContributor("Homer Simpson", now),
+				NewContributor("Lisa Simpson", now),
+				NewContributor("Marge Simpson", now)}},
+	}
+
+	for _, c := range cases {
+		entry := new(LogEntry)
+		entry.Author = c.Author
+		entry.UnixTime = now
+
+		entries := Logs{entry}
+		actual := entries.relatedContributors()
+
+		if len(actual) != len(c.Expected) {
+			t.Fatalf("'%v' not equal '%v'", actual, c.Expected)
+		}
+
+		for i := range actual {
+			if actual[i].Name != c.Expected[i].Name {
+				t.Errorf("'%s' not equal '%s'", actual[i].Name, c.Expected[i].Name)
 			}
 		}
 	}

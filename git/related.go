@@ -13,6 +13,12 @@ type Contributor struct {
 	UnixTime     time.Time
 }
 
+type Contributors []*Contributor
+
+func (c *Contributor) String() string {
+	return c.Name
+}
+
 func NewContributor(name string, lastContribution time.Time) *Contributor {
 	contributor := new(Contributor)
 	contributor.Name = name
@@ -38,21 +44,26 @@ func (entries *Logs) relatedWorkItems() []string {
 	return workItems
 }
 
-func (entries *Logs) relatedContributors() []*Contributor {
-	contributors := make([]*Contributor, 0)
+func (entries *Logs) relatedContributors() Contributors {
+	contributors := make(Contributors, 0)
 	namedContributors := make(map[string]*Contributor)
 
+	remove := regexp.MustCompile(" ?<[^>]+>")
+	re := regexp.MustCompile(", | and |,")
+
 	for _, entry := range *entries {
-		name := entry.Author
+		authors := remove.ReplaceAllString(entry.Author, "")
+		names := re.Split(authors, -1)
+		for _, name := range names {
+			contributor, ok := namedContributors[name]
+			if ok {
+				contributor.Count += 1
+			} else {
+				contributor := NewContributor(name, entry.UnixTime)
 
-		contributor, ok := namedContributors[name]
-		if ok {
-			contributor.Count += 1
-		} else {
-			contributor := NewContributor(name, entry.UnixTime)
-
-			namedContributors[name] = contributor
-			contributors = append(contributors, contributor)
+				namedContributors[name] = contributor
+				contributors = append(contributors, contributor)
+			}
 		}
 	}
 
