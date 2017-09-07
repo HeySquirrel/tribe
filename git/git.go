@@ -1,7 +1,6 @@
 package git
 
 import (
-	"fmt"
 	humanize "github.com/dustin/go-humanize"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
@@ -36,22 +35,6 @@ type Repo struct {
 
 func (repo *Repo) git(args ...string) (string, error) {
 	return repo.shell.Exec("git", args...)
-}
-
-func (repo *Repo) log(args ...string) (string, error) {
-	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-	after := fmt.Sprintf("--after=%s", sixMonthsAgo.Format("2006/01/02"))
-
-	logCommand := make([]string, 0)
-	logCommand = append(logCommand, "log", "--no-merges", after)
-	logCommand = append(logCommand, args...)
-
-	results, err := repo.git(logCommand...)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(results), nil
 }
 
 func New(dir string, logger *tlog.Log) (*Repo, error) {
