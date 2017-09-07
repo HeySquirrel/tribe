@@ -5,7 +5,6 @@ import (
 	humanize "github.com/dustin/go-humanize"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -77,7 +76,7 @@ func New(dir string, logger *tlog.Log) (*Repo, error) {
 }
 
 func (repo *Repo) Changes() []string {
-	var results = make([]string, 1)
+	var results = make([]string, 0)
 
 	cmdOut, err := repo.git("status", "--porcelain")
 	if err != nil {
@@ -134,21 +133,6 @@ func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
 
 	sort.Sort(sort.Reverse(byRelevance(files)))
 	return files
-}
-
-func (entries *Logs) relatedWorkItems() []string {
-	workItems := make([]string, 0)
-
-	re := regexp.MustCompile("(S|DE)[0-9][0-9]+")
-
-	for _, entry := range *entries {
-		found := re.FindString(entry.Subject)
-		if len(found) > 0 {
-			workItems = append(workItems, found)
-		}
-	}
-
-	return workItems
 }
 
 func (entries *Logs) relatedContributors() []*Contributor {
