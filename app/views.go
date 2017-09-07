@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/heysquirrel/tribe/git"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
@@ -206,7 +207,7 @@ func (a *App) UpdateContributors(contributors []*git.Contributor) {
 		table.SetBorder(false)
 
 		for _, contributor := range contributors {
-			table.Append([]string{contributor.Name, strconv.Itoa(contributor.Count), contributor.RelativeDate})
+			table.Append([]string{contributor.Name, strconv.Itoa(contributor.Count), humanize.Time(contributor.LastCommit)})
 		}
 
 		table.Render()
@@ -223,7 +224,7 @@ func (a *App) UpdateRelatedFiles(files []*git.RelatedFile) {
 		table.SetBorder(false)
 
 		for _, file := range files {
-			table.Append([]string{file.Name, strconv.Itoa(file.Count), file.RelativeDate})
+			table.Append([]string{file.Name, strconv.Itoa(file.Count), humanize.Time(file.LastCommit)})
 		}
 
 		table.Render()

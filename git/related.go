@@ -1,17 +1,15 @@
 package git
 
 import (
-	humanize "github.com/dustin/go-humanize"
 	"regexp"
 	"sort"
 	"time"
 )
 
 type Contributor struct {
-	Name         string
-	Count        int
-	RelativeDate string
-	UnixTime     time.Time
+	Name       string
+	Count      int
+	LastCommit time.Time
 }
 
 type Contributors []*Contributor
@@ -24,8 +22,7 @@ func NewContributor(name string, lastContribution time.Time) *Contributor {
 	contributor := new(Contributor)
 	contributor.Name = name
 	contributor.Count = 1
-	contributor.UnixTime = lastContribution
-	contributor.RelativeDate = humanize.Time(lastContribution)
+	contributor.LastCommit = lastContribution
 
 	return contributor
 }
@@ -60,7 +57,7 @@ func (entries *Logs) relatedContributors() Contributors {
 			if ok {
 				contributor.Count += 1
 			} else {
-				contributor := NewContributor(name, entry.UnixTime)
+				contributor := NewContributor(name, entry.LastCommit)
 
 				namedContributors[name] = contributor
 				contributors = append(contributors, contributor)
@@ -72,10 +69,9 @@ func (entries *Logs) relatedContributors() Contributors {
 }
 
 type RelatedFile struct {
-	Name         string
-	Count        int
-	RelativeDate string
-	UnixTime     time.Time
+	Name       string
+	Count      int
+	LastCommit time.Time
 }
 
 type byRelevance []*RelatedFile
@@ -83,19 +79,18 @@ type byRelevance []*RelatedFile
 func (a byRelevance) Len() int      { return len(a) }
 func (a byRelevance) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a byRelevance) Less(i, j int) bool {
-	if a[i].UnixTime == a[j].UnixTime {
+	if a[i].LastCommit == a[j].LastCommit {
 		return a[i].Count < a[j].Count
 	}
 
-	return a[i].UnixTime.Before(a[j].UnixTime)
+	return a[i].LastCommit.Before(a[j].LastCommit)
 }
 
 func NewRelatedFile(name string, lastCommitTime time.Time) *RelatedFile {
 	relatedFile := new(RelatedFile)
 	relatedFile.Name = name
 	relatedFile.Count = 1
-	relatedFile.UnixTime = lastCommitTime
-	relatedFile.RelativeDate = humanize.Time(lastCommitTime)
+	relatedFile.LastCommit = lastCommitTime
 
 	return relatedFile
 }
@@ -114,7 +109,7 @@ func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
 			if ok {
 				relatedFile.Count += 1
 			} else {
-				relatedFile := NewRelatedFile(file, entry.UnixTime)
+				relatedFile := NewRelatedFile(file, entry.LastCommit)
 
 				namedFiles[file] = relatedFile
 				files = append(files, relatedFile)

@@ -23,7 +23,7 @@ type LogEntry struct {
 	Body         string
 	Author       string
 	RelativeDate string
-	UnixTime     time.Time
+	LastCommit   time.Time
 	Files        []string
 }
 
@@ -123,9 +123,9 @@ func parse(reader io.Reader) Logs {
 
 			unixTime, err := strconv.ParseInt(timestr, 10, 64)
 			if err != nil {
-				currentEntry.UnixTime = time.Unix(0, 0)
+				currentEntry.LastCommit = time.Unix(0, 0)
 			} else {
-				currentEntry.UnixTime = time.Unix(unixTime, 0)
+				currentEntry.LastCommit = time.Unix(unixTime, 0)
 			}
 
 			continue

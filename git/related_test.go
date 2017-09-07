@@ -55,7 +55,7 @@ func TestRelatedContributors(t *testing.T) {
 	for _, c := range cases {
 		entry := new(LogEntry)
 		entry.Author = c.Author
-		entry.UnixTime = now
+		entry.LastCommit = now
 
 		entries := Logs{entry}
 		actual := entries.relatedContributors()
