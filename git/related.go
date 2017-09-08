@@ -79,11 +79,12 @@ type byRelevance []*RelatedFile
 func (a byRelevance) Len() int      { return len(a) }
 func (a byRelevance) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a byRelevance) Less(i, j int) bool {
-	if a[i].LastCommit == a[j].LastCommit {
-		return a[i].Count < a[j].Count
-	}
+	// if a[i].LastCommit == a[j].LastCommit {
+	// 	return a[i].Count < a[j].Count
+	// }
 
-	return a[i].LastCommit.Before(a[j].LastCommit)
+	// return a[i].LastCommit.Before(a[j].LastCommit)
+	return a[i].Count < a[j].Count
 }
 
 func NewRelatedFile(name string, lastCommitTime time.Time) *RelatedFile {
