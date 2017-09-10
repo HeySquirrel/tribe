@@ -61,7 +61,7 @@ func (a *App) currentFileChanged() {
 
 	go func(app *App, file string) {
 		files, workItems, contributors := app.Git.Related(file)
-		app.UpdateContributors(contributors)
+		app.UpdateContributors2(contributors)
 		app.UpdateRelatedFiles(files)
 		app.UpdateRelatedWork(workItems)
 	}(a, file)
