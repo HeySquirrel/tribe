@@ -34,17 +34,6 @@ type View struct {
 }
 
 var views = map[string]View{
-	changesView: {
-		title:      "Last Changed",
-		text:       "",
-		x1:         0.0,
-		y1:         0.0,
-		x2:         0.35,
-		y2:         0.2,
-		highlight:  true,
-		selBgColor: gocui.ColorCyan,
-		selFgColor: gocui.ColorBlack,
-	},
 	associatedFilesView: {
 		title: "Associated Files",
 		text:  "",
@@ -105,7 +94,6 @@ var views = map[string]View{
 }
 
 var defaultViews = []string{
-	changesView,
 	contributorsView,
 	associatedFilesView,
 	logsView,

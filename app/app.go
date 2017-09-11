@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/heysquirrel/tribe/git"
 	tlog "github.com/heysquirrel/tribe/log"
+	"github.com/heysquirrel/tribe/widgets"
 	"github.com/jroimartin/gocui"
 	"log"
 	"os"
@@ -35,7 +36,9 @@ func New() *App {
 	if err != nil {
 		log.Panicln(err)
 	}
-	a.Gui.SetManager(a)
+
+	changes := widgets.NewChanges()
+	a.Gui.SetManager(changes, a)
 
 	return a
 }
