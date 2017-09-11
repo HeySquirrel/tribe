@@ -4,6 +4,7 @@ import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/heysquirrel/tribe/git"
+	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
 	"io"
 	"strconv"
@@ -100,10 +101,13 @@ func (a *App) UpdateRelatedFiles(files []*git.RelatedFile) {
 	a.updateView(associatedFilesView, func(v *gocui.View) {
 		maxX, _ := v.Size()
 
-		table := NewTable(maxX, NewColumn("NAME", 0.55), NewColumn("COMMITS", 0.2), NewColumn("LAST COMMIT", 0.25))
+		table := NewTable(maxX, NewColumn("NAME", 0.75), NewColumn("COMMITS", 0.1), NewColumn("LAST COMMIT", 0.15))
 
 		for _, file := range files {
-			table.MustAddRow([]string{file.Name, strconv.Itoa(file.Count), humanize.Time(file.LastCommit)})
+			table.MustAddRow([]string{
+				view.RenderFilename(file.Name),
+				strconv.Itoa(file.Count),
+				humanize.Time(file.LastCommit)})
 		}
 
 		table.Render(v)
