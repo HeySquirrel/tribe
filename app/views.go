@@ -139,15 +139,6 @@ func (a *App) Layout(g *gocui.Gui) error {
 	return a.setKeyBindings()
 }
 
-func (a *App) UpdateChanges(files []string) {
-	a.updateView(changesView, func(v *gocui.View) {
-		for _, file := range files {
-			fmt.Fprintln(v, file)
-		}
-		a.currentFileChanged()
-	})
-}
-
 func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
 	a.updateView(debugView, func(v *gocui.View) {
 		maxX, _ := v.Size()

@@ -1,36 +1,95 @@
 package widgets
 
 import (
+	"fmt"
+	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
 	"log"
 )
 
+type SelectionListener interface {
+	ValueChanged(selectedFile string)
+}
+
 type ChangesView struct {
-	name string
-	gui  *gocui.Gui
+	name          string
+	gui           *gocui.Gui
+	listeners     []SelectionListener
+	changes       []string
+	selectedIndex int
 }
 
 func NewChangesView(gui *gocui.Gui) *ChangesView {
-	view := new(ChangesView)
-	view.name = "changes"
-	view.gui = gui
+	c := new(ChangesView)
+	c.name = "changes"
+	c.gui = gui
+	c.listeners = make([]SelectionListener, 0)
+	c.changes = make([]string, 0)
+	c.selectedIndex = 0
 
-	return view
+	return c
+}
+
+func (c *ChangesView) AddListener(listener SelectionListener) {
+	c.listeners = append(c.listeners, listener)
+}
+
+func (c *ChangesView) SetChanges(changes []string) {
+	c.changes = changes
+
+	c.gui.Update(func(g *gocui.Gui) error {
+		v, err := g.View(c.name)
+		if err != nil {
+			return err
+		}
+		v.Clear()
+
+		for _, change := range changes {
+			fmt.Fprintln(v, view.RenderFilename(change))
+		}
+
+		c.SetSelected(0)
+		return nil
+	})
 }
 
 func (c *ChangesView) GetSelected() string {
-	v, err := c.gui.View(c.name)
-	if err != nil {
-		log.Panicln(err)
-	}
+	return c.changes[c.selectedIndex]
+}
 
-	_, cy := v.Cursor()
-	file, err := v.Line(cy)
-	if err != nil {
-		file = ""
-	}
+func (c *ChangesView) SetSelected(index int) {
+	c.selectedIndex = index
 
-	return file
+	c.gui.Update(func(g *gocui.Gui) error {
+		v, err := g.View(c.name)
+		if err != nil {
+			return err
+		}
+
+		err = v.SetCursor(0, index)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		c.notifyListeners()
+		return nil
+	})
+}
+
+func (c *ChangesView) Next() {
+	if c.selectedIndex < len(c.changes)-1 {
+		c.SetSelected(c.selectedIndex + 1)
+	} else {
+		c.SetSelected(0)
+	}
+}
+
+func (c *ChangesView) Previous() {
+	if c.selectedIndex > 0 {
+		c.SetSelected(c.selectedIndex - 1)
+	} else {
+		c.SetSelected(len(c.changes) - 1)
+	}
 }
 
 func (c *ChangesView) Layout(g *gocui.Gui) error {
@@ -52,6 +111,31 @@ func (c *ChangesView) Layout(g *gocui.Gui) error {
 	v.SelFgColor = gocui.ColorBlack
 
 	_, err = g.SetCurrentView(c.name)
+	if err != nil {
+		return err
+	}
+
+	return c.setKeyBindings()
+}
+
+func (c *ChangesView) notifyListeners() {
+	selected := c.GetSelected()
+
+	for _, listener := range c.listeners {
+		listener.ValueChanged(selected)
+	}
+}
+
+func (c *ChangesView) setKeyBindings() error {
+	next := func(g *gocui.Gui, v *gocui.View) error { c.Next(); return nil }
+	previous := func(g *gocui.Gui, v *gocui.View) error { c.Previous(); return nil }
+
+	err := c.gui.SetKeybinding(c.name, gocui.KeyArrowDown, gocui.ModNone, next)
+	if err != nil {
+		return err
+	}
+
+	err = c.gui.SetKeybinding(c.name, gocui.KeyArrowUp, gocui.ModNone, previous)
 	if err != nil {
 		return err
 	}

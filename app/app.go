@@ -39,6 +39,8 @@ func New() *App {
 	}
 
 	a.Changes = widgets.NewChangesView(a.Gui)
+	a.Changes.AddListener(a)
+
 	a.Gui.SetManager(a.Changes, a)
 
 	return a
@@ -64,22 +66,20 @@ func (a *App) Close() {
 }
 
 func (a *App) checkForChanges() {
-	a.UpdateChanges(a.Git.Changes())
+	a.Changes.SetChanges(a.Git.Changes())
 	for {
 		select {
 		case <-a.Done:
 			return
 		case <-time.After(10 * time.Second):
 			a.Debug("Checking for changes")
-			a.UpdateChanges(a.Git.Changes())
+			a.Changes.SetChanges(a.Git.Changes())
 		}
 	}
 
 }
 
-func (a *App) currentFileChanged() {
-	file := a.Changes.GetSelected()
-
+func (a *App) ValueChanged(file string) {
 	go func(app *App, file string) {
 		files, workItems, contributors := app.Git.Related(file)
 		app.UpdateContributors2(contributors)
