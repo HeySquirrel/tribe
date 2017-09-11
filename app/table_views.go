@@ -28,13 +28,17 @@ func NewColumn(name string, size float64) Column {
 	return Column{name: name, size: size}
 }
 
-func NewTable(width int, columns ...Column) *Table {
+func NewTable(width int) *Table {
 	table := new(Table)
 	table.width = width
-	table.columns = columns
+	table.columns = make([]Column, 0)
 	table.rows = make([]Row, 0)
 
 	return table
+}
+
+func (t *Table) AddColumn(name string, size float64) {
+	t.columns = append(t.columns, NewColumn(name, size))
 }
 
 func (t *Table) MustAddRow(row Row) {
@@ -87,7 +91,10 @@ func (t *Table) Render(w io.Writer) {
 func (a *App) UpdateContributors2(contributors []*git.Contributor) {
 	a.updateView(contributorsView, func(v *gocui.View) {
 		maxX, _ := v.Size()
-		table := NewTable(maxX, NewColumn("NAME", 0.55), NewColumn("COMMITS", 0.2), NewColumn("LAST COMMIT", 0.25))
+		table := NewTable(maxX)
+		table.AddColumn("NAME", 0.55)
+		table.AddColumn("COMMITS", 0.2)
+		table.AddColumn("LAST COMMIT", 0.25)
 
 		for _, contributor := range contributors {
 			table.MustAddRow([]string{contributor.Name, strconv.Itoa(contributor.Count), humanize.Time(contributor.LastCommit)})
@@ -101,7 +108,10 @@ func (a *App) UpdateRelatedFiles(files []*git.RelatedFile) {
 	a.updateView(associatedFilesView, func(v *gocui.View) {
 		maxX, _ := v.Size()
 
-		table := NewTable(maxX, NewColumn("NAME", 0.75), NewColumn("COMMITS", 0.1), NewColumn("LAST COMMIT", 0.15))
+		table := NewTable(maxX)
+		table.AddColumn("NAME", 0.75)
+		table.AddColumn("COMMITS", 0.1)
+		table.AddColumn("LAST COMMIT", 0.15)
 
 		for _, file := range files {
 			table.MustAddRow([]string{
