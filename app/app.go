@@ -6,6 +6,7 @@ import (
 	"github.com/jroimartin/gocui"
 	"log"
 	"os"
+	"time"
 )
 
 type App struct {
@@ -45,6 +46,8 @@ func (a *App) Debug(message string) {
 }
 
 func (a *App) Loop() {
+	go a.checkForChanges()
+
 	err := a.Gui.MainLoop()
 	if err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
@@ -54,6 +57,20 @@ func (a *App) Loop() {
 func (a *App) Close() {
 	close(a.Done)
 	a.Gui.Close()
+}
+
+func (a *App) checkForChanges() {
+	a.UpdateChanges(a.Git.Changes())
+	for {
+		select {
+		case <-a.Done:
+			return
+		case <-time.After(10 * time.Second):
+			a.Debug("Checking for changes")
+			a.UpdateChanges(a.Git.Changes())
+		}
+	}
+
 }
 
 func (a *App) currentFileChanged() {
