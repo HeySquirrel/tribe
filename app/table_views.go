@@ -50,7 +50,7 @@ func (t *Table) MustAddRow(row Row) {
 	t.rows = append(t.rows, row)
 }
 
-func Center2(s string, width int) string {
+func center(s string, width int) string {
 	leftPad := width/2 + len(s)/2
 
 	if leftPad%2 != 0 {
@@ -65,7 +65,7 @@ func (t *Table) Render(w io.Writer) {
 
 	header := make([]string, 0)
 	for _, column := range t.columns {
-		header = append(header, Center2(column.name, column.size))
+		header = append(header, center(column.name, column.size))
 	}
 	fmt.Fprintln(w, strings.Join(header, "|"))
 
