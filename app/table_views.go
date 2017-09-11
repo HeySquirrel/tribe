@@ -13,7 +13,7 @@ import (
 
 type Column struct {
 	name string
-	size float64
+	size int
 }
 
 type Row []string
@@ -24,7 +24,7 @@ type Table struct {
 	rows    []Row
 }
 
-func NewColumn(name string, size float64) Column {
+func NewColumn(name string, size int) Column {
 	return Column{name: name, size: size}
 }
 
@@ -38,7 +38,8 @@ func NewTable(width int) *Table {
 }
 
 func (t *Table) AddColumn(name string, size float64) {
-	t.columns = append(t.columns, NewColumn(name, size))
+	columnSize := int(float64(t.width) * size)
+	t.columns = append(t.columns, NewColumn(name, columnSize))
 }
 
 func (t *Table) MustAddRow(row Row) {
@@ -64,8 +65,7 @@ func (t *Table) Render(w io.Writer) {
 
 	header := make([]string, 0)
 	for _, column := range t.columns {
-		columnSize := int(float64(maxView) * column.size)
-		header = append(header, Center2(column.name, columnSize))
+		header = append(header, Center2(column.name, column.size))
 	}
 	fmt.Fprintln(w, strings.Join(header, "|"))
 
@@ -75,12 +75,11 @@ func (t *Table) Render(w io.Writer) {
 		columns := make([]string, 0)
 
 		for j, column := range t.columns {
-			columnSize := int(float64(maxView) * column.size)
 			data := row[j]
 			if i == 0 && j == 0 {
 				data = fmt.Sprintf(" 🌶  %s", data)
 			}
-			columnFormat := fmt.Sprintf(" %%-%ds", columnSize-1)
+			columnFormat := fmt.Sprintf(" %%-%ds", column.size-1)
 			columns = append(columns, fmt.Sprintf(columnFormat, data))
 		}
 
