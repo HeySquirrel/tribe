@@ -68,13 +68,13 @@ func (t *Table) Render(w io.Writer) {
 
 	fmt.Fprintf(w, "+%s+\n", strings.Repeat("-", maxView))
 
-	for _, row := range t.rows {
+	for i, row := range t.rows {
 		columns := make([]string, 0)
 
 		for j, column := range t.columns {
 			columnSize := int(float64(maxView) * column.size)
 			data := row[j]
-			if j == 0 {
+			if i == 0 && j == 0 {
 				data = fmt.Sprintf(" 🌶  %s", data)
 			}
 			columnFormat := fmt.Sprintf(" %%-%ds", columnSize-1)
