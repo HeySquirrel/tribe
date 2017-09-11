@@ -11,9 +11,17 @@ import (
 	"strings"
 )
 
+type Justification int
+
+const (
+	LEFT Justification = 1 + iota
+	RIGHT
+)
+
 type Column struct {
-	name string
-	size int
+	name          string
+	size          int
+	justification Justification
 }
 
 type Row []string
@@ -24,8 +32,16 @@ type Table struct {
 	rows    []Row
 }
 
-func NewColumn(name string, size int) Column {
-	return Column{name: name, size: size}
+func NewColumn(name string, size int, justification Justification) Column {
+	return Column{name: name, size: size, justification: justification}
+}
+
+func (c *Column) Render(data string) string {
+	format := " %%-%ds"
+	if c.justification == RIGHT {
+		format = "%%%ds "
+	}
+	return fmt.Sprintf(fmt.Sprintf(format, c.size-1), data)
 }
 
 func NewTable(width int) *Table {
@@ -37,9 +53,9 @@ func NewTable(width int) *Table {
 	return table
 }
 
-func (t *Table) AddColumn(name string, size float64) {
+func (t *Table) AddColumn(name string, size float64, justification Justification) {
 	columnSize := int(float64(t.width) * size)
-	t.columns = append(t.columns, NewColumn(name, columnSize))
+	t.columns = append(t.columns, NewColumn(name, columnSize, justification))
 }
 
 func (t *Table) MustAddRow(row Row) {
@@ -79,8 +95,8 @@ func (t *Table) Render(w io.Writer) {
 			if i == 0 && j == 0 {
 				data = fmt.Sprintf(" 🌶  %s", data)
 			}
-			columnFormat := fmt.Sprintf(" %%-%ds", column.size-1)
-			columns = append(columns, fmt.Sprintf(columnFormat, data))
+
+			columns = append(columns, column.Render(data))
 		}
 
 		fmt.Fprintln(w, strings.Join(columns, "|"))
@@ -91,9 +107,9 @@ func (a *App) UpdateContributors2(contributors []*git.Contributor) {
 	a.updateView(contributorsView, func(v *gocui.View) {
 		maxX, _ := v.Size()
 		table := NewTable(maxX)
-		table.AddColumn("NAME", 0.55)
-		table.AddColumn("COMMITS", 0.2)
-		table.AddColumn("LAST COMMIT", 0.25)
+		table.AddColumn("NAME", 0.55, LEFT)
+		table.AddColumn("COMMITS", 0.2, RIGHT)
+		table.AddColumn("LAST COMMIT", 0.25, LEFT)
 
 		for _, contributor := range contributors {
 			table.MustAddRow([]string{contributor.Name, strconv.Itoa(contributor.Count), humanize.Time(contributor.LastCommit)})
@@ -108,9 +124,9 @@ func (a *App) UpdateRelatedFiles(files []*git.RelatedFile) {
 		maxX, _ := v.Size()
 
 		table := NewTable(maxX)
-		table.AddColumn("NAME", 0.75)
-		table.AddColumn("COMMITS", 0.1)
-		table.AddColumn("LAST COMMIT", 0.15)
+		table.AddColumn("NAME", 0.75, LEFT)
+		table.AddColumn("COMMITS", 0.1, RIGHT)
+		table.AddColumn("LAST COMMIT", 0.15, LEFT)
 
 		for _, file := range files {
 			table.MustAddRow([]string{
