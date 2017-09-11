@@ -4,9 +4,7 @@ import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/heysquirrel/tribe/git"
-	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
-	"github.com/olekukonko/tablewriter"
 	"io"
 	"strconv"
 	"strings"
@@ -91,7 +89,6 @@ func (a *App) UpdateContributors2(contributors []*git.Contributor) {
 		table := NewTable(maxX, NewColumn("NAME", 0.55), NewColumn("COMMITS", 0.2), NewColumn("LAST COMMIT", 0.25))
 
 		for _, contributor := range contributors {
-
 			table.MustAddRow([]string{contributor.Name, strconv.Itoa(contributor.Count), humanize.Time(contributor.LastCommit)})
 		}
 
@@ -103,19 +100,12 @@ func (a *App) UpdateRelatedFiles(files []*git.RelatedFile) {
 	a.updateView(associatedFilesView, func(v *gocui.View) {
 		maxX, _ := v.Size()
 
-		table := tablewriter.NewWriter(v)
-		table.SetColWidth(maxX)
-		table.SetHeader([]string{"Name", "Commits", "Last Commit"})
-		table.SetBorder(false)
+		table := NewTable(maxX, NewColumn("NAME", 0.55), NewColumn("COMMITS", 0.2), NewColumn("LAST COMMIT", 0.25))
 
 		for _, file := range files {
-			table.Append([]string{
-				view.RenderFilename(file.Name),
-				strconv.Itoa(file.Count),
-				humanize.Time(file.LastCommit),
-			})
+			table.MustAddRow([]string{file.Name, strconv.Itoa(file.Count), humanize.Time(file.LastCommit)})
 		}
 
-		table.Render()
+		table.Render(v)
 	})
 }
