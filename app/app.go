@@ -11,10 +11,11 @@ import (
 )
 
 type App struct {
-	Gui  *gocui.Gui
-	Done chan struct{}
-	Log  *tlog.Log
-	Git  *git.Repo
+	Gui     *gocui.Gui
+	Done    chan struct{}
+	Log     *tlog.Log
+	Git     *git.Repo
+	Changes *widgets.ChangesView
 }
 
 func New() *App {
@@ -37,8 +38,8 @@ func New() *App {
 		log.Panicln(err)
 	}
 
-	changes := widgets.NewChanges()
-	a.Gui.SetManager(changes, a)
+	a.Changes = widgets.NewChangesView(a.Gui)
+	a.Gui.SetManager(a.Changes, a)
 
 	return a
 }
@@ -77,7 +78,7 @@ func (a *App) checkForChanges() {
 }
 
 func (a *App) currentFileChanged() {
-	file := a.currentFileSelection()
+	file := a.Changes.GetSelected()
 
 	go func(app *App, file string) {
 		files, workItems, contributors := app.Git.Related(file)

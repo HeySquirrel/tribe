@@ -2,20 +2,38 @@ package widgets
 
 import (
 	"github.com/jroimartin/gocui"
+	"log"
 )
 
-type Changes struct {
+type ChangesView struct {
 	name string
+	gui  *gocui.Gui
 }
 
-func NewChanges() *Changes {
-	changes := new(Changes)
-	changes.name = "changes"
+func NewChangesView(gui *gocui.Gui) *ChangesView {
+	view := new(ChangesView)
+	view.name = "changes"
+	view.gui = gui
 
-	return changes
+	return view
 }
 
-func (c *Changes) Layout(g *gocui.Gui) error {
+func (c *ChangesView) GetSelected() string {
+	v, err := c.gui.View(c.name)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	_, cy := v.Cursor()
+	file, err := v.Line(cy)
+	if err != nil {
+		file = ""
+	}
+
+	return file
+}
+
+func (c *ChangesView) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
 	x1 := int(0.0 * float64(maxX))

@@ -5,7 +5,6 @@ import (
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
 	"github.com/olekukonko/tablewriter"
-	"log"
 	"time"
 )
 
@@ -138,21 +137,6 @@ func (a *App) Layout(g *gocui.Gui) error {
 	}
 
 	return a.setKeyBindings()
-}
-
-func (a *App) currentFileSelection() string {
-	v, err := a.Gui.View(changesView)
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	_, cy := v.Cursor()
-	file, err := v.Line(cy)
-	if err != nil {
-		file = ""
-	}
-
-	return file
 }
 
 func (a *App) UpdateChanges(files []string) {
