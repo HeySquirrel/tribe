@@ -18,6 +18,10 @@ const (
 	RIGHT
 )
 
+const (
+	HOT = `🌶`
+)
+
 type Column struct {
 	name          string
 	size          int
@@ -93,7 +97,7 @@ func (t *Table) Render(w io.Writer) {
 		for j, column := range t.columns {
 			data := row[j]
 			if i == 0 && j == 0 {
-				data = fmt.Sprintf(" 🌶  %s", data)
+				data = fmt.Sprintf(" %s  %s", HOT, data)
 			}
 
 			columns = append(columns, column.Render(data))
