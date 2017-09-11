@@ -107,7 +107,7 @@ func (t *Table) Render(w io.Writer) {
 	}
 }
 
-func (a *App) UpdateContributors2(contributors []*git.Contributor) {
+func (a *App) UpdateContributors(contributors []*git.Contributor) {
 	a.updateView(contributorsView, func(v *gocui.View) {
 		maxX, _ := v.Size()
 		table := NewTable(maxX)
