@@ -90,9 +90,3 @@ func (repo *Repo) GetFile(filename string) *File {
 
 	return file
 }
-
-func (repo *Repo) Related(filename string) ([]*RelatedFile, []string, []*Contributor) {
-	relatedLogs := repo.logs.ContainsFile(filename)
-
-	return relatedLogs.relatedFiles(filename), relatedLogs.relatedWorkItems(), relatedLogs.relatedContributors()
-}
