@@ -86,14 +86,14 @@ func (t *Table) Render(w io.Writer) {
 
 	fmt.Fprintf(w, "+%s+\n", strings.Repeat("-", maxView))
 
-	for i, row := range t.rows {
+	for _, row := range t.rows {
 		columns := make([]string, 0)
 
 		for j, column := range t.columns {
 			data := row[j]
-			if i == 0 && j == 0 {
-				data = fmt.Sprintf(" %s  %s", HOT, data)
-			}
+			// if i == 0 && j == 0 {
+			// 	data = fmt.Sprintf(" %s  %s", HOT, data)
+			// }
 
 			columns = append(columns, column.Render(data))
 		}
