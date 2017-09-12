@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/git"
 	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
 	"log"
@@ -9,14 +10,14 @@ import (
 )
 
 type SelectionListener interface {
-	ValueChanged(selectedFile string)
+	ValueChanged(selectedFile *git.File)
 }
 
 type ChangesView struct {
 	name          string
 	gui           *gocui.Gui
 	listeners     []SelectionListener
-	changes       []string
+	changes       []*git.File
 	selectedIndex int
 }
 
@@ -25,7 +26,7 @@ func NewChangesView(gui *gocui.Gui) *ChangesView {
 	c.name = "changes"
 	c.gui = gui
 	c.listeners = make([]SelectionListener, 0)
-	c.changes = make([]string, 0)
+	c.changes = make([]*git.File, 0)
 	c.selectedIndex = 0
 
 	return c
@@ -35,7 +36,7 @@ func (c *ChangesView) AddListener(listener SelectionListener) {
 	c.listeners = append(c.listeners, listener)
 }
 
-func (c *ChangesView) SetChanges(changes []string) {
+func (c *ChangesView) SetChanges(changes []*git.File) {
 	if reflect.DeepEqual(c.changes, changes) {
 		return
 	}
@@ -50,7 +51,7 @@ func (c *ChangesView) SetChanges(changes []string) {
 		maxX, _ := v.Size()
 
 		for _, change := range changes {
-			fmt.Fprintln(v, view.RenderFilename(maxX, change))
+			fmt.Fprintln(v, view.RenderFilename(maxX, change.Name))
 		}
 
 		c.SetSelected(0)
@@ -58,7 +59,7 @@ func (c *ChangesView) SetChanges(changes []string) {
 	})
 }
 
-func (c *ChangesView) GetSelected() string {
+func (c *ChangesView) GetSelected() *git.File {
 	return c.changes[c.selectedIndex]
 }
 

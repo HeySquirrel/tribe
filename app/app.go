@@ -103,11 +103,10 @@ func (a *App) checkForChanges() {
 
 }
 
-func (a *App) ValueChanged(file string) {
-	go func(app *App, file string) {
-		files, workItems, contributors := app.Git.Related(file)
-		app.RecentContributors.UpdateContributors(contributors)
-		app.AssociatedFiles.UpdateRelatedFiles(files)
-		app.RelatedWork.UpdateRelatedWork(workItems)
+func (a *App) ValueChanged(file *git.File) {
+	go func(app *App, file *git.File) {
+		app.RecentContributors.UpdateContributors(file.Contributors)
+		app.AssociatedFiles.UpdateRelatedFiles(file.Related)
+		app.RelatedWork.UpdateRelatedWork(file.WorkItems)
 	}(a, file)
 }
