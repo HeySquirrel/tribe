@@ -22,6 +22,7 @@ type App struct {
 	Logs               *widgets.LogsView
 	Legend             *widgets.LegendView
 	Feed               *widgets.FeedView
+	DebugView          *widgets.DebugView
 }
 
 func New() *App {
@@ -53,6 +54,7 @@ func New() *App {
 	a.Logs = widgets.NewLogsView(a.Gui)
 	a.Legend = widgets.NewLegendView(a.Gui)
 	a.Feed = widgets.NewFeedView(a.Gui)
+	a.DebugView = widgets.NewDebugView(a.Gui)
 
 	a.Gui.SetManager(
 		a.Changes,
@@ -62,6 +64,7 @@ func New() *App {
 		a.Logs,
 		a.Legend,
 		a.Feed,
+		a.DebugView,
 		a)
 
 	return a
@@ -69,7 +72,7 @@ func New() *App {
 
 func (a *App) Debug(message string) {
 	a.Log.Add(message)
-	a.UpdateDebug(a.Log.Entries())
+	a.DebugView.UpdateDebug(a.Log.Entries())
 }
 
 func (a *App) Loop() {

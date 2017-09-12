@@ -5,13 +5,13 @@ import (
 )
 
 func (a *App) ShowDebug(g *gocui.Gui, v *gocui.View) error {
-	g.SetViewOnTop(debugView)
-	g.SetCurrentView(debugView)
+	g.SetViewOnTop("debug")
+	g.SetCurrentView("debug")
 	return nil
 }
 
 func (a *App) HideDebug(g *gocui.Gui, v *gocui.View) error {
-	g.SetViewOnBottom(debugView)
+	g.SetViewOnBottom("debug")
 	g.SetCurrentView(changesView)
 	return nil
 }

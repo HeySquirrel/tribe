@@ -11,7 +11,7 @@ func (a *App) setKeyBindings() error {
 		log.Panicln(err)
 	}
 
-	err = a.Gui.SetKeybinding(debugView, gocui.KeyF1, gocui.ModNone, a.HideDebug)
+	err = a.Gui.SetKeybinding("debug", gocui.KeyF1, gocui.ModNone, a.HideDebug)
 	if err != nil {
 		log.Panicln(err)
 	}
