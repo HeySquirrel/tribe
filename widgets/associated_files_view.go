@@ -1,7 +1,11 @@
 package widgets
 
 import (
+	humanize "github.com/dustin/go-humanize"
+	"github.com/heysquirrel/tribe/git"
+	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
+	"strconv"
 )
 
 type AssociatedFilesView struct {
@@ -33,4 +37,32 @@ func (a *AssociatedFilesView) Layout(g *gocui.Gui) error {
 	v.Title = "Associated Files"
 
 	return nil
+}
+
+func (a *AssociatedFilesView) UpdateRelatedFiles(files []*git.RelatedFile) {
+	a.gui.Update(func(g *gocui.Gui) error {
+		v, err := g.View(a.name)
+		if err != nil {
+			return err
+		}
+		v.Clear()
+
+		maxX, _ := v.Size()
+
+		table := view.NewTable(maxX)
+		table.AddColumn("NAME", 0.75, view.LEFT)
+		table.AddColumn("COMMITS", 0.1, view.RIGHT)
+		table.AddColumn("LAST COMMIT", 0.15, view.LEFT)
+
+		for _, file := range files {
+			table.MustAddRow([]string{
+				view.RenderFilename(file.Name),
+				strconv.Itoa(file.Count),
+				humanize.Time(file.LastCommit)})
+		}
+
+		table.Render(v)
+
+		return nil
+	})
 }
