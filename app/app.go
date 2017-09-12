@@ -11,18 +11,12 @@ import (
 )
 
 type App struct {
-	Gui                *gocui.Gui
-	Done               chan struct{}
-	Log                *tlog.Log
-	Git                *git.Repo
-	Changes            *widgets.ChangesView
-	AssociatedFiles    *widgets.AssociatedFilesView
-	RecentContributors *widgets.RecentContributorsView
-	RelatedWork        *widgets.RelatedWorkView
-	Logs               *widgets.LogsView
-	Legend             *widgets.LegendView
-	Feed               *widgets.FeedView
-	DebugView          *widgets.DebugView
+	Gui       *gocui.Gui
+	Done      chan struct{}
+	Log       *tlog.Log
+	Git       *git.Repo
+	Changes   *widgets.ChangesView
+	DebugView *widgets.DebugView
 }
 
 func New() *App {
@@ -46,34 +40,29 @@ func New() *App {
 	}
 
 	a.Changes = widgets.NewChangesView(a.Gui)
-	a.AssociatedFiles = widgets.NewAssociatedFilesView(a.Gui)
-	a.Changes.AddListener(func(selectedFile *git.File) {
-		a.AssociatedFiles.UpdateRelatedFiles(selectedFile.Related)
-	})
-
-	a.RecentContributors = widgets.NewRecentContributorsView(a.Gui)
-	a.Changes.AddListener(func(selectedFile *git.File) {
-		a.RecentContributors.UpdateContributors(selectedFile.Contributors)
-	})
-
-	a.RelatedWork = widgets.NewRelatedWorkView(a.Gui)
-	a.Changes.AddListener(func(selectedFile *git.File) {
-		a.RelatedWork.UpdateRelatedWork(selectedFile.WorkItems)
-	})
-
-	a.Logs = widgets.NewLogsView(a.Gui)
-	a.Legend = widgets.NewLegendView(a.Gui)
-	a.Feed = widgets.NewFeedView(a.Gui)
 	a.DebugView = widgets.NewDebugView(a.Gui)
+
+	associatedFiles := widgets.NewAssociatedFilesView(a.Gui)
+	recentContributors := widgets.NewRecentContributorsView(a.Gui)
+	relatedWork := widgets.NewRelatedWorkView(a.Gui)
+	logs := widgets.NewLogsView(a.Gui)
+	legend := widgets.NewLegendView(a.Gui)
+	feed := widgets.NewFeedView(a.Gui)
+
+	a.Changes.AddListener(func(selectedFile *git.File) {
+		associatedFiles.UpdateRelatedFiles(selectedFile.Related)
+		recentContributors.UpdateContributors(selectedFile.Contributors)
+		relatedWork.UpdateRelatedWork(selectedFile.WorkItems)
+	})
 
 	a.Gui.SetManager(
 		a.Changes,
-		a.AssociatedFiles,
-		a.RecentContributors,
-		a.RelatedWork,
-		a.Logs,
-		a.Legend,
-		a.Feed,
+		associatedFiles,
+		recentContributors,
+		relatedWork,
+		logs,
+		legend,
+		feed,
 		a.DebugView,
 		a)
 
