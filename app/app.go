@@ -18,6 +18,7 @@ type App struct {
 	Changes            *widgets.ChangesView
 	AssociatedFiles    *widgets.AssociatedFilesView
 	RecentContributors *widgets.RecentContributorsView
+	RelatedWork        *widgets.RelatedWorkView
 }
 
 func New() *App {
@@ -45,11 +46,13 @@ func New() *App {
 
 	a.AssociatedFiles = widgets.NewAssociatedFilesView(a.Gui)
 	a.RecentContributors = widgets.NewRecentContributorsView(a.Gui)
+	a.RelatedWork = widgets.NewRelatedWorkView(a.Gui)
 
 	a.Gui.SetManager(
 		a.Changes,
 		a.AssociatedFiles,
 		a.RecentContributors,
+		a.RelatedWork,
 		a)
 
 	return a

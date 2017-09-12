@@ -49,14 +49,6 @@ var views = map[string]View{
 		x2:    0.35,
 		y2:    0.99,
 	},
-	relevantWorkView: {
-		title: "Relevant Work Items",
-		text:  "",
-		x1:    0.35,
-		y1:    0.45,
-		x2:    1.0,
-		y2:    0.9,
-	},
 	legendView: {
 		title: "Legend",
 		text:  "",
@@ -79,7 +71,6 @@ var views = map[string]View{
 var defaultViews = []string{
 	logsView,
 	feedView,
-	relevantWorkView,
 	legendView,
 	debugView,
 }
