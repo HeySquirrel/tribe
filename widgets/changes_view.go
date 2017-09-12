@@ -48,7 +48,13 @@ func (c *ChangesView) SetChanges(changes []*git.File) {
 		v.Clear()
 
 		for _, change := range changes {
-			fmt.Fprintf(v, "%-30s >%5d >%3d >%3d\n", view.RenderFilename(30, change.Name), len(change.Logs), change.NumberOfDefects(), change.NumberOfStories())
+			fmt.Fprintf(v,
+				"%-30s >%5d >%3d >%3d\n",
+				view.RenderFilename(30, change.Name),
+				len(change.Logs),
+				change.NumberOfDefects(),
+				change.NumberOfStories(),
+			)
 		}
 
 		c.SetSelected(0)

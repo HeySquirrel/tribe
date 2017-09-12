@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"fmt"
 	"github.com/jroimartin/gocui"
 )
 
@@ -31,6 +32,8 @@ func (l *LegendView) Layout(g *gocui.Gui) error {
 	}
 
 	v.Title = "Legend"
+
+	fmt.Fprintln(v, "File > Commits > Defects > Stories")
 
 	return nil
 }
