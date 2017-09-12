@@ -47,9 +47,10 @@ func (c *ChangesView) SetChanges(changes []string) {
 			return err
 		}
 		v.Clear()
+		maxX, _ := v.Size()
 
 		for _, change := range changes {
-			fmt.Fprintln(v, view.RenderFilename(change))
+			fmt.Fprintln(v, view.RenderFilename(maxX, change))
 		}
 
 		c.SetSelected(0)

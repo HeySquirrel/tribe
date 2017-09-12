@@ -54,9 +54,11 @@ func (a *AssociatedFilesView) UpdateRelatedFiles(files []*git.RelatedFile) {
 		table.AddColumn("COMMITS", 0.1, view.RIGHT)
 		table.AddColumn("LAST COMMIT", 0.15, view.LEFT)
 
+		nameSize := table.ColumnSize("NAME")
+
 		for _, file := range files {
 			table.MustAddRow([]string{
-				view.RenderFilename(file.Name),
+				view.RenderFilename(nameSize, file.Name),
 				strconv.Itoa(file.Count),
 				humanize.Time(file.LastCommit)})
 		}

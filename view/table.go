@@ -65,6 +65,16 @@ func (t *Table) MustAddRow(row Row) {
 	t.rows = append(t.rows, row)
 }
 
+func (t *Table) ColumnSize(name string) int {
+	for _, column := range t.columns {
+		if column.name == name {
+			return column.size
+		}
+	}
+
+	return 0
+}
+
 func center(s string, width int) string {
 	leftPad := width/2 + len(s)/2
 
