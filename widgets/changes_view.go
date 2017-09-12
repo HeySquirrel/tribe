@@ -5,6 +5,7 @@ import (
 	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
 	"log"
+	"reflect"
 )
 
 type SelectionListener interface {
@@ -35,8 +36,11 @@ func (c *ChangesView) AddListener(listener SelectionListener) {
 }
 
 func (c *ChangesView) SetChanges(changes []string) {
-	c.changes = changes
+	if reflect.DeepEqual(c.changes, changes) {
+		return
+	}
 
+	c.changes = changes
 	c.gui.Update(func(g *gocui.Gui) error {
 		v, err := g.View(c.name)
 		if err != nil {
