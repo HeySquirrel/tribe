@@ -11,12 +11,13 @@ import (
 )
 
 type App struct {
-	Gui             *gocui.Gui
-	Done            chan struct{}
-	Log             *tlog.Log
-	Git             *git.Repo
-	Changes         *widgets.ChangesView
-	AssociatedFiles *widgets.AssociatedFilesView
+	Gui                *gocui.Gui
+	Done               chan struct{}
+	Log                *tlog.Log
+	Git                *git.Repo
+	Changes            *widgets.ChangesView
+	AssociatedFiles    *widgets.AssociatedFilesView
+	RecentContributors *widgets.RecentContributorsView
 }
 
 func New() *App {
@@ -43,10 +44,12 @@ func New() *App {
 	a.Changes.AddListener(a)
 
 	a.AssociatedFiles = widgets.NewAssociatedFilesView(a.Gui)
+	a.RecentContributors = widgets.NewRecentContributorsView(a.Gui)
 
 	a.Gui.SetManager(
 		a.Changes,
 		a.AssociatedFiles,
+		a.RecentContributors,
 		a)
 
 	return a

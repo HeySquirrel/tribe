@@ -33,14 +33,6 @@ type View struct {
 }
 
 var views = map[string]View{
-	contributorsView: {
-		title: "Recent Contributors",
-		text:  "",
-		x1:    0.0,
-		y1:    0.2,
-		x2:    0.35,
-		y2:    0.4,
-	},
 	logsView: {
 		title: "Logs",
 		text:  "",
@@ -85,7 +77,6 @@ var views = map[string]View{
 }
 
 var defaultViews = []string{
-	contributorsView,
 	logsView,
 	feedView,
 	relevantWorkView,
