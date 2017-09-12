@@ -104,11 +104,6 @@ func (a *App) Layout(g *gocui.Gui) error {
 		}
 	}
 
-	_, err := g.SetCurrentView(changesView)
-	if err != nil {
-		return err
-	}
-
 	return a.setKeyBindings()
 }
 
