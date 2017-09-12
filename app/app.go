@@ -46,11 +46,21 @@ func New() *App {
 	}
 
 	a.Changes = widgets.NewChangesView(a.Gui)
-	a.Changes.AddListener(a)
-
 	a.AssociatedFiles = widgets.NewAssociatedFilesView(a.Gui)
+	a.Changes.AddListener(func(selectedFile *git.File) {
+		a.AssociatedFiles.UpdateRelatedFiles(selectedFile.Related)
+	})
+
 	a.RecentContributors = widgets.NewRecentContributorsView(a.Gui)
+	a.Changes.AddListener(func(selectedFile *git.File) {
+		a.RecentContributors.UpdateContributors(selectedFile.Contributors)
+	})
+
 	a.RelatedWork = widgets.NewRelatedWorkView(a.Gui)
+	a.Changes.AddListener(func(selectedFile *git.File) {
+		a.RelatedWork.UpdateRelatedWork(selectedFile.WorkItems)
+	})
+
 	a.Logs = widgets.NewLogsView(a.Gui)
 	a.Legend = widgets.NewLegendView(a.Gui)
 	a.Feed = widgets.NewFeedView(a.Gui)
@@ -101,12 +111,4 @@ func (a *App) checkForChanges() {
 		}
 	}
 
-}
-
-func (a *App) ValueChanged(file *git.File) {
-	go func(app *App, file *git.File) {
-		app.RecentContributors.UpdateContributors(file.Contributors)
-		app.AssociatedFiles.UpdateRelatedFiles(file.Related)
-		app.RelatedWork.UpdateRelatedWork(file.WorkItems)
-	}(a, file)
 }

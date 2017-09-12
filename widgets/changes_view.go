@@ -9,9 +9,7 @@ import (
 	"reflect"
 )
 
-type SelectionListener interface {
-	ValueChanged(selectedFile *git.File)
-}
+type SelectionListener func(selectedFile *git.File)
 
 type ChangesView struct {
 	name          string
@@ -128,7 +126,7 @@ func (c *ChangesView) notifyListeners() {
 	selected := c.GetSelected()
 
 	for _, listener := range c.listeners {
-		listener.ValueChanged(selected)
+		listener(selected)
 	}
 }
 
