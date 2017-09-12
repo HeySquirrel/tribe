@@ -20,24 +20,8 @@ func NewDebugView(gui *gocui.Gui) *DebugView {
 	return r
 }
 
-func (r *DebugView) Layout(g *gocui.Gui) error {
-	maxX, maxY := g.Size()
-
-	x1 := int(0.25 * float64(maxX))
-	y1 := int(0.25 * float64(maxY))
-	x2 := int(0.8*float64(maxX)) - 1
-	y2 := int(0.8*float64(maxY)) - 1
-
-	v, err := g.SetView(r.name, x1, y1, x2, y2)
-	if err != gocui.ErrUnknownView {
-		return err
-	}
-
-	v.Title = "Debug"
-
-	g.SetViewOnBottom(r.name)
-
-	return nil
+func (d *DebugView) Hide() {
+	d.gui.SetViewOnBottom("debug")
 }
 
 func (r *DebugView) UpdateDebug(entries []*tlog.LogEntry) {
@@ -62,4 +46,33 @@ func (r *DebugView) UpdateDebug(entries []*tlog.LogEntry) {
 
 		return nil
 	})
+}
+
+func (d *DebugView) Layout(g *gocui.Gui) error {
+	maxX, maxY := g.Size()
+
+	x1 := int(0.25 * float64(maxX))
+	y1 := int(0.25 * float64(maxY))
+	x2 := int(0.8*float64(maxX)) - 1
+	y2 := int(0.8*float64(maxY)) - 1
+
+	v, err := g.SetView(d.name, x1, y1, x2, y2)
+	if err != gocui.ErrUnknownView {
+		return err
+	}
+
+	v.Title = "Debug"
+
+	g.SetViewOnBottom(d.name)
+
+	return d.setKeyBindings()
+}
+
+func (d *DebugView) setKeyBindings() error {
+	hide := func(g *gocui.Gui, v *gocui.View) error { d.Hide(); return nil }
+	err := d.gui.SetKeybinding(d.name, gocui.KeyF1, gocui.ModNone, hide)
+	if err != nil {
+		return err
+	}
+	return nil
 }
