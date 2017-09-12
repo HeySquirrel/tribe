@@ -33,14 +33,6 @@ type View struct {
 }
 
 var views = map[string]View{
-	associatedFilesView: {
-		title: "Associated Files",
-		text:  "",
-		x1:    0.35,
-		y1:    0.0,
-		x2:    1.0,
-		y2:    0.2,
-	},
 	contributorsView: {
 		title: "Recent Contributors",
 		text:  "",
@@ -94,7 +86,6 @@ var views = map[string]View{
 
 var defaultViews = []string{
 	contributorsView,
-	associatedFilesView,
 	logsView,
 	feedView,
 	relevantWorkView,
