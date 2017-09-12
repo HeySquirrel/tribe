@@ -4,6 +4,7 @@ import (
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
+	"log"
 	"time"
 )
 
@@ -21,7 +22,21 @@ func NewDebugView(gui *gocui.Gui) *DebugView {
 }
 
 func (d *DebugView) Hide() {
-	d.gui.SetViewOnBottom("debug")
+	d.gui.SetViewOnBottom(d.name)
+
+	_, err := d.gui.SetCurrentView("changes")
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func (d *DebugView) Show() {
+	d.gui.SetViewOnTop(d.name)
+
+	_, err := d.gui.SetCurrentView(d.name)
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 func (r *DebugView) UpdateDebug(entries []*tlog.LogEntry) {
@@ -70,7 +85,7 @@ func (d *DebugView) Layout(g *gocui.Gui) error {
 
 func (d *DebugView) setKeyBindings() error {
 	hide := func(g *gocui.Gui, v *gocui.View) error { d.Hide(); return nil }
-	err := d.gui.SetKeybinding(d.name, gocui.KeyF1, gocui.ModNone, hide)
+	err := d.gui.SetKeybinding(d.name, gocui.KeyF2, gocui.ModNone, hide)
 	if err != nil {
 		return err
 	}

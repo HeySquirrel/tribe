@@ -6,7 +6,8 @@ import (
 )
 
 func (a *App) setKeyBindings() error {
-	err := a.Gui.SetKeybinding("", gocui.KeyF1, gocui.ModNone, a.ShowDebug)
+	show := func(g *gocui.Gui, v *gocui.View) error { a.DebugView.Show(); return nil }
+	err := a.Gui.SetKeybinding("", gocui.KeyF1, gocui.ModNone, show)
 	if err != nil {
 		log.Panicln(err)
 	}
