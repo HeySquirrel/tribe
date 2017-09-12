@@ -9,14 +9,10 @@ import (
 )
 
 const (
-	changesView         = "changes"
-	contributorsView    = "contributors"
-	associatedFilesView = "associatedfiles"
-	logsView            = "logs"
-	feedView            = "feed"
-	relevantWorkView    = "relevantwork"
-	legendView          = "legend"
-	debugView           = "debug"
+	changesView = "changes"
+	feedView    = "feed"
+	legendView  = "legend"
+	debugView   = "debug"
 )
 
 type View struct {
