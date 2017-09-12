@@ -130,14 +130,6 @@ func (a *App) UpdateDebug(entries []*tlog.LogEntry) {
 	})
 }
 
-func (a *App) UpdateRelatedWork(workItems []string) {
-	a.updateView(relevantWorkView, func(v *gocui.View) {
-		for _, workItem := range workItems {
-			fmt.Fprintln(v, workItem)
-		}
-	})
-}
-
 func (a *App) updateView(view string, fn func(*gocui.View)) {
 	a.Gui.Update(func(g *gocui.Gui) error {
 		v, err := g.View(view)

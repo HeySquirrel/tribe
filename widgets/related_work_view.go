@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"fmt"
 	"github.com/jroimartin/gocui"
 )
 
@@ -33,4 +34,20 @@ func (r *RelatedWorkView) Layout(g *gocui.Gui) error {
 	v.Title = "Relevant Work Items"
 
 	return nil
+}
+
+func (r *RelatedWorkView) UpdateRelatedWork(workItems []string) {
+	r.gui.Update(func(g *gocui.Gui) error {
+		v, err := g.View(r.name)
+		if err != nil {
+			return err
+		}
+		v.Clear()
+
+		for _, workItem := range workItems {
+			fmt.Fprintln(v, workItem)
+		}
+
+		return nil
+	})
 }

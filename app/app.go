@@ -96,6 +96,6 @@ func (a *App) ValueChanged(file string) {
 		files, workItems, contributors := app.Git.Related(file)
 		app.RecentContributors.UpdateContributors(contributors)
 		app.AssociatedFiles.UpdateRelatedFiles(files)
-		app.UpdateRelatedWork(workItems)
+		app.RelatedWork.UpdateRelatedWork(workItems)
 	}(a, file)
 }
