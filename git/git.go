@@ -19,6 +19,17 @@ type File struct {
 	Contributors Contributors
 	Related      []*RelatedFile
 	WorkItems    []string
+	Logs         Logs
+}
+
+func (f *File) NumberOfDefects() int {
+	count := 0
+	for _, work := range f.WorkItems {
+		if strings.HasPrefix(work, "DE") {
+			count += 1
+		}
+	}
+	return count
 }
 
 func (repo *Repo) git(args ...string) (string, error) {
@@ -75,6 +86,7 @@ func (repo *Repo) GetFile(filename string) *File {
 	file.Related = logs.relatedFiles(filename)
 	file.Contributors = logs.relatedContributors()
 	file.WorkItems = logs.relatedWorkItems()
+	file.Logs = logs
 
 	return file
 }
