@@ -10,7 +10,6 @@ import (
 
 const (
 	changesView = "changes"
-	feedView    = "feed"
 	debugView   = "debug"
 )
 
@@ -28,14 +27,6 @@ type View struct {
 }
 
 var views = map[string]View{
-	feedView: {
-		title: "Feed",
-		text:  "",
-		x1:    0.0,
-		y1:    0.4,
-		x2:    0.35,
-		y2:    0.99,
-	},
 	debugView: {
 		title:  "Debug",
 		text:   "",
@@ -48,7 +39,6 @@ var views = map[string]View{
 }
 
 var defaultViews = []string{
-	feedView,
 	debugView,
 }
 

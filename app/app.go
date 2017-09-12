@@ -21,6 +21,7 @@ type App struct {
 	RelatedWork        *widgets.RelatedWorkView
 	Logs               *widgets.LogsView
 	Legend             *widgets.LegendView
+	Feed               *widgets.FeedView
 }
 
 func New() *App {
@@ -51,6 +52,7 @@ func New() *App {
 	a.RelatedWork = widgets.NewRelatedWorkView(a.Gui)
 	a.Logs = widgets.NewLogsView(a.Gui)
 	a.Legend = widgets.NewLegendView(a.Gui)
+	a.Feed = widgets.NewFeedView(a.Gui)
 
 	a.Gui.SetManager(
 		a.Changes,
@@ -59,6 +61,7 @@ func New() *App {
 		a.RelatedWork,
 		a.Logs,
 		a.Legend,
+		a.Feed,
 		a)
 
 	return a
