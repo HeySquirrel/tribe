@@ -11,7 +11,6 @@ import (
 const (
 	changesView = "changes"
 	feedView    = "feed"
-	legendView  = "legend"
 	debugView   = "debug"
 )
 
@@ -37,14 +36,6 @@ var views = map[string]View{
 		x2:    0.35,
 		y2:    0.99,
 	},
-	legendView: {
-		title: "Legend",
-		text:  "",
-		x1:    0.35,
-		y1:    0.9,
-		x2:    1.0,
-		y2:    0.99,
-	},
 	debugView: {
 		title:  "Debug",
 		text:   "",
@@ -58,7 +49,6 @@ var views = map[string]View{
 
 var defaultViews = []string{
 	feedView,
-	legendView,
 	debugView,
 }
 
