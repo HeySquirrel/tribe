@@ -32,6 +32,16 @@ func (f *File) NumberOfDefects() int {
 	return count
 }
 
+func (f *File) NumberOfStories() int {
+	count := 0
+	for _, work := range f.WorkItems {
+		if strings.HasPrefix(work, "S") {
+			count += 1
+		}
+	}
+	return count
+}
+
 func (repo *Repo) git(args ...string) (string, error) {
 	return repo.shell.Exec("git", args...)
 }
