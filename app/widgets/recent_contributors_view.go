@@ -54,7 +54,7 @@ func (r *RecentContributorsView) UpdateContributors(contributors []*git.Contribu
 		table.AddColumn("LAST COMMIT", 0.25, view.LEFT)
 
 		for _, contributor := range contributors {
-			table.MustAddRow([]string{contributor.Name, strconv.Itoa(contributor.Count), humanize.Time(contributor.LastCommit)})
+			table.MustAddRow([]string{contributor.Name, strconv.Itoa(contributor.Count), humanize.Time(contributor.LastCommit.Date)})
 		}
 
 		table.Render(v)

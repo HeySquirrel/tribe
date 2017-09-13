@@ -9,7 +9,7 @@ import (
 type Contributor struct {
 	Name       string
 	Count      int
-	LastCommit time.Time
+	LastCommit *Commit
 }
 
 type Contributors []*Contributor
@@ -18,11 +18,11 @@ func (c *Contributor) String() string {
 	return c.Name
 }
 
-func NewContributor(name string, lastContribution time.Time) *Contributor {
+func NewContributor(name string, lastCommit *Commit) *Contributor {
 	contributor := new(Contributor)
 	contributor.Name = name
 	contributor.Count = 1
-	contributor.LastCommit = lastContribution
+	contributor.LastCommit = lastCommit
 
 	return contributor
 }
@@ -57,7 +57,7 @@ func (commits *Commits) relatedContributors() Contributors {
 			if ok {
 				contributor.Count += 1
 			} else {
-				contributor := NewContributor(name, commit.Date)
+				contributor := NewContributor(name, commit)
 
 				namedContributors[name] = contributor
 				contributors = append(contributors, contributor)
