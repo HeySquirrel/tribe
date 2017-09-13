@@ -1,9 +1,9 @@
 package app
 
 import (
+	"github.com/heysquirrel/tribe/app/widgets"
 	"github.com/heysquirrel/tribe/git"
 	tlog "github.com/heysquirrel/tribe/log"
-	"github.com/heysquirrel/tribe/widgets"
 	"github.com/jroimartin/gocui"
 	"log"
 	"os"
