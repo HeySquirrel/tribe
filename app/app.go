@@ -64,7 +64,9 @@ func New() *App {
 		legend,
 		feed,
 		a.DebugView,
-		a)
+	)
+
+	a.setKeyBindings()
 
 	return a
 }
