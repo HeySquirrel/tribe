@@ -9,13 +9,10 @@ import (
 	"time"
 )
 
-type Filename string
-
 type Repo struct {
 	shell   *shell.Shell
 	logger  *tlog.Log
 	commits Commits
-	files   map[Filename]File
 	Api     *rally.Rally
 }
 
