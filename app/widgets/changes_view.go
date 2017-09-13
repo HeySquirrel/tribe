@@ -2,8 +2,8 @@ package widgets
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/app/view"
 	"github.com/heysquirrel/tribe/git"
-	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
 	"log"
 	"reflect"

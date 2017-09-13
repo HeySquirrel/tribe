@@ -1,8 +1,8 @@
 package widgets
 
 import (
+	"github.com/heysquirrel/tribe/app/view"
 	tlog "github.com/heysquirrel/tribe/log"
-	"github.com/heysquirrel/tribe/view"
 	"github.com/jroimartin/gocui"
 	"log"
 	"time"
