@@ -49,8 +49,8 @@ func (c *ChangesView) SetChanges(changes []*git.File) {
 
 		for _, change := range changes {
 			fmt.Fprintf(v,
-				"%-30s >%5d >%3d >%3d\n",
-				view.RenderFilename(30, change.Name),
+				"%-40s >%5d >%3d >%3d\n",
+				view.RenderFilename(40, change.Name),
 				len(change.Logs),
 				change.NumberOfDefects(),
 				change.NumberOfStories(),

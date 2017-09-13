@@ -1,12 +1,16 @@
 package app
 
 import (
+	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/app/widgets"
 	"github.com/heysquirrel/tribe/git"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/jroimartin/gocui"
+	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
 	"time"
 )
 
@@ -25,11 +29,24 @@ func New() *App {
 		log.Panicln(err)
 	}
 
+	usr, err := user.Current()
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	configFile := filepath.Join(usr.HomeDir, ".tribe")
+	config, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	api := rally.New(string(config))
+
 	a := new(App)
 	a.Done = make(chan struct{})
 	a.Log = tlog.New()
 
-	a.Git, err = git.New(pwd, a.Log)
+	a.Git, err = git.New(pwd, a.Log, api)
 	if err != nil {
 		log.Panicln(err)
 	}

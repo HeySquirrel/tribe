@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/jroimartin/gocui"
 )
 
@@ -36,7 +37,7 @@ func (r *RelatedWorkView) Layout(g *gocui.Gui) error {
 	return nil
 }
 
-func (r *RelatedWorkView) UpdateRelatedWork(workItems []string) {
+func (r *RelatedWorkView) UpdateRelatedWork(workItems []rally.Artifact) {
 	r.gui.Update(func(g *gocui.Gui) error {
 		v, err := g.View(r.name)
 		if err != nil {
@@ -45,7 +46,7 @@ func (r *RelatedWorkView) UpdateRelatedWork(workItems []string) {
 		v.Clear()
 
 		for _, workItem := range workItems {
-			fmt.Fprintln(v, workItem)
+			fmt.Fprintf(v, "%8s - %s\n", workItem.FormattedID, workItem.Name)
 		}
 
 		return nil

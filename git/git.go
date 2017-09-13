@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/apis/rally"
 	tlog "github.com/heysquirrel/tribe/log"
 	"github.com/heysquirrel/tribe/shell"
 	"strings"
@@ -12,20 +13,21 @@ type Repo struct {
 	shell  *shell.Shell
 	logger *tlog.Log
 	logs   Logs
+	Api    *rally.Rally
 }
 
 type File struct {
 	Name         string
 	Contributors Contributors
 	Related      []*RelatedFile
-	WorkItems    []string
+	WorkItems    []rally.Artifact
 	Logs         Logs
 }
 
 func (f *File) NumberOfDefects() int {
 	count := 0
 	for _, work := range f.WorkItems {
-		if strings.HasPrefix(work, "DE") {
+		if strings.HasPrefix(work.FormattedID, "DE") {
 			count += 1
 		}
 	}
@@ -35,7 +37,7 @@ func (f *File) NumberOfDefects() int {
 func (f *File) NumberOfStories() int {
 	count := 0
 	for _, work := range f.WorkItems {
-		if strings.HasPrefix(work, "S") {
+		if strings.HasPrefix(work.FormattedID, "S") {
 			count += 1
 		}
 	}
@@ -46,7 +48,7 @@ func (repo *Repo) git(args ...string) (string, error) {
 	return repo.shell.Exec("git", args...)
 }
 
-func New(dir string, logger *tlog.Log) (*Repo, error) {
+func New(dir string, logger *tlog.Log, api *rally.Rally) (*Repo, error) {
 	temp := shell.New(dir, logger)
 	out, err := temp.Exec("git", "rev-parse", "--show-toplevel")
 	if err != nil {
@@ -56,6 +58,7 @@ func New(dir string, logger *tlog.Log) (*Repo, error) {
 	repo := new(Repo)
 	repo.shell = shell.New(strings.TrimSpace(out), logger)
 	repo.logger = logger
+	repo.Api = api
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
 	repo.logs, err = repo.LogsAfter(sixMonthsAgo)
@@ -90,12 +93,13 @@ func (repo *Repo) Changes() []*File {
 
 func (repo *Repo) GetFile(filename string) *File {
 	logs := repo.logs.ContainsFile(filename)
+	workItems, _ := repo.Api.GetByFormattedId(logs.relatedWorkItems()...)
 
 	file := new(File)
 	file.Name = filename
 	file.Related = logs.relatedFiles(filename)
 	file.Contributors = logs.relatedContributors()
-	file.WorkItems = logs.relatedWorkItems()
+	file.WorkItems = workItems
 	file.Logs = logs
 
 	return file

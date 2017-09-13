@@ -80,7 +80,7 @@ func TestLogsAfter(t *testing.T) {
 		t.Fatal("Unable to get pwd")
 	}
 
-	repo, err := New(pwd, tlog.New())
+	repo, err := New(pwd, tlog.New(), nil)
 	if err != nil {
 		t.Fatal("Unable to get repo")
 	}
