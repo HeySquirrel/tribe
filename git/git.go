@@ -9,15 +9,19 @@ import (
 	"time"
 )
 
+type Filename string
+
 type Repo struct {
-	shell  *shell.Shell
-	logger *tlog.Log
-	logs   Commits
-	Api    *rally.Rally
+	shell   *shell.Shell
+	logger  *tlog.Log
+	commits Commits
+	files   map[Filename]File
+	Api     *rally.Rally
 }
 
 type File struct {
 	Name         string
+	LastCommit   *Commit
 	Contributors Contributors
 	Related      []*RelatedFile
 	WorkItems    []rally.Artifact
@@ -61,12 +65,12 @@ func New(dir string, logger *tlog.Log, api *rally.Rally) (*Repo, error) {
 	repo.Api = api
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-	repo.logs, err = repo.CommitsAfter(sixMonthsAgo)
+	repo.commits, err = repo.CommitsAfter(sixMonthsAgo)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Add(fmt.Sprintf("Processed %d logs", len(repo.logs)))
+	logger.Add(fmt.Sprintf("Processed %d commits", len(repo.commits)))
 
 	return repo, err
 }
@@ -92,15 +96,16 @@ func (repo *Repo) Changes() []*File {
 }
 
 func (repo *Repo) GetFile(filename string) *File {
-	logs := repo.logs.ContainsFile(filename)
-	workItems, _ := repo.Api.GetByFormattedId(logs.relatedWorkItems()...)
+	commits := repo.commits.ContainsFile(filename)
+	workItems, _ := repo.Api.GetByFormattedId(commits.relatedWorkItems()...)
 
 	file := new(File)
 	file.Name = filename
-	file.Related = logs.relatedFiles(filename)
-	file.Contributors = logs.relatedContributors()
+	file.LastCommit = commits[0]
+	file.Related = commits.relatedFiles(filename)
+	file.Contributors = commits.relatedContributors()
 	file.WorkItems = workItems
-	file.Commits = logs
+	file.Commits = commits
 
 	return file
 }
