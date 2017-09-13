@@ -18,13 +18,12 @@ const (
 )
 
 type LogEntry struct {
-	Sha          string
-	Subject      string
-	Body         string
-	Author       string
-	RelativeDate string
-	LastCommit   time.Time
-	Files        []string
+	Sha        string
+	Subject    string
+	Body       string
+	Author     string
+	LastCommit time.Time
+	Files      []string
 }
 
 type Logs []*LogEntry
