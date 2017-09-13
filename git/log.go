@@ -28,8 +28,8 @@ type Commit struct {
 
 type Commits []*Commit
 
-func (entry *Commit) HasFile(filename string) bool {
-	for _, file := range entry.Files {
+func (commit *Commit) HasFile(filename string) bool {
+	for _, file := range commit.Files {
 		if file == filename {
 			return true
 		}
@@ -39,15 +39,15 @@ func (entry *Commit) HasFile(filename string) bool {
 }
 
 func (l *Commits) ContainsFile(filename string) Commits {
-	logs := make(Commits, 0)
+	commits := make(Commits, 0)
 
-	for _, entry := range *l {
-		if entry.HasFile(filename) {
-			logs = append(logs, entry)
+	for _, commit := range *l {
+		if commit.HasFile(filename) {
+			commits = append(commits, commit)
 		}
 	}
 
-	return logs
+	return commits
 }
 
 func (repo *Repo) CommitsAfter(after time.Time) (Commits, error) {
