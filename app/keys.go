@@ -12,7 +12,8 @@ func (a *App) setKeyBindings() error {
 		log.Panicln(err)
 	}
 
-	err = a.Gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, a.quit)
+	quit := func(g *gocui.Gui, v *gocui.View) error { return gocui.ErrQuit }
+	err = a.Gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
 	if err != nil {
 		log.Panicln(err)
 	}
