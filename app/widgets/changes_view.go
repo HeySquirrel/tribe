@@ -51,7 +51,7 @@ func (c *ChangesView) SetChanges(changes []*git.File) {
 			fmt.Fprintf(v,
 				"%-40s >%5d >%3d >%3d\n",
 				view.RenderFilename(40, change.Name),
-				len(change.Logs),
+				len(change.Commits),
 				change.NumberOfDefects(),
 				change.NumberOfStories(),
 			)

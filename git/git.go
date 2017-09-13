@@ -12,7 +12,7 @@ import (
 type Repo struct {
 	shell  *shell.Shell
 	logger *tlog.Log
-	logs   Logs
+	logs   Commits
 	Api    *rally.Rally
 }
 
@@ -21,7 +21,7 @@ type File struct {
 	Contributors Contributors
 	Related      []*RelatedFile
 	WorkItems    []rally.Artifact
-	Logs         Logs
+	Commits      Commits
 }
 
 func (f *File) NumberOfDefects() int {
@@ -61,7 +61,7 @@ func New(dir string, logger *tlog.Log, api *rally.Rally) (*Repo, error) {
 	repo.Api = api
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-	repo.logs, err = repo.LogsAfter(sixMonthsAgo)
+	repo.logs, err = repo.CommitsAfter(sixMonthsAgo)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (repo *Repo) GetFile(filename string) *File {
 	file.Related = logs.relatedFiles(filename)
 	file.Contributors = logs.relatedContributors()
 	file.WorkItems = workItems
-	file.Logs = logs
+	file.Commits = logs
 
 	return file
 }

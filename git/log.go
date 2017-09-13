@@ -17,18 +17,18 @@ const (
 	date   = "Date: "
 )
 
-type LogEntry struct {
-	Sha        string
-	Subject    string
-	Body       string
-	Author     string
-	LastCommit time.Time
-	Files      []string
+type Commit struct {
+	Sha     string
+	Subject string
+	Body    string
+	Author  string
+	Date    time.Time
+	Files   []string
 }
 
-type Logs []*LogEntry
+type Commits []*Commit
 
-func (entry *LogEntry) HasFile(filename string) bool {
+func (entry *Commit) HasFile(filename string) bool {
 	for _, file := range entry.Files {
 		if file == filename {
 			return true
@@ -38,8 +38,8 @@ func (entry *LogEntry) HasFile(filename string) bool {
 	return false
 }
 
-func (l *Logs) ContainsFile(filename string) Logs {
-	logs := make(Logs, 0)
+func (l *Commits) ContainsFile(filename string) Commits {
+	logs := make(Commits, 0)
 
 	for _, entry := range *l {
 		if entry.HasFile(filename) {
@@ -50,7 +50,7 @@ func (l *Logs) ContainsFile(filename string) Logs {
 	return logs
 }
 
-func (repo *Repo) LogsAfter(after time.Time) (Logs, error) {
+func (repo *Repo) CommitsAfter(after time.Time) (Commits, error) {
 	afterArg := fmt.Sprintf("--after=%s", after.Format("2006/01/02"))
 	args := []string{"log", "--no-merges", "--raw", "--date=unix", afterArg}
 
@@ -67,40 +67,40 @@ func (repo *Repo) LogsAfter(after time.Time) (Logs, error) {
 		return nil, err
 	}
 
-	entries := parse(stdout)
+	commits := parse(stdout)
 
 	err = cmd.Wait()
 	if err != nil {
 		return nil, err
 	}
 
-	return entries, nil
+	return commits, nil
 }
 
-func parse(reader io.Reader) Logs {
-	entries := make([]*LogEntry, 0)
+func parse(reader io.Reader) Commits {
+	commits := make([]*Commit, 0)
 	scanner := bufio.NewScanner(reader)
 
-	var currentEntry *LogEntry
+	var currentCommit *Commit
 	var body []string
 
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 		if len(currentLine) == 0 {
-			if len(body) != 0 && currentEntry.Body == "" {
-				currentEntry.Body = strings.Join(body, " ")
+			if len(body) != 0 && currentCommit.Body == "" {
+				currentCommit.Body = strings.Join(body, " ")
 			}
 			continue
 		}
 
 		if strings.HasPrefix(currentLine, commit) {
-			currentEntry = new(LogEntry)
+			currentCommit = new(Commit)
 			body = make([]string, 0)
 
-			entries = append(entries, currentEntry)
+			commits = append(commits, currentCommit)
 
-			currentEntry.Sha = strings.TrimPrefix(currentLine, commit)
-			currentEntry.Files = make([]string, 0)
+			currentCommit.Sha = strings.TrimPrefix(currentLine, commit)
+			currentCommit.Files = make([]string, 0)
 			continue
 		}
 
@@ -108,9 +108,9 @@ func parse(reader io.Reader) Logs {
 			authorLine := strings.TrimPrefix(currentLine, author)
 			address, err := mail.ParseAddress(authorLine)
 			if err != nil {
-				currentEntry.Author = authorLine
+				currentCommit.Author = authorLine
 			} else {
-				currentEntry.Author = address.Name
+				currentCommit.Author = address.Name
 			}
 
 			continue
@@ -122,9 +122,9 @@ func parse(reader io.Reader) Logs {
 
 			unixTime, err := strconv.ParseInt(timestr, 10, 64)
 			if err != nil {
-				currentEntry.LastCommit = time.Unix(0, 0)
+				currentCommit.Date = time.Unix(0, 0)
 			} else {
-				currentEntry.LastCommit = time.Unix(unixTime, 0)
+				currentCommit.Date = time.Unix(unixTime, 0)
 			}
 
 			continue
@@ -132,8 +132,8 @@ func parse(reader io.Reader) Logs {
 
 		if strings.HasPrefix(currentLine, "    ") {
 			line := strings.TrimSpace(currentLine)
-			if currentEntry.Subject == "" {
-				currentEntry.Subject = line
+			if currentCommit.Subject == "" {
+				currentCommit.Subject = line
 			} else {
 				body = append(body, line)
 			}
@@ -153,11 +153,11 @@ func parse(reader io.Reader) Logs {
 			lineScanner.Scan() // Change Types
 
 			lineScanner.Scan() // File Name
-			currentEntry.Files = append(currentEntry.Files, lineScanner.Text())
+			currentCommit.Files = append(currentCommit.Files, lineScanner.Text())
 			continue
 		}
 
 	}
 
-	return entries
+	return commits
 }

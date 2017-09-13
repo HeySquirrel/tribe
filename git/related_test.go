@@ -18,10 +18,10 @@ func TestRelatedWorkItems(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		entry := new(LogEntry)
-		entry.Subject = c.Subject
+		commit := new(LogEntry)
+		commit.Subject = c.Subject
 
-		entries := Logs{entry}
+		entries := Logs{commit}
 		actual := entries.relatedWorkItems()
 
 		if len(actual) != len(c.Expected) {
@@ -53,11 +53,11 @@ func TestRelatedContributors(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		entry := new(LogEntry)
-		entry.Author = c.Author
-		entry.LastCommit = now
+		commit := new(Commit)
+		commit.Author = c.Author
+		commit.Date = now
 
-		entries := Logs{entry}
+		entries := Commits{commit}
 		actual := entries.relatedContributors()
 
 		if len(actual) != len(c.Expected) {

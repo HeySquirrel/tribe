@@ -18,7 +18,7 @@ func TestOneRawGitLog(t *testing.T) {
 	AssertInt(t, len(entries), 1)
 	AssertString(t, entries[0].Sha, "2366697ee5e9c56106a595fdc84c4218f7f9db04")
 	AssertString(t, entries[0].Author, "Joe Developer")
-	AssertInt64(t, entries[0].LastCommit.Unix(), 1502491416)
+	AssertInt64(t, entries[0].Date.Unix(), 1502491416)
 	AssertString(t, entries[0].Subject, "DE3456 - All logins should respect login bypass_login")
 	AssertString(t, entries[0].Body, "/oauth/token wasn't respecting the organization.bypass_login flag. Unlike the web login /oauth/token was being controlled by User.authenticate. We changed User.authenticate to respect the bypass_login flag.")
 	AssertString(t, entries[0].Files[0], "app/models/user.rb")

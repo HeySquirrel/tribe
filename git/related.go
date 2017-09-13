@@ -27,13 +27,13 @@ func NewContributor(name string, lastContribution time.Time) *Contributor {
 	return contributor
 }
 
-func (entries *Logs) relatedWorkItems() []string {
+func (commits *Commits) relatedWorkItems() []string {
 	workItems := make([]string, 0)
 
 	re := regexp.MustCompile("(S|DE|F)[0-9][0-9]+")
 
-	for _, entry := range *entries {
-		found := re.FindAllString(entry.Subject, -1)
+	for _, commit := range *commits {
+		found := re.FindAllString(commit.Subject, -1)
 		if found != nil {
 			workItems = append(workItems, found...)
 		}
@@ -42,22 +42,22 @@ func (entries *Logs) relatedWorkItems() []string {
 	return workItems
 }
 
-func (entries *Logs) relatedContributors() Contributors {
+func (commits *Commits) relatedContributors() Contributors {
 	contributors := make(Contributors, 0)
 	namedContributors := make(map[string]*Contributor)
 
 	remove := regexp.MustCompile(" ?<[^>]+>")
 	re := regexp.MustCompile(", | and |,")
 
-	for _, entry := range *entries {
-		authors := remove.ReplaceAllString(entry.Author, "")
+	for _, commit := range *commits {
+		authors := remove.ReplaceAllString(commit.Author, "")
 		names := re.Split(authors, -1)
 		for _, name := range names {
 			contributor, ok := namedContributors[name]
 			if ok {
 				contributor.Count += 1
 			} else {
-				contributor := NewContributor(name, entry.LastCommit)
+				contributor := NewContributor(name, commit.Date)
 
 				namedContributors[name] = contributor
 				contributors = append(contributors, contributor)
@@ -91,12 +91,12 @@ func NewRelatedFile(name string, lastCommitTime time.Time) *RelatedFile {
 	return relatedFile
 }
 
-func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
+func (commits *Commits) relatedFiles(filename string) []*RelatedFile {
 	files := make([]*RelatedFile, 0)
 	namedFiles := make(map[string]*RelatedFile)
 
-	for _, entry := range *entries {
-		for _, file := range entry.Files {
+	for _, commit := range *commits {
+		for _, file := range commit.Files {
 			if file == filename {
 				continue
 			}
@@ -105,7 +105,7 @@ func (entries *Logs) relatedFiles(filename string) []*RelatedFile {
 			if ok {
 				relatedFile.Count += 1
 			} else {
-				relatedFile := NewRelatedFile(file, entry.LastCommit)
+				relatedFile := NewRelatedFile(file, commit.Date)
 
 				namedFiles[file] = relatedFile
 				files = append(files, relatedFile)
