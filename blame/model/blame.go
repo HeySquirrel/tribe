@@ -6,6 +6,9 @@ import (
 )
 
 type Blame struct {
+	File  string
+	Start int
+	End   int
 	Lines []Line
 }
 
@@ -27,5 +30,5 @@ func New(filename string) (*Blame, error) {
 		lines[i] = Line{Text: scanner.Text(), Number: i}
 	}
 
-	return &Blame{Lines: lines}, nil
+	return &Blame{File: filename, Start: 0, End: 20, Lines: lines}, nil
 }

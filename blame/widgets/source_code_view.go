@@ -5,6 +5,7 @@ import (
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
 	"log"
+	"path/filepath"
 )
 
 type SourceCodeView struct {
@@ -71,7 +72,8 @@ func (s *SourceCodeView) Layout(g *gocui.Gui) error {
 		return err
 	}
 
-	v.Title = "Source"
+	_, title := filepath.Split(s.blame.File)
+	v.Title = fmt.Sprintf(" %s:%d,%d ", title, s.blame.Start, s.blame.End)
 	v.Highlight = true
 	v.SelBgColor = gocui.ColorCyan
 	v.SelFgColor = gocui.ColorBlack
