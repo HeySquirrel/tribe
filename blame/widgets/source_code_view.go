@@ -2,17 +2,17 @@ package widgets
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/blame"
+	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
 )
 
 type SourceCodeView struct {
 	name  string
-	blame *blame.Blame
+	blame *model.Blame
 	gui   *gocui.Gui
 }
 
-func NewSourceCodeView(gui *gocui.Gui, blame *blame.Blame) *SourceCodeView {
+func NewSourceCodeView(gui *gocui.Gui, blame *model.Blame) *SourceCodeView {
 	s := new(SourceCodeView)
 	s.name = "source"
 	s.gui = gui

@@ -1,4 +1,4 @@
-package blame
+package model
 
 import (
 	"bufio"

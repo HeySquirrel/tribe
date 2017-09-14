@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/heysquirrel/tribe/app"
+	"github.com/heysquirrel/tribe/blame"
 	"github.com/spf13/cobra"
 )
 
@@ -13,10 +13,10 @@ var blameCmd = &cobra.Command{
 	Long:  `Better long description here`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		app := app.New(args[0])
-		defer app.Close()
+		blame := blame.NewBlameApp(args[0])
+		defer blame.Close()
 
-		app.Loop()
+		blame.Loop()
 	},
 }
 
