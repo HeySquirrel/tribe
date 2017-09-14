@@ -60,7 +60,7 @@ func (s *SourceCodeView) Next() {
 	if s.currentLine < len(s.blame.Lines)-1 {
 		s.SetSelected(s.currentLine + 1)
 	} else {
-		s.SetSelected(0)
+		fmt.Print("\a")
 	}
 }
 
@@ -68,7 +68,7 @@ func (s *SourceCodeView) Previous() {
 	if s.currentLine > 0 {
 		s.SetSelected(s.currentLine - 1)
 	} else {
-		s.SetSelected(len(s.blame.Lines) - 1)
+		fmt.Print("\a")
 	}
 }
 
@@ -97,7 +97,7 @@ func (s *SourceCodeView) Layout(g *gocui.Gui) error {
 	}
 
 	for _, line := range s.blame.Lines {
-		fmt.Fprintf(v, "%4d| %s\n", line.Number, line.Text)
+		fmt.Fprintf(v, "%3d| %s\n", line.Number, line.Text)
 	}
 
 	v.SetOrigin(0, s.currentLine)
