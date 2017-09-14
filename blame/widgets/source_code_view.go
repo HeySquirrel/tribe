@@ -8,10 +8,13 @@ import (
 	"path/filepath"
 )
 
+type SelectionListener func(selectedLine *model.Line)
+
 type SourceCodeView struct {
 	name        string
-	blame       *model.Blame
 	gui         *gocui.Gui
+	listeners   []SelectionListener
+	blame       *model.Blame
 	currentLine int
 }
 
@@ -23,6 +26,14 @@ func NewSourceCodeView(gui *gocui.Gui, blame *model.Blame) *SourceCodeView {
 	s.currentLine = 0
 
 	return s
+}
+
+func (s *SourceCodeView) AddListener(listener SelectionListener) {
+	s.listeners = append(s.listeners, listener)
+}
+
+func (s *SourceCodeView) GetSelected() *model.Line {
+	return s.blame.Lines[s.currentLine]
 }
 
 func (c *SourceCodeView) SetSelected(index int) {
@@ -108,4 +119,12 @@ func (s *SourceCodeView) setKeyBindings() error {
 	}
 
 	return nil
+}
+
+func (s *SourceCodeView) notifyListeners() {
+	selected := s.GetSelected()
+
+	for _, listener := range s.listeners {
+		listener(selected)
+	}
 }

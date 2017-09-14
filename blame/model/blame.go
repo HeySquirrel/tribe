@@ -10,7 +10,7 @@ type Blame struct {
 	File  string
 	Start int
 	End   int
-	Lines []Line
+	Lines []*Line
 }
 
 type Line struct {
@@ -29,10 +29,10 @@ func NewBlame(filename string, start, end int) (*Blame, error) {
 	}
 	defer file.Close()
 
-	lines := make([]Line, 0)
+	lines := make([]*Line, 0)
 	scanner := bufio.NewScanner(file)
 	for i := 1; scanner.Scan(); i++ {
-		lines = append(lines, Line{Text: scanner.Text(), Number: i})
+		lines = append(lines, &Line{Text: scanner.Text(), Number: i})
 	}
 
 	numberOfLines := len(lines)
