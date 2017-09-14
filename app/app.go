@@ -1,52 +1,49 @@
 package app
 
 import (
-	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/app/widgets"
-	"github.com/heysquirrel/tribe/git"
-	tlog "github.com/heysquirrel/tribe/log"
+	"github.com/heysquirrel/tribe/blame"
 	"github.com/jroimartin/gocui"
-	"io/ioutil"
 	"log"
-	"os"
-	"os/user"
-	"path/filepath"
-	"time"
 )
 
 type App struct {
-	Gui       *gocui.Gui
-	Done      chan struct{}
-	Log       *tlog.Log
-	Git       *git.Repo
-	Changes   *widgets.ChangesView
-	DebugView *widgets.DebugView
+	Gui  *gocui.Gui
+	Done chan struct{}
+	// Log       *tlog.Log
+	// Git       *git.Repo
+	// Changes   *widgets.ChangesView
+	// DebugView *widgets.DebugView
 }
 
-func New() *App {
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Panicln(err)
-	}
+func New(filename string) *App {
+	// pwd, err := os.Getwd()
+	// if err != nil {
+	// 	log.Panicln(err)
+	// }
 
-	usr, err := user.Current()
-	if err != nil {
-		log.Panicln(err)
-	}
+	// usr, err := user.Current()
+	// if err != nil {
+	// 	log.Panicln(err)
+	// }
 
-	configFile := filepath.Join(usr.HomeDir, ".tribe")
-	config, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		log.Panicln(err)
-	}
+	// configFile := filepath.Join(usr.HomeDir, ".tribe")
+	// config, err := ioutil.ReadFile(configFile)
+	// if err != nil {
+	// 	log.Panicln(err)
+	// }
 
-	api := rally.New(string(config))
+	// api := rally.New(string(config))
 
 	a := new(App)
 	a.Done = make(chan struct{})
-	a.Log = tlog.New()
+	// a.Log = tlog.New()
 
-	a.Git, err = git.New(pwd, a.Log, api)
+	// a.Git, err = git.New(pwd, a.Log, api)
+	// if err != nil {
+	// 	log.Panicln(err)
+	// }
+	blame, err := blame.New(filename)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -56,31 +53,34 @@ func New() *App {
 		log.Panicln(err)
 	}
 
-	a.Changes = widgets.NewChangesView(a.Gui)
-	a.DebugView = widgets.NewDebugView(a.Gui)
+	// a.Changes = widgets.NewChangesView(a.Gui)
+	// a.DebugView = widgets.NewDebugView(a.Gui)
 
-	associatedFiles := widgets.NewAssociatedFilesView(a.Gui)
-	recentContributors := widgets.NewRecentContributorsView(a.Gui)
-	relatedWork := widgets.NewRelatedWorkView(a.Gui)
-	logs := widgets.NewLogsView(a.Gui)
-	legend := widgets.NewLegendView(a.Gui)
-	feed := widgets.NewFeedView(a.Gui)
+	// associatedFiles := widgets.NewAssociatedFilesView(a.Gui)
+	// recentContributors := widgets.NewRecentContributorsView(a.Gui)
+	// relatedWork := widgets.NewRelatedWorkView(a.Gui)
+	// logs := widgets.NewLogsView(a.Gui)
+	// legend := widgets.NewLegendView(a.Gui)
+	// feed := widgets.NewFeedView(a.Gui)
 
-	a.Changes.AddListener(func(selectedFile *git.File) {
-		associatedFiles.UpdateRelatedFiles(selectedFile.Related)
-		recentContributors.UpdateContributors(selectedFile.Contributors)
-		relatedWork.UpdateRelatedWork(selectedFile.WorkItems)
-	})
+	// a.Changes.AddListener(func(selectedFile *git.File) {
+	// 	associatedFiles.UpdateRelatedFiles(selectedFile.Related)
+	// 	recentContributors.UpdateContributors(selectedFile.Contributors)
+	// 	relatedWork.UpdateRelatedWork(selectedFile.WorkItems)
+	// })
+
+	source := widgets.NewSourceCodeView(a.Gui, blame)
 
 	a.Gui.SetManager(
-		a.Changes,
-		associatedFiles,
-		recentContributors,
-		relatedWork,
-		logs,
-		legend,
-		feed,
-		a.DebugView,
+		source,
+		// a.Changes,
+		// associatedFiles,
+		// recentContributors,
+		// relatedWork,
+		// logs,
+		// legend,
+		// feed,
+		// a.DebugView,
 	)
 
 	a.setKeyBindings()
@@ -89,12 +89,12 @@ func New() *App {
 }
 
 func (a *App) Debug(message string) {
-	a.Log.Add(message)
-	a.DebugView.UpdateDebug(a.Log.Entries())
+	// a.Log.Add(message)
+	// a.DebugView.UpdateDebug(a.Log.Entries())
 }
 
 func (a *App) Loop() {
-	go a.checkForChanges()
+	// go a.checkForChanges()
 
 	err := a.Gui.MainLoop()
 	if err != nil && err != gocui.ErrQuit {
@@ -108,15 +108,15 @@ func (a *App) Close() {
 }
 
 func (a *App) checkForChanges() {
-	a.Changes.SetChanges(a.Git.Changes())
-	for {
-		select {
-		case <-a.Done:
-			return
-		case <-time.After(10 * time.Second):
-			a.Debug("Checking for changes")
-			a.Changes.SetChanges(a.Git.Changes())
-		}
-	}
+	// a.Changes.SetChanges(a.Git.Changes())
+	// for {
+	// 	select {
+	// 	case <-a.Done:
+	// 		return
+	// 	case <-time.After(10 * time.Second):
+	// 		a.Debug("Checking for changes")
+	// 		a.Changes.SetChanges(a.Git.Changes())
+	// 	}
+	// }
 
 }

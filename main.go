@@ -1,10 +1,15 @@
 package main
 
-import "github.com/heysquirrel/tribe/app"
+import (
+	"fmt"
+	"os"
+
+	"github.com/heysquirrel/tribe/cmd"
+)
 
 func main() {
-	a := app.New()
-	defer a.Close()
-
-	a.Loop()
+	if err := cmd.RootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
