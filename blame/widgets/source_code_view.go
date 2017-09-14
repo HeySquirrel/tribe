@@ -23,7 +23,7 @@ func NewSourceCodeView(gui *gocui.Gui, blame *model.Blame) *SourceCodeView {
 	s.name = "source"
 	s.gui = gui
 	s.blame = blame
-	s.currentLine = 0
+	s.currentLine = blame.Start - 1
 
 	return s
 }
@@ -51,6 +51,7 @@ func (c *SourceCodeView) SetSelected(index int) {
 			log.Panic(err)
 		}
 
+		c.notifyListeners()
 		return nil
 	})
 }
@@ -99,7 +100,7 @@ func (s *SourceCodeView) Layout(g *gocui.Gui) error {
 		fmt.Fprintf(v, "%4d| %s\n", line.Number, line.Text)
 	}
 
-	v.SetOrigin(0, s.blame.Start-1)
+	v.SetOrigin(0, s.currentLine)
 
 	return s.setKeyBindings()
 }

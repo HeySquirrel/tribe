@@ -27,12 +27,17 @@ func NewBlameApp(filename string) *BlameApp {
 	}
 
 	source := widgets.NewSourceCodeView(a.Gui, blame)
+	lineContext := widgets.NewLineContextView(a.Gui, blame.Lines[blame.Start-1])
+
+	source.AddListener(func(currentLine *model.Line) {
+		lineContext.SetCurrentLine(currentLine)
+	})
 
 	a.Gui.SetManager(
 		source,
 		widgets.NewFrequentContributorsView(a.Gui),
 		widgets.NewAssociatedWorkView(a.Gui),
-		widgets.NewLineContextView(a.Gui),
+		lineContext,
 	)
 
 	a.setKeyBindings()
