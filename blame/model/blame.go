@@ -2,6 +2,7 @@ package model
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 )
 
@@ -17,18 +18,31 @@ type Line struct {
 	Number int
 }
 
-func New(filename string) (*Blame, error) {
+func NewBlame(filename string, start, end int) (*Blame, error) {
+	if start <= 0 || end <= 0 {
+		return nil, fmt.Errorf("fatal: invalid line numbers %d:%d", start, end)
+	}
+
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	lines := make([]Line, 20)
+	lines := make([]Line, 0)
 	scanner := bufio.NewScanner(file)
-	for i := 0; i < 20 && scanner.Scan(); i++ {
-		lines[i] = Line{Text: scanner.Text(), Number: i}
+	for i := 1; scanner.Scan(); i++ {
+		lines = append(lines, Line{Text: scanner.Text(), Number: i})
 	}
 
-	return &Blame{File: filename, Start: 0, End: 20, Lines: lines}, nil
+	numberOfLines := len(lines)
+	if numberOfLines < start || numberOfLines < end {
+		return nil, fmt.Errorf(
+			"fatal: file %s has only %d lines",
+			filename,
+			numberOfLines,
+		)
+	}
+
+	return &Blame{File: filename, Start: start, End: end, Lines: lines}, nil
 }

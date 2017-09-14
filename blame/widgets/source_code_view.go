@@ -26,6 +26,7 @@ func NewSourceCodeView(gui *gocui.Gui, blame *model.Blame) *SourceCodeView {
 }
 
 func (c *SourceCodeView) SetSelected(index int) {
+	moveDistance := index - c.currentLine
 	c.currentLine = index
 
 	c.gui.Update(func(g *gocui.Gui) error {
@@ -34,7 +35,7 @@ func (c *SourceCodeView) SetSelected(index int) {
 			return err
 		}
 
-		err = v.SetCursor(0, index)
+		v.MoveCursor(0, moveDistance, false)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -86,6 +87,8 @@ func (s *SourceCodeView) Layout(g *gocui.Gui) error {
 	for _, line := range s.blame.Lines {
 		fmt.Fprintf(v, "%4d| %s\n", line.Number, line.Text)
 	}
+
+	v.SetOrigin(0, s.blame.Start-1)
 
 	return s.setKeyBindings()
 }

@@ -16,7 +16,7 @@ func NewBlameApp(filename string) *BlameApp {
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
 
-	blame, err := model.New(filename)
+	blame, err := model.NewBlame(filename, 20, 40)
 	if err != nil {
 		log.Panicln(err)
 	}
