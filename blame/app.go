@@ -32,6 +32,7 @@ func NewBlameApp(filename string) *BlameApp {
 		source,
 		widgets.NewFrequentContributorsView(a.Gui),
 		widgets.NewAssociatedWorkView(a.Gui),
+		widgets.NewLineContextView(a.Gui),
 	)
 
 	a.setKeyBindings()
