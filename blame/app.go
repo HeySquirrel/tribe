@@ -30,6 +30,7 @@ func NewBlameApp(filename string) *BlameApp {
 
 	a.Gui.SetManager(
 		source,
+		widgets.NewFrequentContributorsView(a.Gui),
 	)
 
 	a.setKeyBindings()
