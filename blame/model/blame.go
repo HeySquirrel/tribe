@@ -6,11 +6,11 @@ import (
 	"os"
 )
 
-type Blame struct {
-	File  string
-	Start int
-	End   int
-	Lines []*Line
+type File struct {
+	Filename string
+	Start    int
+	End      int
+	Lines    []*Line
 }
 
 type Line struct {
@@ -18,7 +18,7 @@ type Line struct {
 	Number int
 }
 
-func NewBlame(filename string, start, end int) (*Blame, error) {
+func NewFile(filename string, start, end int) (*File, error) {
 	if start <= 0 || end <= 0 {
 		return nil, fmt.Errorf("fatal: invalid line numbers %d:%d", start, end)
 	}
@@ -44,13 +44,13 @@ func NewBlame(filename string, start, end int) (*Blame, error) {
 		)
 	}
 
-	return &Blame{File: filename, Start: start, End: end, Lines: lines}, nil
+	return &File{Filename: filename, Start: start, End: end, Lines: lines}, nil
 }
 
-func (b *Blame) Len() int {
+func (b *File) Len() int {
 	return len(b.Lines)
 }
 
-func (b *Blame) GetLine(lineNumber int) *Line {
+func (b *File) GetLine(lineNumber int) *Line {
 	return b.Lines[lineNumber-1]
 }

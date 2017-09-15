@@ -13,7 +13,7 @@ type BlameApp struct {
 	Presenter *widgets.Presenter
 }
 
-func NewBlameApp(blame *model.Blame) *BlameApp {
+func NewBlameApp(blame *model.File) *BlameApp {
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
 	var err error

@@ -11,7 +11,7 @@ type SourcePresenter interface {
 
 type SourceView interface {
 	SetCurrentLine(line *model.Line)
-	SetFile(file *model.Blame)
+	SetFile(file *model.File)
 	Beep()
 }
 
@@ -21,12 +21,12 @@ type ContextView interface {
 
 type Presenter struct {
 	currentLine *model.Line
-	file        *model.Blame
+	file        *model.File
 	sourceView  SourceView
 	contextView ContextView
 }
 
-func NewPresenter(file *model.Blame) *Presenter {
+func NewPresenter(file *model.File) *Presenter {
 	presenter := new(Presenter)
 	presenter.file = file
 	presenter.currentLine = file.GetLine(file.Start)

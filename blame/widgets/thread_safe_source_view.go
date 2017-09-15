@@ -30,7 +30,7 @@ func (v *ThreadSafeSourceView) SetCurrentLine(line *model.Line) {
 	update(v.gui, func() { v.view.SetCurrentLine(line) })
 }
 
-func (v *ThreadSafeSourceView) SetFile(file *model.Blame) {
+func (v *ThreadSafeSourceView) SetFile(file *model.File) {
 	update(v.gui, func() { v.view.SetFile(file) })
 }
 
