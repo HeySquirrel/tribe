@@ -12,14 +12,10 @@ type BlameApp struct {
 	Done chan struct{}
 }
 
-func NewBlameApp(filename string) *BlameApp {
+func NewBlameApp(blame *model.Blame) *BlameApp {
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
-
-	blame, err := model.NewBlame(filename, 20, 40)
-	if err != nil {
-		log.Panicln(err)
-	}
+	var err error
 
 	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
