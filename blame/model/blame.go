@@ -46,3 +46,11 @@ func NewBlame(filename string, start, end int) (*Blame, error) {
 
 	return &Blame{File: filename, Start: start, End: end, Lines: lines}, nil
 }
+
+func (b *Blame) Len() int {
+	return len(b.Lines)
+}
+
+func (b *Blame) GetLine(lineNumber int) *Line {
+	return b.Lines[lineNumber-1]
+}

@@ -23,7 +23,7 @@ func NewSourceCodeView(gui *gocui.Gui, blame *model.Blame) *SourceCodeView {
 	s.name = "source"
 	s.gui = gui
 	s.blame = blame
-	s.currentLine = blame.Start - 1
+	s.currentLine = blame.Start
 
 	return s
 }
@@ -33,7 +33,7 @@ func (s *SourceCodeView) AddListener(listener SelectionListener) {
 }
 
 func (s *SourceCodeView) GetSelected() *model.Line {
-	return s.blame.Lines[s.currentLine]
+	return s.blame.GetLine(s.currentLine)
 }
 
 func (c *SourceCodeView) SetSelected(index int) {
@@ -57,7 +57,7 @@ func (c *SourceCodeView) SetSelected(index int) {
 }
 
 func (s *SourceCodeView) Next() {
-	if s.currentLine < len(s.blame.Lines)-1 {
+	if s.currentLine < s.blame.Len() {
 		s.SetSelected(s.currentLine + 1)
 	} else {
 		fmt.Print("\a")
@@ -65,7 +65,7 @@ func (s *SourceCodeView) Next() {
 }
 
 func (s *SourceCodeView) Previous() {
-	if s.currentLine > 0 {
+	if s.currentLine > 1 {
 		s.SetSelected(s.currentLine - 1)
 	} else {
 		fmt.Print("\a")
@@ -100,7 +100,7 @@ func (s *SourceCodeView) Layout(g *gocui.Gui) error {
 		fmt.Fprintf(v, "%3d| %s\n", line.Number, line.Text)
 	}
 
-	v.SetOrigin(0, s.currentLine)
+	v.SetOrigin(0, s.currentLine-1)
 
 	return s.setKeyBindings()
 }

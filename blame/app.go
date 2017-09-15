@@ -23,7 +23,7 @@ func NewBlameApp(blame *model.Blame) *BlameApp {
 	}
 
 	source := widgets.NewSourceCodeView(a.Gui, blame)
-	lineContext := widgets.NewLineContextView(a.Gui, blame.Lines[blame.Start-1])
+	lineContext := widgets.NewLineContextView(a.Gui, blame.GetLine(blame.Start))
 
 	source.AddListener(func(currentLine *model.Line) {
 		lineContext.SetCurrentLine(currentLine)

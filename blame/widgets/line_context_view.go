@@ -29,8 +29,10 @@ func (l *LineContextView) SetCurrentLine(currentLine *model.Line) {
 		if err != nil {
 			return err
 		}
+		v.Clear()
 
 		v.Title = fmt.Sprintf(" Line %d ", l.currentLine.Number)
+		fmt.Fprintln(v, l.currentLine.Text)
 
 		return nil
 	})
