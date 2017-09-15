@@ -8,8 +8,9 @@ import (
 )
 
 type BlameApp struct {
-	Gui  *gocui.Gui
-	Done chan struct{}
+	Gui       *gocui.Gui
+	Done      chan struct{}
+	Presenter *widgets.Presenter
 }
 
 func NewBlameApp(blame *model.Blame) *BlameApp {
@@ -22,12 +23,12 @@ func NewBlameApp(blame *model.Blame) *BlameApp {
 		log.Panicln(err)
 	}
 
-	source := widgets.NewSourceCodeView(a.Gui, blame)
-	lineContext := widgets.NewLineContextView(a.Gui, blame.GetLine(blame.Start))
+	a.Presenter = widgets.NewPresenter(blame)
+	source := widgets.NewSourceCodeView(a.Presenter)
+	lineContext := widgets.NewLineContextView()
 
-	source.AddListener(func(currentLine *model.Line) {
-		lineContext.SetCurrentLine(currentLine)
-	})
+	a.Presenter.SetSourceView(widgets.NewThreadSafeSourceView(a.Gui, source))
+	a.Presenter.SetSourceContextView(widgets.NewThreadSafeContextView(a.Gui, lineContext))
 
 	a.Gui.SetManager(
 		source,

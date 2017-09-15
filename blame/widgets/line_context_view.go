@@ -7,35 +7,21 @@ import (
 )
 
 type LineContextView struct {
-	name        string
-	gui         *gocui.Gui
-	currentLine *model.Line
+	name string
+	view *gocui.View
 }
 
-func NewLineContextView(gui *gocui.Gui, currentLine *model.Line) *LineContextView {
+func NewLineContextView() *LineContextView {
 	l := new(LineContextView)
 	l.name = "lineview"
-	l.gui = gui
-	l.currentLine = currentLine
 
 	return l
 }
 
-func (l *LineContextView) SetCurrentLine(currentLine *model.Line) {
-	l.currentLine = currentLine
-
-	l.gui.Update(func(g *gocui.Gui) error {
-		v, err := g.View(l.name)
-		if err != nil {
-			return err
-		}
-		v.Clear()
-
-		v.Title = fmt.Sprintf(" Line %d ", l.currentLine.Number)
-		fmt.Fprintln(v, l.currentLine.Text)
-
-		return nil
-	})
+func (l *LineContextView) SetCurrentLine(line *model.Line) {
+	l.view.Clear()
+	l.view.Title = fmt.Sprintf(" Line %d ", line.Number)
+	fmt.Fprintln(l.view, line.Text)
 }
 
 func (l *LineContextView) Layout(g *gocui.Gui) error {
@@ -46,12 +32,14 @@ func (l *LineContextView) Layout(g *gocui.Gui) error {
 	x2 := int(1.0*float64(maxX)) - 1
 	y2 := int(1.0*float64(maxY)) - 1
 
-	_, err := g.SetView(l.name, x1, y1, x2, y2)
+	v, err := g.SetView(l.name, x1, y1, x2, y2)
 	if err != gocui.ErrUnknownView {
 		return err
 	}
 
-	l.SetCurrentLine(l.currentLine)
+	l.view = v
+
+	v.Title = "Context"
 
 	return nil
 }
