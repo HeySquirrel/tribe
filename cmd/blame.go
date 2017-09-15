@@ -14,7 +14,7 @@ var blameCmd = &cobra.Command{
 	Use:   "blame",
 	Short: "Show a detailed history of each line of a file",
 	Long:  `Better long description here`,
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		filename := args[0]
 		var start, end int
