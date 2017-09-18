@@ -22,7 +22,7 @@ func TestRelatedWorkItems(t *testing.T) {
 		commit.Subject = c.Subject
 
 		entries := Commits{commit}
-		actual := entries.relatedWorkItems()
+		actual := entries.RelatedWorkItems()
 
 		if len(actual) != len(c.Expected) {
 			t.Fatalf("'%v' not equal '%v'", actual, c.Expected)
@@ -46,6 +46,8 @@ func TestRelatedContributors(t *testing.T) {
 		{"Bart Simpson", Contributors{NewContributor("Bart Simpson", lastCommit)}},
 		{"Bart Simpson <bart@simpsons.com>", Contributors{NewContributor("Bart Simpson", lastCommit)}},
 		{"Bart Simpson and Lisa Simpson",
+			Contributors{NewContributor("Bart Simpson", lastCommit), NewContributor("Lisa Simpson", lastCommit)}},
+		{"Bart Simpson abnd Lisa Simpson",
 			Contributors{NewContributor("Bart Simpson", lastCommit), NewContributor("Lisa Simpson", lastCommit)}},
 		{"Homer Simpson, Lisa Simpson and Marge Simpson",
 			Contributors{NewContributor("Homer Simpson", lastCommit),

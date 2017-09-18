@@ -47,7 +47,7 @@ func (commits *Commits) RelatedContributors() Contributors {
 	namedContributors := make(map[string]*Contributor)
 
 	remove := regexp.MustCompile(" ?<[^>]+>")
-	re := regexp.MustCompile(", | and |,")
+	re := regexp.MustCompile(", | ab?nd |,")
 
 	for _, commit := range *commits {
 		authors := remove.ReplaceAllString(commit.Author, "")
