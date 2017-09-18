@@ -62,7 +62,7 @@ func New(dir string, logger *tlog.Log, api *rally.Rally) (*Repo, error) {
 	repo.Api = api
 
 	sixMonthsAgo := time.Now().AddDate(0, -6, 0)
-	repo.commits, err = repo.CommitsAfter(sixMonthsAgo)
+	repo.commits, err = CommitsAfter(sixMonthsAgo)
 	if err != nil {
 		return nil, err
 	}

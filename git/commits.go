@@ -50,11 +50,14 @@ func (l *Commits) ContainsFile(filename string) Commits {
 	return commits
 }
 
-func (repo *Repo) CommitsAfter(after time.Time) (Commits, error) {
+func CommitsAfter(after time.Time) (Commits, error) {
 	afterArg := fmt.Sprintf("--after=%s", after.Format("2006/01/02"))
-	args := []string{"log", "--no-merges", "--raw", "--date=unix", afterArg}
+	return Log(afterArg)
+}
 
-	repo.logger.Add("git " + strings.Join(args, " "))
+func Log(extraArgs ...string) (Commits, error) {
+	args := []string{"log", "--no-merges", "--raw", "--date=unix"}
+	args = append(args, extraArgs...)
 
 	cmd := exec.Command("git", args...)
 	stdout, err := cmd.StdoutPipe()
