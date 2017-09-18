@@ -1,18 +1,21 @@
 package widgets
 
 import (
+	"fmt"
 	"github.com/jroimartin/gocui"
 )
 
 type AssociatedWorkView struct {
-	name string
-	gui  *gocui.Gui
+	name      string
+	gui       *gocui.Gui
+	workItems []string
 }
 
-func NewAssociatedWorkView(gui *gocui.Gui) *AssociatedWorkView {
+func NewAssociatedWorkView(gui *gocui.Gui, workItems []string) *AssociatedWorkView {
 	a := new(AssociatedWorkView)
 	a.name = "workitems"
 	a.gui = gui
+	a.workItems = workItems
 
 	return a
 }
@@ -31,6 +34,12 @@ func (a *AssociatedWorkView) Layout(g *gocui.Gui) error {
 	}
 
 	v.Title = "Associated Work"
+
+	for _, item := range a.workItems {
+		fmt.Fprintf(v, "  %s\n",
+			item,
+		)
+	}
 
 	return nil
 }

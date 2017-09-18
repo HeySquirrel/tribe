@@ -36,11 +36,12 @@ func NewBlameApp(blame *model.File) *BlameApp {
 	}
 
 	contributors := logs.RelatedContributors()
+	workItems := logs.RelatedWorkItems()
 
 	a.Gui.SetManager(
 		source,
 		widgets.NewFrequentContributorsView(a.Gui, contributors),
-		widgets.NewAssociatedWorkView(a.Gui),
+		widgets.NewAssociatedWorkView(a.Gui, workItems),
 		lineContext,
 	)
 
