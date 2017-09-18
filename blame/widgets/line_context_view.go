@@ -3,8 +3,10 @@ package widgets
 import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
+	"github.com/fatih/color"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
+	"regexp"
 	"strings"
 )
 
@@ -23,6 +25,8 @@ func NewLineContextView() *LineContextView {
 func (l *LineContextView) SetContext(start, end int, commits git.Commits) {
 	maxX, _ := l.view.Size()
 	maxView := maxX - 2
+	re := regexp.MustCompile("(S|DE|F|s|de|f)[0-9][0-9]+")
+	revert := regexp.MustCompile("(r|R)evert")
 
 	l.view.Clear()
 	l.view.Title = fmt.Sprintf(" Lines %d - %d ", start, end)
@@ -31,9 +35,11 @@ func (l *LineContextView) SetContext(start, end int, commits git.Commits) {
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
 
 	for _, commit := range commits {
+		subject := re.ReplaceAllStringFunc(commit.Subject, func(workitem string) string { return color.MagentaString(workitem) })
+		subject = revert.ReplaceAllStringFunc(subject, func(revert string) string { return color.CyanString(revert) })
 		fmt.Fprintf(l.view, " %10s - %s - %s\n",
 			commit.Sha[0:9],
-			commit.Subject,
+			subject,
 			humanize.Time(commit.Date),
 		)
 	}

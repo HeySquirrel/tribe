@@ -30,7 +30,7 @@ func NewContributor(name string, lastCommit *Commit) *Contributor {
 func (commits *Commits) RelatedWorkItems() []string {
 	workItems := make([]string, 0)
 
-	re := regexp.MustCompile("(S|DE|F)[0-9][0-9]+")
+	re := regexp.MustCompile("(S|DE|F|s|de|f)[0-9][0-9]+")
 
 	for _, commit := range *commits {
 		found := re.FindAllString(commit.Subject, -1)
