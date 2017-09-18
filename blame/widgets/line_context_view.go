@@ -2,8 +2,10 @@ package widgets
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/blame/model"
+	humanize "github.com/dustin/go-humanize"
+	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
+	"strings"
 )
 
 type LineContextView struct {
@@ -18,10 +20,43 @@ func NewLineContextView() *LineContextView {
 	return l
 }
 
-func (l *LineContextView) SetCurrentLine(line *model.Line) {
+func (l *LineContextView) SetContext(start, end int, commits git.Commits) {
+	maxX, _ := l.view.Size()
+	maxView := maxX - 2
+
 	l.view.Clear()
-	l.view.Title = fmt.Sprintf(" Line %d ", line.Number)
-	fmt.Fprintln(l.view, line.Text)
+	l.view.Title = fmt.Sprintf(" Lines %d - %d ", start, end)
+
+	fmt.Fprintln(l.view, "\n\n  Commits")
+	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
+
+	for _, commit := range commits {
+		fmt.Fprintf(l.view, " %10s - %s - %s\n",
+			commit.Sha[0:9],
+			commit.Subject,
+			humanize.Time(commit.Date),
+		)
+	}
+
+	fmt.Fprintln(l.view, "\n\n  Work Items")
+	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
+
+	for _, item := range commits.RelatedWorkItems() {
+		fmt.Fprintf(l.view, "  %s\n",
+			item,
+		)
+	}
+
+	fmt.Fprintln(l.view, "\n\n  Contributors")
+	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
+
+	for _, contributor := range commits.RelatedContributors() {
+		fmt.Fprintf(l.view, "  %-20s - %d Commits - %s\n",
+			contributor.Name,
+			contributor.Count,
+			humanize.Time(contributor.LastCommit.Date),
+		)
+	}
 }
 
 func (l *LineContextView) Layout(g *gocui.Gui) error {

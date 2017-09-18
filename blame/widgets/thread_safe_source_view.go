@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"github.com/heysquirrel/tribe/blame/model"
+	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
 )
 
@@ -42,6 +43,6 @@ func NewThreadSafeContextView(gui *gocui.Gui, contextView ContextView) *ThreadSa
 	return &ThreadSafeContextView{gui: gui, view: contextView}
 }
 
-func (v *ThreadSafeContextView) SetCurrentLine(line *model.Line) {
-	update(v.gui, func() { v.view.SetCurrentLine(line) })
+func (v *ThreadSafeContextView) SetContext(start, end int, commits git.Commits) {
+	update(v.gui, func() { v.view.SetContext(start, end, commits) })
 }

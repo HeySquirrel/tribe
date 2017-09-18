@@ -94,13 +94,13 @@ func (repo *Repo) Changes() []*File {
 
 func (repo *Repo) GetFile(filename string) *File {
 	commits := repo.commits.ContainsFile(filename)
-	workItems, _ := repo.Api.GetByFormattedId(commits.relatedWorkItems()...)
+	workItems, _ := repo.Api.GetByFormattedId(commits.RelatedWorkItems()...)
 
 	file := new(File)
 	file.Name = filename
 	file.LastCommit = commits[0]
 	file.Related = commits.relatedFiles(filename)
-	file.Contributors = commits.relatedContributors()
+	file.Contributors = commits.RelatedContributors()
 	file.WorkItems = workItems
 	file.Commits = commits
 

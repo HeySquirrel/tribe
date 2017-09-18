@@ -3,6 +3,7 @@ package model
 import (
 	"bufio"
 	"fmt"
+	"github.com/heysquirrel/tribe/git"
 	"os"
 )
 
@@ -47,10 +48,15 @@ func NewFile(filename string, start, end int) (*File, error) {
 	return &File{Filename: filename, Start: start, End: end, Lines: lines}, nil
 }
 
-func (b *File) Len() int {
-	return len(b.Lines)
+func (f *File) Len() int {
+	return len(f.Lines)
 }
 
-func (b *File) GetLine(lineNumber int) *Line {
-	return b.Lines[lineNumber-1]
+func (f *File) GetLine(lineNumber int) *Line {
+	return f.Lines[lineNumber-1]
+}
+
+func (f *File) Blame(start, end int) (git.Commits, error) {
+	return git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, f.Filename))
+
 }

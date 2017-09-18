@@ -27,7 +27,7 @@ func NewContributor(name string, lastCommit *Commit) *Contributor {
 	return contributor
 }
 
-func (commits *Commits) relatedWorkItems() []string {
+func (commits *Commits) RelatedWorkItems() []string {
 	workItems := make([]string, 0)
 
 	re := regexp.MustCompile("(S|DE|F)[0-9][0-9]+")
@@ -42,7 +42,7 @@ func (commits *Commits) relatedWorkItems() []string {
 	return workItems
 }
 
-func (commits *Commits) relatedContributors() Contributors {
+func (commits *Commits) RelatedContributors() Contributors {
 	contributors := make(Contributors, 0)
 	namedContributors := make(map[string]*Contributor)
 

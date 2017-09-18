@@ -59,7 +59,7 @@ func TestRelatedContributors(t *testing.T) {
 		commit.Date = now
 
 		entries := Commits{commit}
-		actual := entries.relatedContributors()
+		actual := entries.RelatedContributors()
 
 		if len(actual) != len(c.Expected) {
 			t.Fatalf("'%v' not equal '%v'", actual, c.Expected)
