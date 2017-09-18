@@ -1,18 +1,23 @@
 package widgets
 
 import (
+	"fmt"
+	humanize "github.com/dustin/go-humanize"
+	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
 )
 
 type FrequentContributorsView struct {
-	name string
-	gui  *gocui.Gui
+	name         string
+	gui          *gocui.Gui
+	contributors git.Contributors
 }
 
-func NewFrequentContributorsView(gui *gocui.Gui) *FrequentContributorsView {
+func NewFrequentContributorsView(gui *gocui.Gui, contributors git.Contributors) *FrequentContributorsView {
 	c := new(FrequentContributorsView)
 	c.name = "contributors"
 	c.gui = gui
+	c.contributors = contributors
 
 	return c
 }
@@ -31,6 +36,14 @@ func (c *FrequentContributorsView) Layout(g *gocui.Gui) error {
 	}
 
 	v.Title = "Frequent Contributors"
+
+	for _, contributor := range c.contributors {
+		fmt.Fprintf(v, "  %-20s - %d Commits - %s\n",
+			contributor.Name,
+			contributor.Count,
+			humanize.Time(contributor.LastCommit.Date),
+		)
+	}
 
 	return nil
 }

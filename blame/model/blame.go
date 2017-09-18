@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/heysquirrel/tribe/git"
 	"os"
+	"time"
 )
 
 type File struct {
@@ -58,5 +59,13 @@ func (f *File) GetLine(lineNumber int) *Line {
 
 func (f *File) Blame(start, end int) (git.Commits, error) {
 	return git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, f.Filename))
+}
 
+func (f *File) Logs() (git.Commits, error) {
+	commits, err := git.CommitsAfter(time.Now().AddDate(-1, 0, 0))
+	if err != nil {
+		return nil, err
+	}
+
+	return commits.ContainsFile(f.Filename), nil
 }

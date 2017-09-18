@@ -30,9 +30,16 @@ func NewBlameApp(blame *model.File) *BlameApp {
 	a.Presenter.SetSourceView(widgets.NewThreadSafeSourceView(a.Gui, source))
 	a.Presenter.SetSourceContextView(widgets.NewThreadSafeContextView(a.Gui, lineContext))
 
+	logs, err := blame.Logs()
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	contributors := logs.RelatedContributors()
+
 	a.Gui.SetManager(
 		source,
-		widgets.NewFrequentContributorsView(a.Gui),
+		widgets.NewFrequentContributorsView(a.Gui, contributors),
 		widgets.NewAssociatedWorkView(a.Gui),
 		lineContext,
 	)
