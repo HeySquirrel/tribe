@@ -18,10 +18,10 @@ func TestRelatedWorkItems(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		commit := new(LogEntry)
+		commit := new(Commit)
 		commit.Subject = c.Subject
 
-		entries := Logs{commit}
+		entries := Commits{commit}
 		actual := entries.relatedWorkItems()
 
 		if len(actual) != len(c.Expected) {
@@ -38,18 +38,19 @@ func TestRelatedWorkItems(t *testing.T) {
 
 func TestRelatedContributors(t *testing.T) {
 	now := time.Now()
+	lastCommit := &Commit{Author: "who cares", Date: now}
 	cases := []struct {
 		Author   string
 		Expected Contributors
 	}{
-		{"Bart Simpson", Contributors{NewContributor("Bart Simpson", now)}},
-		{"Bart Simpson <bart@simpsons.com>", Contributors{NewContributor("Bart Simpson", now)}},
+		{"Bart Simpson", Contributors{NewContributor("Bart Simpson", lastCommit)}},
+		{"Bart Simpson <bart@simpsons.com>", Contributors{NewContributor("Bart Simpson", lastCommit)}},
 		{"Bart Simpson and Lisa Simpson",
-			Contributors{NewContributor("Bart Simpson", now), NewContributor("Lisa Simpson", now)}},
+			Contributors{NewContributor("Bart Simpson", lastCommit), NewContributor("Lisa Simpson", lastCommit)}},
 		{"Homer Simpson, Lisa Simpson and Marge Simpson",
-			Contributors{NewContributor("Homer Simpson", now),
-				NewContributor("Lisa Simpson", now),
-				NewContributor("Marge Simpson", now)}},
+			Contributors{NewContributor("Homer Simpson", lastCommit),
+				NewContributor("Lisa Simpson", lastCommit),
+				NewContributor("Marge Simpson", lastCommit)}},
 	}
 
 	for _, c := range cases {

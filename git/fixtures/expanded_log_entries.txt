@@ -1,0 +1,25 @@
+commit 1633ea32bf23ba1f59626d4f2330cf65c4a2ec8d
+Author: Joe Quimby <joe@quimby.com>
+Date:   1438158853
+
+    Delete fun notifications
+
+diff --git a/app/models/fun.rb b/app/models/fun.rb
+--- a/app/models/fun.rb
++++ b/app/models/fun.rb
+@@ -175,1 +177,3 @@
++      where(fun: fun).destroy_all
++    end
+   end
+
+commit cebd1d270dbd6d795a0cbafc72b2c2c638661a62
+Author: Kent Brockman <kent@brockman.com>
+Date:   1350383260
+
+    WIP: Help API
+
+diff --git a/app/models/help.rb b/app/models/help.rb
+--- a/app/models/help.rb
++++ b/app/models/help.rb
+@@ -35,0 +45,1 @@
++  end

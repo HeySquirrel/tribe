@@ -1,7 +1,6 @@
 package git
 
 import (
-	tlog "github.com/heysquirrel/tribe/log"
 	"io"
 	"os"
 	"path/filepath"
@@ -74,18 +73,18 @@ func TestContainsFile(t *testing.T) {
 	AssertInt(t, len(unknownEntries), 0)
 }
 
+func TestLogContainsDiff(t *testing.T) {
+	input, cleanup := setup(t, "expanded_log_entries.txt")
+	defer cleanup()
+
+	entries := parse(input)
+
+	AssertInt(t, len(entries), 2)
+	AssertString(t, "1633ea32bf23ba1f59626d4f2330cf65c4a2ec8d", entries[0].Sha)
+}
+
 func TestLogsAfter(t *testing.T) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal("Unable to get pwd")
-	}
-
-	repo, err := New(pwd, tlog.New(), nil)
-	if err != nil {
-		t.Fatal("Unable to get repo")
-	}
-
-	logs, err := repo.LogsAfter(time.Now().AddDate(0, -6, 0))
+	logs, err := CommitsAfter(time.Now().AddDate(0, -6, 0))
 	if err != nil {
 		t.Fatal("unable to get logs")
 	}
