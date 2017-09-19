@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/blame"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -37,7 +39,9 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		blame := blame.NewBlameApp(data)
+		api := rally.New(viper.GetString("rally.key"))
+
+		blame := blame.NewBlameApp(api, data)
 		defer blame.Close()
 
 		blame.Loop()

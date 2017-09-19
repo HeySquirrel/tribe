@@ -5,10 +5,7 @@ import (
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
 	"github.com/jroimartin/gocui"
-	"io/ioutil"
 	"log"
-	"os/user"
-	"path/filepath"
 )
 
 type BlameApp struct {
@@ -17,22 +14,10 @@ type BlameApp struct {
 	Presenter *widgets.Presenter
 }
 
-func NewBlameApp(blame *model.File) *BlameApp {
-	usr, err := user.Current()
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	configFile := filepath.Join(usr.HomeDir, ".tribe")
-	config, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	api := rally.New(string(config))
-
+func NewBlameApp(api *rally.Rally, blame *model.File) *BlameApp {
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
+	var err error
 
 	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
