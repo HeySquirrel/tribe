@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestGetByFormattedId(t *testing.T) {
+func TestGetByFormattedIds(t *testing.T) {
 	usr, err := user.Current()
 	if err != nil {
 		t.Fatal(err)
@@ -22,7 +22,7 @@ func TestGetByFormattedId(t *testing.T) {
 
 	api := New(string(config))
 
-	artifacts, _ := api.GetByFormattedId("S144101")
+	artifacts, _ := api.GetByFormattedIds("S144101")
 
 	fmt.Printf("HERE: %v\n", artifacts)
 }

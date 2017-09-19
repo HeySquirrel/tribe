@@ -1,10 +1,14 @@
 package blame
 
 import (
+	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
 	"github.com/jroimartin/gocui"
+	"io/ioutil"
 	"log"
+	"os/user"
+	"path/filepath"
 )
 
 type BlameApp struct {
@@ -14,9 +18,21 @@ type BlameApp struct {
 }
 
 func NewBlameApp(blame *model.File) *BlameApp {
+	usr, err := user.Current()
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	configFile := filepath.Join(usr.HomeDir, ".tribe")
+	config, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	api := rally.New(string(config))
+
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
-	var err error
 
 	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
@@ -25,7 +41,7 @@ func NewBlameApp(blame *model.File) *BlameApp {
 
 	a.Presenter = widgets.NewPresenter(blame)
 	source := widgets.NewSourceCodeView(a.Presenter)
-	lineContext := widgets.NewLineContextView()
+	lineContext := widgets.NewLineContextView(api)
 
 	a.Presenter.SetSourceView(widgets.NewThreadSafeSourceView(a.Gui, source))
 	a.Presenter.SetSourceContextView(widgets.NewThreadSafeContextView(a.Gui, lineContext))

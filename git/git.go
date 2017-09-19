@@ -21,7 +21,7 @@ type File struct {
 	LastCommit   *Commit
 	Contributors Contributors
 	Related      []*RelatedFile
-	WorkItems    []rally.Artifact
+	WorkItems    []*rally.Artifact
 	Commits      Commits
 }
 
@@ -94,7 +94,7 @@ func (repo *Repo) Changes() []*File {
 
 func (repo *Repo) GetFile(filename string) *File {
 	commits := repo.commits.ContainsFile(filename)
-	workItems, _ := repo.Api.GetByFormattedId(commits.RelatedWorkItems()...)
+	workItems, _ := repo.Api.GetByFormattedIds(commits.RelatedWorkItems()...)
 
 	file := new(File)
 	file.Name = filename

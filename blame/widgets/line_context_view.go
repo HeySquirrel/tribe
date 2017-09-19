@@ -4,20 +4,24 @@ import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
+	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
+	"log"
 	"regexp"
 	"strings"
 )
 
 type LineContextView struct {
-	name string
-	view *gocui.View
+	name   string
+	view   *gocui.View
+	server apis.WorkItemServer
 }
 
-func NewLineContextView() *LineContextView {
+func NewLineContextView(server apis.WorkItemServer) *LineContextView {
 	l := new(LineContextView)
 	l.name = "lineview"
+	l.server = server
 
 	return l
 }
@@ -46,10 +50,15 @@ func (l *LineContextView) SetContext(start, end int, commits git.Commits) {
 
 	fmt.Fprintln(l.view, "\n\n  Work Items")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
+	items, err := apis.GetWorkItems(l.server, commits.RelatedWorkItems()...)
+	if err != nil {
+		log.Panicln(err)
+	}
 
-	for _, item := range commits.RelatedWorkItems() {
-		fmt.Fprintf(l.view, "  %s\n",
-			item,
+	for _, item := range items {
+		fmt.Fprintf(l.view, "  %10s - %s\n",
+			item.GetId(),
+			item.GetName(),
 		)
 	}
 
