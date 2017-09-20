@@ -1,7 +1,6 @@
 package blame
 
 import (
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
 	"github.com/jroimartin/gocui"
@@ -14,7 +13,7 @@ type BlameApp struct {
 	Presenter *widgets.Presenter
 }
 
-func NewBlameApp(api apis.WorkItemServer, blame *model.File) *BlameApp {
+func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
 	var err error
@@ -24,28 +23,18 @@ func NewBlameApp(api apis.WorkItemServer, blame *model.File) *BlameApp {
 		log.Panicln(err)
 	}
 
-	a.Presenter = widgets.NewPresenter(blame)
+	a.Presenter = widgets.NewPresenter(file, annotate)
 	source := widgets.NewSourceCodeView(a.Presenter)
-	lineContext := widgets.NewLineContextView(api)
+	lineContext := widgets.NewLineContextView()
 
 	a.Presenter.SetSourceView(widgets.NewThreadSafeSourceView(a.Gui, source))
 	a.Presenter.SetSourceContextView(widgets.NewThreadSafeContextView(a.Gui, lineContext))
 
-	logs, err := blame.Logs()
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	contributors := logs.RelatedContributors()
-	workItems, err := apis.GetWorkItems(api, logs.RelatedWorkItems()...)
-	if err != nil {
-		log.Panicln(err)
-	}
-
+	annotation := annotate.File(file)
 	a.Gui.SetManager(
 		source,
-		widgets.NewFrequentContributorsView(a.Gui, contributors),
-		widgets.NewAssociatedWorkView(a.Gui, workItems),
+		widgets.NewFrequentContributorsView(a.Gui, annotation.GetContributors()),
+		widgets.NewAssociatedWorkView(a.Gui, annotation.GetWorkItems()),
 		lineContext,
 	)
 

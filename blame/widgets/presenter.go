@@ -16,7 +16,7 @@ type SourceView interface {
 }
 
 type ContextView interface {
-	SetContext(line *model.History)
+	SetContext(annotation model.Annotation)
 }
 
 type Presenter struct {
@@ -24,12 +24,14 @@ type Presenter struct {
 	file        *model.File
 	sourceView  SourceView
 	contextView ContextView
+	annotate    model.Annotate
 }
 
-func NewPresenter(file *model.File) *Presenter {
+func NewPresenter(file *model.File, annotate model.Annotate) *Presenter {
 	presenter := new(Presenter)
 	presenter.file = file
 	presenter.currentLine = file.GetLine(file.Start)
+	presenter.annotate = annotate
 
 	return presenter
 }
@@ -75,8 +77,7 @@ func (p *Presenter) setCurrentLine(line *model.Line) {
 
 func (p *Presenter) updateContext() {
 	go func(p *Presenter) {
-		c := p.currentLine.GetHistory()
-		history := <-c
-		p.contextView.SetContext(history)
+		a := p.annotate.Line(p.currentLine)
+		p.contextView.SetContext(a)
 	}(p)
 }

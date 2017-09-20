@@ -34,15 +34,18 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		data, err := model.NewFile(filename, start, end)
+		file, err := model.NewFile(filename, start, end)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		api := rally.New(viper.GetString("rally.key"))
+		apikey := viper.GetString("rally.key")
+		api := apis.NewCachingServer(rally.New(apikey))
 
-		blame := blame.NewBlameApp(apis.NewCachingServer(api), data)
+		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))
+
+		blame := blame.NewBlameApp(file, annotate)
 		defer blame.Close()
 
 		blame.Loop()

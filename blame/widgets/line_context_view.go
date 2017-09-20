@@ -4,30 +4,26 @@ import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
-	"log"
 	"regexp"
 	"strings"
 )
 
 type LineContextView struct {
-	name   string
-	view   *gocui.View
-	server apis.WorkItemServer
+	name string
+	view *gocui.View
 }
 
-func NewLineContextView(server apis.WorkItemServer) *LineContextView {
+func NewLineContextView() *LineContextView {
 	l := new(LineContextView)
 	l.name = "lineview"
-	l.server = server
 
 	return l
 }
 
-func (l *LineContextView) SetContext(history *model.History) {
-	commits := history.GetCommits()
+func (l *LineContextView) SetContext(annotation model.Annotation) {
+	commits := annotation.GetCommits()
 
 	maxX, _ := l.view.Size()
 	maxView := maxX - 2
@@ -35,7 +31,7 @@ func (l *LineContextView) SetContext(history *model.History) {
 	revert := regexp.MustCompile("(r|R)evert")
 
 	l.view.Clear()
-	l.view.Title = fmt.Sprintf(" Lines %d - %d ", history.Start, history.End)
+	l.view.Title = " Annotation "
 
 	fmt.Fprintln(l.view, "\n\n  Commits")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
@@ -52,12 +48,8 @@ func (l *LineContextView) SetContext(history *model.History) {
 
 	fmt.Fprintln(l.view, "\n\n  Work Items")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
-	items, err := apis.GetWorkItems(l.server, commits.RelatedWorkItems()...)
-	if err != nil {
-		log.Panicln(err)
-	}
 
-	for _, item := range items {
+	for _, item := range annotation.GetWorkItems() {
 		fmt.Fprintf(l.view, "%10s - %s\n",
 			item.GetId(),
 			item.GetName(),
@@ -67,7 +59,7 @@ func (l *LineContextView) SetContext(history *model.History) {
 	fmt.Fprintln(l.view, "\n\n  Contributors")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
 
-	for _, contributor := range commits.RelatedContributors() {
+	for _, contributor := range annotation.GetContributors() {
 		fmt.Fprintf(l.view, "  %-20s - %d Commits - %s\n",
 			contributor.Name,
 			contributor.Count,
