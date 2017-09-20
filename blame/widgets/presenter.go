@@ -16,7 +16,7 @@ type SourceView interface {
 }
 
 type ContextView interface {
-	SetContext(annotation model.Annotation)
+	SetContext(annotation *model.LineAnnotation)
 }
 
 type Presenter struct {

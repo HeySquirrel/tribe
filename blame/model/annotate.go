@@ -20,13 +20,25 @@ type annotation struct {
 	workItems []apis.WorkItem
 }
 
+type FileAnnotation struct {
+	Annotation
+	File *File
+}
+
+type LineAnnotation struct {
+	Annotation
+	Start int
+	End   int
+	Line  *Line
+}
+
 func (a *annotation) GetCommits() git.Commits           { return a.commits }
 func (a *annotation) GetWorkItems() []apis.WorkItem     { return a.workItems }
 func (a *annotation) GetContributors() git.Contributors { return a.commits.RelatedContributors() }
 
 type Annotate interface {
-	File(file *File) Annotation
-	Line(line *Line) Annotation
+	File(file *File) *FileAnnotation
+	Line(line *Line) *LineAnnotation
 }
 
 type annotate struct {
@@ -37,7 +49,7 @@ func NewAnnotate(server apis.WorkItemServer) Annotate {
 	return &annotate{server}
 }
 
-func (a *annotate) File(file *File) Annotation {
+func (a *annotate) File(file *File) *FileAnnotation {
 	commits, err := git.CommitsAfter(time.Now().AddDate(-1, 0, 0))
 	if err != nil {
 		log.Panicln(err)
@@ -49,10 +61,10 @@ func (a *annotate) File(file *File) Annotation {
 		log.Panicln(err)
 	}
 
-	return &annotation{fileCommits, workItems}
+	return &FileAnnotation{&annotation{fileCommits, workItems}, file}
 }
 
-func (a *annotate) Line(line *Line) Annotation {
+func (a *annotate) Line(line *Line) *LineAnnotation {
 	start := 1
 	end := line.Number + 1
 
@@ -60,13 +72,13 @@ func (a *annotate) Line(line *Line) Annotation {
 		start = line.Number - 1
 	}
 
-	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.Filename))
+	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.File.Filename))
 	workItems, err := apis.GetWorkItems(a.server, commits.RelatedWorkItems()...)
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	return &annotation{commits, workItems}
+	return &LineAnnotation{&annotation{commits, workItems}, start, end, line}
 }
 
 type cache struct {
@@ -89,14 +101,14 @@ func NewCachingAnnotate(annotate Annotate) Annotate {
 	return &cache{annotate, gc}
 }
 
-func (c *cache) File(file *File) Annotation { return c.annotate.File(file) }
-func (c *cache) Line(line *Line) Annotation {
+func (c *cache) File(file *File) *FileAnnotation { return c.annotate.File(file) }
+func (c *cache) Line(line *Line) *LineAnnotation {
 	value, err := c.cache.Get(line)
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	annotation, ok := value.(Annotation)
+	annotation, ok := value.(*LineAnnotation)
 	if !ok {
 		log.Panicln("Unknown Result")
 	}

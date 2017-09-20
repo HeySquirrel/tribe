@@ -14,9 +14,9 @@ type File struct {
 }
 
 type Line struct {
-	Filename string
-	Text     string
-	Number   int
+	File   *File
+	Text   string
+	Number int
 }
 
 func NewFile(filename string, start, end int) (*File, error) {
@@ -24,19 +24,27 @@ func NewFile(filename string, start, end int) (*File, error) {
 		return nil, fmt.Errorf("fatal: invalid line numbers %d:%d", start, end)
 	}
 
-	file, err := os.Open(filename)
+	reader, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer reader.Close()
 
-	lines := make([]*Line, 0)
-	scanner := bufio.NewScanner(file)
+	file := new(File)
+	file.Filename = filename
+	file.Start = start
+	file.End = end
+	file.Lines = make([]*Line, 0)
+
+	scanner := bufio.NewScanner(reader)
 	for i := 1; scanner.Scan(); i++ {
-		lines = append(lines, &Line{Filename: filename, Text: scanner.Text(), Number: i})
+		file.Lines = append(
+			file.Lines,
+			&Line{File: file, Text: scanner.Text(), Number: i},
+		)
 	}
 
-	numberOfLines := len(lines)
+	numberOfLines := len(file.Lines)
 	if numberOfLines < start || numberOfLines < end {
 		return nil, fmt.Errorf(
 			"fatal: file %s has only %d lines",
@@ -45,7 +53,7 @@ func NewFile(filename string, start, end int) (*File, error) {
 		)
 	}
 
-	return &File{Filename: filename, Start: start, End: end, Lines: lines}, nil
+	return file, nil
 }
 
 func (f *File) Len() int {

@@ -42,6 +42,6 @@ func NewThreadSafeContextView(gui *gocui.Gui, contextView ContextView) *ThreadSa
 	return &ThreadSafeContextView{gui: gui, view: contextView}
 }
 
-func (v *ThreadSafeContextView) SetContext(annotation model.Annotation) {
+func (v *ThreadSafeContextView) SetContext(annotation *model.LineAnnotation) {
 	update(v.gui, func() { v.view.SetContext(annotation) })
 }

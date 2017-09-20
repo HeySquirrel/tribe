@@ -22,7 +22,7 @@ func NewLineContextView() *LineContextView {
 	return l
 }
 
-func (l *LineContextView) SetContext(annotation model.Annotation) {
+func (l *LineContextView) SetContext(annotation *model.LineAnnotation) {
 	commits := annotation.GetCommits()
 
 	maxX, _ := l.view.Size()
@@ -31,7 +31,7 @@ func (l *LineContextView) SetContext(annotation model.Annotation) {
 	revert := regexp.MustCompile("(r|R)evert")
 
 	l.view.Clear()
-	l.view.Title = " Annotation "
+	l.view.Title = fmt.Sprintf(" Lines %d-%d ", annotation.Start, annotation.End)
 
 	fmt.Fprintln(l.view, "\n\n  Commits")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))
