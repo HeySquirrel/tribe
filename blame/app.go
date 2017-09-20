@@ -1,7 +1,7 @@
 package blame
 
 import (
-	"github.com/heysquirrel/tribe/apis/rally"
+	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
 	"github.com/jroimartin/gocui"
@@ -14,7 +14,7 @@ type BlameApp struct {
 	Presenter *widgets.Presenter
 }
 
-func NewBlameApp(api *rally.Rally, blame *model.File) *BlameApp {
+func NewBlameApp(api apis.WorkItemServer, blame *model.File) *BlameApp {
 	a := new(BlameApp)
 	a.Done = make(chan struct{})
 	var err error
