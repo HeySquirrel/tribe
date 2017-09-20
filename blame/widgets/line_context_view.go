@@ -26,8 +26,8 @@ func NewLineContextView(server apis.WorkItemServer) *LineContextView {
 	return l
 }
 
-func (l *LineContextView) SetContext(line *model.Line) {
-	commits := line.GetCommits()
+func (l *LineContextView) SetContext(history *model.History) {
+	commits := history.GetCommits()
 
 	maxX, _ := l.view.Size()
 	maxView := maxX - 2
@@ -35,7 +35,7 @@ func (l *LineContextView) SetContext(line *model.Line) {
 	revert := regexp.MustCompile("(r|R)evert")
 
 	l.view.Clear()
-	l.view.Title = fmt.Sprintf(" Line %d ", line.Number)
+	l.view.Title = fmt.Sprintf(" Lines %d - %d ", history.Start, history.End)
 
 	fmt.Fprintln(l.view, "\n\n  Commits")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))

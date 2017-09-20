@@ -3,6 +3,7 @@ package model
 import (
 	"bufio"
 	"fmt"
+	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/git"
 	"log"
 	"os"
@@ -17,33 +18,54 @@ type File struct {
 	Lines    []*Line
 }
 
+type History struct {
+	commits   git.Commits
+	workitems []apis.WorkItem
+	Start     int
+	End       int
+}
+
+func (h *History) GetCommits() git.Commits           { return h.commits }
+func (h *History) GetWorkItems() []apis.WorkItem     { return h.workitems }
+func (h *History) GetContributors() git.Contributors { return h.commits.RelatedContributors() }
+
 type Line struct {
 	Filename string
 	Text     string
 	Number   int
 	once     sync.Once
-	commits  git.Commits
+	history  *History
 }
 
-func (l *Line) init() {
+func NewHistory(line *Line) *History {
 	start := 1
-	end := l.Number + 1
+	end := line.Number + 1
 
-	if l.Number > 1 {
-		start = l.Number - 1
+	if line.Number > 1 {
+		start = line.Number - 1
 	}
 
-	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, l.Filename))
+	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.Filename))
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	l.commits = commits
+	return &History{commits: commits, Start: start, End: end}
 }
 
-func (l *Line) GetCommits() git.Commits {
-	l.once.Do(l.init)
-	return l.commits
+func (l *Line) gatherHistory() {
+	l.history = NewHistory(l)
+}
+
+func (l *Line) GetHistory() <-chan *History {
+	c := make(chan *History)
+	go func(line *Line) {
+		defer close(c)
+		line.once.Do(line.gatherHistory)
+		c <- line.history
+	}(l)
+
+	return c
 }
 
 func NewFile(filename string, start, end int) (*File, error) {

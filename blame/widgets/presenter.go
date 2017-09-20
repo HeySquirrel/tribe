@@ -16,7 +16,7 @@ type SourceView interface {
 }
 
 type ContextView interface {
-	SetContext(line *model.Line)
+	SetContext(line *model.History)
 }
 
 type Presenter struct {
@@ -75,6 +75,8 @@ func (p *Presenter) setCurrentLine(line *model.Line) {
 
 func (p *Presenter) updateContext() {
 	go func(p *Presenter) {
-		p.contextView.SetContext(p.currentLine)
+		c := p.currentLine.GetHistory()
+		history := <-c
+		p.contextView.SetContext(history)
 	}(p)
 }
