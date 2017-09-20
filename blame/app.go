@@ -37,7 +37,10 @@ func NewBlameApp(api apis.WorkItemServer, blame *model.File) *BlameApp {
 	}
 
 	contributors := logs.RelatedContributors()
-	workItems := logs.RelatedWorkItems()
+	workItems, err := apis.GetWorkItems(api, logs.RelatedWorkItems()...)
+	if err != nil {
+		log.Panicln(err)
+	}
 
 	a.Gui.SetManager(
 		source,
