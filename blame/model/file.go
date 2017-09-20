@@ -7,10 +7,10 @@ import (
 )
 
 type File struct {
-	Filename string
-	Start    int
-	End      int
-	Lines    []*Line
+	Name  string
+	Start int
+	End   int
+	Lines []*Line
 }
 
 type Line struct {
@@ -31,7 +31,7 @@ func NewFile(filename string, start, end int) (*File, error) {
 	defer reader.Close()
 
 	file := new(File)
-	file.Filename = filename
+	file.Name = filename
 	file.Start = start
 	file.End = end
 	file.Lines = make([]*Line, 0)

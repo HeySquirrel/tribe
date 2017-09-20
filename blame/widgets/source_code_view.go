@@ -34,7 +34,7 @@ func (s *SourceCodeView) SetCurrentLine(currentLine *model.Line) {
 }
 
 func (s *SourceCodeView) SetFile(file *model.File) {
-	_, title := filepath.Split(file.Filename)
+	_, title := filepath.Split(file.Name)
 	s.view.Title = fmt.Sprintf(" %s:%d,%d ", title, file.Start, file.End)
 
 	for _, line := range file.Lines {
