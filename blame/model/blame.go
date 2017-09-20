@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/heysquirrel/tribe/git"
+	"log"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -16,8 +18,32 @@ type File struct {
 }
 
 type Line struct {
-	Text   string
-	Number int
+	Filename string
+	Text     string
+	Number   int
+	once     sync.Once
+	commits  git.Commits
+}
+
+func (l *Line) init() {
+	start := 1
+	end := l.Number + 1
+
+	if l.Number > 1 {
+		start = l.Number - 1
+	}
+
+	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, l.Filename))
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	l.commits = commits
+}
+
+func (l *Line) GetCommits() git.Commits {
+	l.once.Do(l.init)
+	return l.commits
 }
 
 func NewFile(filename string, start, end int) (*File, error) {
@@ -34,7 +60,7 @@ func NewFile(filename string, start, end int) (*File, error) {
 	lines := make([]*Line, 0)
 	scanner := bufio.NewScanner(file)
 	for i := 1; scanner.Scan(); i++ {
-		lines = append(lines, &Line{Text: scanner.Text(), Number: i})
+		lines = append(lines, &Line{Filename: filename, Text: scanner.Text(), Number: i})
 	}
 
 	numberOfLines := len(lines)

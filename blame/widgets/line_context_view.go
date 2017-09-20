@@ -5,7 +5,7 @@ import (
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
 	"github.com/heysquirrel/tribe/apis"
-	"github.com/heysquirrel/tribe/git"
+	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
 	"log"
 	"regexp"
@@ -26,14 +26,16 @@ func NewLineContextView(server apis.WorkItemServer) *LineContextView {
 	return l
 }
 
-func (l *LineContextView) SetContext(start, end int, commits git.Commits) {
+func (l *LineContextView) SetContext(line *model.Line) {
+	commits := line.GetCommits()
+
 	maxX, _ := l.view.Size()
 	maxView := maxX - 2
 	re := regexp.MustCompile("(S|DE|F|s|de|f)[0-9][0-9]+")
 	revert := regexp.MustCompile("(r|R)evert")
 
 	l.view.Clear()
-	l.view.Title = fmt.Sprintf(" Lines %d - %d ", start, end)
+	l.view.Title = fmt.Sprintf(" Line %d ", line.Number)
 
 	fmt.Fprintln(l.view, "\n\n  Commits")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))

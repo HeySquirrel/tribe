@@ -2,8 +2,6 @@ package widgets
 
 import (
 	"github.com/heysquirrel/tribe/blame/model"
-	"github.com/heysquirrel/tribe/git"
-	"log"
 )
 
 type SourcePresenter interface {
@@ -18,7 +16,7 @@ type SourceView interface {
 }
 
 type ContextView interface {
-	SetContext(start, end int, commits git.Commits)
+	SetContext(line *model.Line)
 }
 
 type Presenter struct {
@@ -77,19 +75,6 @@ func (p *Presenter) setCurrentLine(line *model.Line) {
 
 func (p *Presenter) updateContext() {
 	go func(p *Presenter) {
-		line := p.currentLine
-		start := 1
-		end := line.Number + 1
-
-		if line.Number > 1 {
-			start = line.Number - 1
-		}
-
-		commits, err := p.file.Blame(start, end)
-		if err != nil {
-			log.Panicln(err)
-		}
-
-		p.contextView.SetContext(start, end, commits)
+		p.contextView.SetContext(p.currentLine)
 	}(p)
 }
