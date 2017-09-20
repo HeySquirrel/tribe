@@ -37,7 +37,7 @@ func (a *AssociatedWorkView) Layout(g *gocui.Gui) error {
 	v.Title = "Associated Work"
 
 	for _, item := range a.workItems {
-		fmt.Fprintf(v, "  %10s - %s\n",
+		fmt.Fprintf(v, "%10s - %s\n",
 			item.GetId(),
 			item.GetName(),
 		)

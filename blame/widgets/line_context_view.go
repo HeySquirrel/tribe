@@ -56,7 +56,7 @@ func (l *LineContextView) SetContext(start, end int, commits git.Commits) {
 	}
 
 	for _, item := range items {
-		fmt.Fprintf(l.view, "  %10s - %s\n",
+		fmt.Fprintf(l.view, "%10s - %s\n",
 			item.GetId(),
 			item.GetName(),
 		)
