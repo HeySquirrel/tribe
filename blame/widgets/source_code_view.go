@@ -63,8 +63,6 @@ func (s *SourceCodeView) Layout(g *gocui.Gui) error {
 
 	v.Title = "Source"
 	v.Highlight = true
-	v.SelBgColor = gocui.ColorBlack
-	v.SelFgColor = gocui.ColorWhite | gocui.AttrBold
 
 	_, err = g.SetCurrentView(s.name)
 	if err != nil {
