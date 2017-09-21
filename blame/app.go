@@ -23,6 +23,9 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		log.Panicln(err)
 	}
 
+	associatedWork := make(chan *model.AssociatedWork)
+	associatedContributors := make(chan *model.AssociatedContributors)
+
 	a.Gui.SelFgColor = gocui.ColorGreen | gocui.AttrBold
 	a.Gui.BgColor = gocui.ColorDefault
 	a.Gui.Highlight = true
@@ -33,14 +36,20 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 
 	a.Presenter.SetSourceView(widgets.NewThreadSafeSourceView(a.Gui, source))
 	a.Presenter.SetSourceContextView(widgets.NewThreadSafeContextView(a.Gui, lineContext))
+	_, workview := widgets.NewFileWorkItemsView(a.Gui, associatedWork)
 
-	annotation := annotate.File(file)
 	a.Gui.SetManager(
 		source,
-		widgets.NewFrequentContributorsView(a.Gui, annotation.GetContributors()),
-		widgets.NewAssociatedWorkView(a.Gui, annotation.GetWorkItems()),
+		workview,
+		widgets.NewFileContributorsView(a.Gui, associatedContributors),
 		lineContext,
 	)
+
+	go func() {
+		annotation := annotate.File(file)
+		associatedWork <- &model.AssociatedWork{annotation, annotation.GetWorkItems()}
+		associatedContributors <- &model.AssociatedContributors{annotation, annotation.GetContributors()}
+	}()
 
 	a.setKeyBindings()
 

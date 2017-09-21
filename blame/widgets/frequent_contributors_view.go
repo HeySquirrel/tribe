@@ -3,47 +3,51 @@ package widgets
 import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
-	"github.com/heysquirrel/tribe/git"
+	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
 )
 
-type FrequentContributorsView struct {
-	name         string
-	gui          *gocui.Gui
-	contributors git.Contributors
-}
+func NewFileContributorsView(g *gocui.Gui, contributors <-chan *model.AssociatedContributors) gocui.ManagerFunc {
+	name := "filecontributors"
 
-func NewFrequentContributorsView(gui *gocui.Gui, contributors git.Contributors) *FrequentContributorsView {
-	c := new(FrequentContributorsView)
-	c.name = "contributors"
-	c.gui = gui
-	c.contributors = contributors
+	// Handle Updates
+	go func(name string) {
+		for associated := range contributors {
+			g.Update(func(g *gocui.Gui) error {
+				v, _ := g.View(name)
+				v.Title = fmt.Sprintf(" Contributors: %s ", associated.Context.GetTitle())
 
-	return c
-}
+				for _, contributor := range associated.Contributors {
+					fmt.Fprintf(v, "  %-20s - %d Commits - %s\n",
+						contributor.Name,
+						contributor.Count,
+						humanize.Time(contributor.LastCommit.Date),
+					)
+				}
 
-func (c *FrequentContributorsView) Layout(g *gocui.Gui) error {
-	maxX, maxY := g.Size()
+				return nil
+			})
+		}
+	}(name)
 
-	x1 := int(0.0 * float64(maxX))
-	y1 := int(0.75 * float64(maxY))
-	x2 := int(0.5*float64(maxX)) - 1
-	y2 := int(1.0*float64(maxY)) - 1
+	// Initial Layout
+	layout := func(g *gocui.Gui) error {
+		maxX, maxY := g.Size()
 
-	v, err := g.SetView(c.name, x1, y1, x2, y2)
-	if err != gocui.ErrUnknownView {
-		return err
+		x1 := int(0.0 * float64(maxX))
+		y1 := int(0.75 * float64(maxY))
+		x2 := int(0.5*float64(maxX)) - 1
+		y2 := int(1.0*float64(maxY)) - 1
+
+		v, err := g.SetView(name, x1, y1, x2, y2)
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+
+		v.Title = "Contributors"
+
+		return nil
 	}
 
-	v.Title = "Frequent Contributors"
-
-	for _, contributor := range c.contributors {
-		fmt.Fprintf(v, "  %-20s - %d Commits - %s\n",
-			contributor.Name,
-			contributor.Count,
-			humanize.Time(contributor.LastCommit.Date),
-		)
-	}
-
-	return nil
+	return layout
 }
