@@ -84,6 +84,7 @@ func (a *annotate) Line(line *Line) *LineAnnotation {
 type cache struct {
 	annotate Annotate
 	cache    gcache.Cache
+	seed     chan *Line
 }
 
 func NewCachingAnnotate(annotate Annotate) Annotate {
@@ -97,12 +98,52 @@ func NewCachingAnnotate(annotate Annotate) Annotate {
 			return nil, errors.New("Unknown line")
 		}).
 		Build()
+	seed := make(chan *Line)
+	c := &cache{annotate, gc, seed}
 
-	return &cache{annotate, gc}
+	c.startCacheWorkers()
+
+	return c
 }
 
-func (c *cache) File(file *File) *FileAnnotation { return c.annotate.File(file) }
+func (c *cache) startCacheWorkers() {
+	for i := 0; i < 3; i++ {
+		go func() {
+			for line := range c.seed {
+				_, err := c.cache.Get(line)
+				if err != nil {
+					log.Panicln(err)
+				}
+			}
+		}()
+	}
+}
+
+func (c *cache) seedCacheForFile(file *File) {
+	for i := file.Start; i <= file.End; i++ {
+		c.seed <- file.GetLine(i)
+	}
+}
+
+func (c *cache) seedCacheForLine(line *Line) {
+	if line.Number > 1 {
+		c.seed <- line.File.GetLine(line.Number - 1)
+	}
+
+	if line.Number < line.File.Len() {
+		c.seed <- line.File.GetLine(line.Number + 1)
+	}
+}
+
+func (c *cache) File(file *File) *FileAnnotation {
+	go c.seedCacheForFile(file)
+
+	return c.annotate.File(file)
+}
+
 func (c *cache) Line(line *Line) *LineAnnotation {
+	go c.seedCacheForLine(line)
+
 	value, err := c.cache.Get(line)
 	if err != nil {
 		log.Panicln(err)
