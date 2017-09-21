@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
-	"path/filepath"
 )
 
 type SourceCodeView struct {
@@ -34,8 +33,7 @@ func (s *SourceCodeView) SetCurrentLine(currentLine *model.Line) {
 }
 
 func (s *SourceCodeView) SetFile(file *model.File) {
-	_, title := filepath.Split(file.Name)
-	s.view.Title = fmt.Sprintf(" %s:%d,%d ", title, file.Start, file.End)
+	s.view.Title = fmt.Sprintf(" Source: %s ", file.Name)
 
 	for _, line := range file.Lines {
 		fmt.Fprintf(s.view, "%3d| %s\n", line.Number, line.Text)

@@ -55,7 +55,7 @@ func (a *annotate) File(file *File) *FileAnnotation {
 		log.Panicln(err)
 	}
 
-	fileCommits := commits.ContainsFile(file.Name)
+	fileCommits := commits.ContainsFile(file.RelPath)
 	workItems, err := apis.GetWorkItems(a.server, fileCommits.RelatedWorkItems()...)
 	if err != nil {
 		log.Panicln(err)
@@ -72,7 +72,7 @@ func (a *annotate) Line(line *Line) *LineAnnotation {
 		start = line.Number - 1
 	}
 
-	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.File.Name))
+	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.File.RelPath))
 	workItems, err := apis.GetWorkItems(a.server, commits.RelatedWorkItems()...)
 	if err != nil {
 		log.Panicln(err)

@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type File struct {
-	Name  string
-	Start int
-	End   int
-	Lines []*Line
+	RelPath string
+	Name    string
+	Start   int
+	End     int
+	Lines   []*Line
 }
 
 type Line struct {
@@ -24,6 +26,7 @@ func NewFile(filename string, start, end int) (*File, error) {
 		return nil, fmt.Errorf("fatal: invalid line numbers %d:%d", start, end)
 	}
 
+	_, name := filepath.Split(filename)
 	reader, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -31,7 +34,8 @@ func NewFile(filename string, start, end int) (*File, error) {
 	defer reader.Close()
 
 	file := new(File)
-	file.Name = filename
+	file.RelPath = filename
+	file.Name = name
 	file.Start = start
 	file.End = end
 	file.Lines = make([]*Line, 0)
