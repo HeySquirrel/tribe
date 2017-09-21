@@ -23,6 +23,10 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		log.Panicln(err)
 	}
 
+	a.Gui.SelFgColor = gocui.ColorGreen | gocui.AttrBold
+	a.Gui.BgColor = gocui.ColorDefault
+	a.Gui.Highlight = true
+
 	a.Presenter = widgets.NewPresenter(file, annotate)
 	source := widgets.NewSourceCodeView(a.Presenter)
 	lineContext := widgets.NewLineContextView()
