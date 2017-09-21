@@ -17,6 +17,8 @@ type WorkItemServer interface {
 	GetWorkItem(id string) (WorkItem, error)
 }
 
+type WorkItems []WorkItem
+
 type cache struct {
 	server WorkItemServer
 	cache  gcache.Cache
@@ -56,7 +58,7 @@ type result struct {
 	err      error
 }
 
-func GetWorkItems(server WorkItemServer, ids ...string) ([]WorkItem, error) {
+func GetWorkItems(server WorkItemServer, ids ...string) (WorkItems, error) {
 	results := make([]WorkItem, 0)
 	c := fetchWorkItems(server, ids...)
 

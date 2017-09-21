@@ -31,7 +31,7 @@ func (l *LineContextView) SetContext(annotation *model.LineAnnotation) {
 	revert := regexp.MustCompile("(r|R)evert")
 
 	l.view.Clear()
-	l.view.Title = fmt.Sprintf(" Lines %d-%d ", annotation.Start, annotation.End)
+	l.view.Title = annotation.GetTitle()
 
 	fmt.Fprintln(l.view, "\n\n  Commits")
 	fmt.Fprintf(l.view, "+%s+\n", strings.Repeat("-", maxView))

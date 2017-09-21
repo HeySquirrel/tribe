@@ -15,6 +15,11 @@ type Annotation interface {
 	GetWorkItems() []apis.WorkItem
 	GetContributors() git.Contributors
 }
+
+type Context interface {
+	GetTitle() string
+}
+
 type annotation struct {
 	commits   git.Commits
 	workItems []apis.WorkItem
@@ -30,6 +35,11 @@ type LineAnnotation struct {
 	Start int
 	End   int
 	Line  *Line
+}
+
+func (f *FileAnnotation) GetTitle() string { return f.File.Name }
+func (l *LineAnnotation) GetTitle() string {
+	return fmt.Sprintf("%s Lines %d-%d", l.Line.File.Name, l.Start, l.End)
 }
 
 func (a *annotation) GetCommits() git.Commits           { return a.commits }
