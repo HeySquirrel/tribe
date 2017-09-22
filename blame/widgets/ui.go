@@ -11,18 +11,18 @@ type keyBinding struct {
 }
 
 type UI struct {
-	name   string
-	startx float64
-	starty float64
-	endx   float64
-	endy   float64
-	gui    *gocui.Gui
+	Name   string
+	Startx float64
+	Starty float64
+	Endx   float64
+	Endy   float64
+	Gui    *gocui.Gui
 	keys   []keyBinding
 }
 
 func (u *UI) Update(f func(v *gocui.View)) {
-	u.gui.Update(func(g *gocui.Gui) error {
-		v, err := g.View(u.name)
+	u.Gui.Update(func(g *gocui.Gui) error {
+		v, err := g.View(u.Name)
 		if err != nil {
 			return err
 		}
@@ -40,14 +40,14 @@ func (u *UI) Title(title string) {
 
 func (u *UI) Focus() {
 	u.Update(func(v *gocui.View) {
-		u.gui.CurrentView().Highlight = false
+		u.Gui.CurrentView().Highlight = false
 		v.Highlight = true
-		u.gui.SetCurrentView(u.name)
+		u.Gui.SetCurrentView(u.Name)
 	})
 }
 
 func (u *UI) AddLocalKey(key interface{}, handler func()) {
-	u.keys = append(u.keys, keyBinding{u.name, key, handler})
+	u.keys = append(u.keys, keyBinding{u.Name, key, handler})
 }
 
 func (u *UI) AddGlobalKey(key interface{}, handler func()) {
@@ -57,12 +57,12 @@ func (u *UI) AddGlobalKey(key interface{}, handler func()) {
 func (u *UI) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
-	x1 := int(u.startx * float64(maxX))
-	y1 := int(u.starty * float64(maxY))
-	x2 := int(u.endx*float64(maxX)) - 1
-	y2 := int(u.endy*float64(maxY)) - 1
+	x1 := int(u.Startx * float64(maxX))
+	y1 := int(u.Starty * float64(maxY))
+	x2 := int(u.Endx*float64(maxX)) - 1
+	y2 := int(u.Endy*float64(maxY)) - 1
 
-	_, err := g.SetView(u.name, x1, y1, x2, y2)
+	_, err := g.SetView(u.Name, x1, y1, x2, y2)
 	if err != gocui.ErrUnknownView {
 		return err
 	}
