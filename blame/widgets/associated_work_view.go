@@ -7,14 +7,38 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+type SelectionEvent int
+
 type list struct {
 	*UI
-	items    apis.WorkItems
-	current  int
-	selected chan apis.WorkItem
+	items      []fmt.Stringer
+	current    int
+	selectFire SelectionEvent
+	selected   chan fmt.Stringer
 }
 
-func (l *list) setSelection(index int) {
+const (
+	OnSelect SelectionEvent = iota
+	OnEnter
+)
+
+func NewList(ui *UI, selectFire SelectionEvent, selected chan fmt.Stringer) *list {
+	l := &list{
+		ui,
+		make([]fmt.Stringer, 0),
+		-1,
+		selectFire,
+		selected,
+	}
+
+	l.AddLocalKey(gocui.KeyArrowUp, l.Previous)
+	l.AddLocalKey(gocui.KeyArrowDown, l.Next)
+	l.AddLocalKey(gocui.KeyEnter, func() { l.fire(OnEnter) })
+
+	return l
+}
+
+func (l *list) SetSelection(index int) {
 	if len(l.items) == 0 {
 		return
 	}
@@ -33,30 +57,48 @@ func (l *list) setSelection(index int) {
 			l.current = index
 			v.MoveCursor(0, moveDistance, false)
 		}
+		l.fire(OnSelect)
 	})
 }
 
-func (l *list) setItems(items apis.WorkItems) {
+func (l *list) fire(event SelectionEvent) {
+	if event != l.selectFire {
+		return
+	}
+
+	go func() {
+		l.selected <- l.items[l.current]
+	}()
+}
+
+func (l *list) SetItems(items []fmt.Stringer) {
 	l.Update(func(v *gocui.View) {
 		v.Clear()
 
 		for _, item := range items {
-			fmt.Fprintf(v, "%10s - %s\n",
-				item.GetId(),
-				item.GetName(),
-			)
+			fmt.Fprintln(v, item)
 		}
 
 		l.items = items
-		l.setSelection(0)
+		l.SetSelection(0)
 	})
 }
 
-func (l *list) next()     { l.setSelection(l.current + 1) }
-func (l *list) previous() { l.setSelection(l.current - 1) }
+func (l *list) Next()     { l.SetSelection(l.current + 1) }
+func (l *list) Previous() { l.SetSelection(l.current - 1) }
+
+type WorkItemDisplay struct {
+	item apis.WorkItem
+}
+
+func (w WorkItemDisplay) String() string {
+	return fmt.Sprintf("%10s - %s", w.item.GetId(), w.item.GetName())
+}
 
 func NewFileWorkItemsView(g *gocui.Gui, works <-chan *model.AssociatedWork) (<-chan apis.WorkItem, gocui.Manager) {
+	onSelection := make(chan fmt.Stringer)
 	selected := make(chan apis.WorkItem)
+
 	ui := &UI{
 		name:   "fileworkitems",
 		startx: 0.0,
@@ -65,17 +107,27 @@ func NewFileWorkItemsView(g *gocui.Gui, works <-chan *model.AssociatedWork) (<-c
 		endy:   0.75,
 		gui:    g,
 	}
-	l := &list{ui, []apis.WorkItem{}, -1, selected}
-	l.AddLocalKey(gocui.KeyArrowUp, l.previous)
-	l.AddLocalKey(gocui.KeyArrowDown, l.next)
+
+	l := NewList(ui, OnEnter, onSelection)
 	l.AddGlobalKey(gocui.KeyF2, l.Focus)
 
 	go func(l *list) {
 		for work := range works {
 			l.Title(fmt.Sprintf(" Associated Work: %s ", work.Context.GetTitle()))
-			l.setItems(work.WorkItems)
+			workitems := make([]fmt.Stringer, len(work.WorkItems))
+			for i, item := range work.WorkItems {
+				workitems[i] = WorkItemDisplay{item}
+			}
+			l.SetItems(workitems)
 		}
 	}(l)
+
+	go func() {
+		for item := range onSelection {
+			wid := item.(WorkItemDisplay)
+			selected <- wid.item
+		}
+	}()
 
 	return selected, l
 }
