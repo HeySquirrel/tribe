@@ -14,9 +14,6 @@ type Annotation interface {
 	GetCommits() git.Commits
 	GetWorkItems() []apis.WorkItem
 	GetContributors() git.Contributors
-}
-
-type Context interface {
 	GetTitle() string
 }
 
@@ -26,25 +23,25 @@ type annotation struct {
 }
 
 type FileAnnotation struct {
-	Annotation
+	*annotation
 	File *File
 }
 
 type LineAnnotation struct {
-	Annotation
+	*annotation
 	Start int
 	End   int
 	Line  *Line
 }
 
+func (a *annotation) GetCommits() git.Commits           { return a.commits }
+func (a *annotation) GetWorkItems() []apis.WorkItem     { return a.workItems }
+func (a *annotation) GetContributors() git.Contributors { return a.commits.RelatedContributors() }
+
 func (f *FileAnnotation) GetTitle() string { return f.File.Name }
 func (l *LineAnnotation) GetTitle() string {
 	return fmt.Sprintf("%s Lines %d-%d", l.Line.File.Name, l.Start, l.End)
 }
-
-func (a *annotation) GetCommits() git.Commits           { return a.commits }
-func (a *annotation) GetWorkItems() []apis.WorkItem     { return a.workItems }
-func (a *annotation) GetContributors() git.Contributors { return a.commits.RelatedContributors() }
 
 type Annotate interface {
 	File(file *File) *FileAnnotation
