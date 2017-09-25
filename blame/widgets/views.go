@@ -16,7 +16,7 @@ func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Ma
 
 	go func(l *list) {
 		for file := range files {
-			l.Title(fmt.Sprintf(" Source: %s ", file.Name))
+			l.Title(fmt.Sprintf("Source: %s ", file.Name))
 			l.SetItems(FileItems(*file), file.Start-1)
 			l.Focus()
 		}
@@ -41,7 +41,7 @@ func NewWorkItemsList(ui *UI) (chan<- model.Annotation, <-chan apis.WorkItem, go
 	go func(l *list) {
 		for annotation := range annotations {
 			workitems := annotation.GetWorkItems()
-			l.Title(fmt.Sprintf(" Associated Work: %s ", annotation.GetTitle()))
+			l.Title(fmt.Sprintf("Associated Work: %s ", annotation.GetTitle()))
 			l.SetItems(WorkItems(workitems), 0)
 		}
 	}(l)
@@ -68,7 +68,7 @@ func NewContributorsList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 		for annotation := range annotations {
 			contributors := annotation.GetContributors()
 
-			l.Title(fmt.Sprintf(" Contributors: %s ", annotation.GetTitle()))
+			l.Title(fmt.Sprintf("Contributors: %s ", annotation.GetTitle()))
 			l.SetItems(ContributorItems(contributors), 0)
 		}
 	}(l)
@@ -94,7 +94,7 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 		for annotation := range annotations {
 			commits := annotation.GetCommits()
 
-			l.Title(fmt.Sprintf(" Commits: %s ", annotation.GetTitle()))
+			l.Title(fmt.Sprintf("Commits: %s ", annotation.GetTitle()))
 			l.SetItems(CommitItems(commits), 0)
 		}
 	}(l)

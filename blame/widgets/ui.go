@@ -1,7 +1,10 @@
 package widgets
 
 import (
+	"errors"
+	"fmt"
 	"github.com/jroimartin/gocui"
+	"log"
 )
 
 type keyBinding struct {
@@ -35,7 +38,15 @@ func (u *UI) Update(f func(v *gocui.View)) {
 
 func (u *UI) Title(title string) {
 	u.Update(func(v *gocui.View) {
-		v.Title = title
+		if u.FocusOn != nil {
+			key, err := ToKeyString(u.FocusOn)
+			if err != nil {
+				log.Panicln(err)
+			}
+			v.Title = fmt.Sprintf("(%s) %s", key, title)
+		} else {
+			v.Title = title
+		}
 	})
 }
 
@@ -89,4 +100,22 @@ func (u *UI) registerKeyBindings(g *gocui.Gui) error {
 
 func ToBinding(f func()) func(g *gocui.Gui, v *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error { f(); return nil }
+}
+
+func ToKeyString(key interface{}) (string, error) {
+	switch t := key.(type) {
+	case gocui.Key:
+		switch t {
+		case gocui.KeyF1:
+			return "F1", nil
+		case gocui.KeyF2:
+			return "F2", nil
+		default:
+			return "", errors.New("unknown key")
+		}
+	case rune:
+		return string(t), nil
+	default:
+		return "", errors.New("unknown key")
+	}
 }
