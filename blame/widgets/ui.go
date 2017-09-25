@@ -40,7 +40,9 @@ func (u *UI) Title(title string) {
 
 func (u *UI) Focus() {
 	u.Update(func(v *gocui.View) {
-		u.Gui.CurrentView().Highlight = false
+		if u.Gui.CurrentView() != nil {
+			u.Gui.CurrentView().Highlight = false
+		}
 		v.Highlight = true
 		u.Gui.SetCurrentView(u.Name)
 	})

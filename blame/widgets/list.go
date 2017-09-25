@@ -48,8 +48,8 @@ func (l *list) SetSelection(index int) {
 
 	l.Update(func(v *gocui.View) {
 		if l.current == -1 {
-			l.current = 0
-			v.SetOrigin(0, 0)
+			l.current = index
+			v.SetOrigin(0, index)
 		} else {
 			moveDistance := index - l.current
 			l.current = index

@@ -21,6 +21,8 @@ type Line struct {
 	Number int
 }
 
+func (l Line) String() string { return l.Text }
+
 func NewFile(filename string, start, end int) (*File, error) {
 	if start <= 0 || end <= 0 {
 		return nil, fmt.Errorf("fatal: invalid line numbers %d:%d", start, end)

@@ -27,12 +27,41 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	a.Gui.BgColor = gocui.ColorDefault
 	a.Gui.Highlight = true
 
-	a.Presenter = widgets.NewPresenter(file, annotate)
-	source := widgets.NewSourceCodeView(a.Presenter)
-	lineContext := widgets.NewLineContextView()
+	sourcecode := &widgets.UI{
+		Name:   "source",
+		Startx: 0.0,
+		Starty: 0.0,
+		Endx:   0.5,
+		Endy:   0.5,
+		Gui:    a.Gui,
+	}
 
-	a.Presenter.SetSourceView(widgets.NewThreadSafeSourceView(a.Gui, source))
-	a.Presenter.SetSourceContextView(widgets.NewThreadSafeContextView(a.Gui, lineContext))
+	commits := &widgets.UI{
+		Name:   "commits",
+		Startx: 0.5,
+		Starty: 0.0,
+		Endx:   1.0,
+		Endy:   0.4,
+		Gui:    a.Gui,
+	}
+
+	lineworkitems := &widgets.UI{
+		Name:   "lineworkitems",
+		Startx: 0.5,
+		Starty: 0.4,
+		Endx:   1.0,
+		Endy:   0.7,
+		Gui:    a.Gui,
+	}
+
+	linecontributors := &widgets.UI{
+		Name:   "linecontributors",
+		Startx: 0.5,
+		Starty: 0.7,
+		Endx:   1.0,
+		Endy:   1.0,
+		Gui:    a.Gui,
+	}
 
 	fileworkitems := &widgets.UI{
 		Name:   "fileworkitems",
@@ -42,6 +71,7 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		Endy:   0.75,
 		Gui:    a.Gui,
 	}
+
 	filecontributors := &widgets.UI{
 		Name:   "filecontributors",
 		Startx: 0.0,
@@ -51,15 +81,36 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		Gui:    a.Gui,
 	}
 
+	filein, lineout, sourceview := widgets.NewSourceCodeList(sourcecode)
+
+	commitin, commitview := widgets.NewCommitList(commits)
+	lineworkin, _, lineworkview := widgets.NewWorkItemsList(lineworkitems)
+	lineconin, lineconview := widgets.NewContributorsList(linecontributors)
+
 	workin, _, workview := widgets.NewWorkItemsList(fileworkitems)
 	conin, conview := widgets.NewContributorsList(filecontributors)
 
 	a.Gui.SetManager(
-		source,
+		sourceview,
+		commitview,
+		lineworkview,
+		lineconview,
 		workview,
 		conview,
-		lineContext,
 	)
+
+	go func() {
+		filein <- file
+	}()
+
+	go func() {
+		for line := range lineout {
+			annotation := annotate.Line(line)
+			commitin <- annotation
+			lineworkin <- annotation
+			lineconin <- annotation
+		}
+	}()
 
 	go func() {
 		annotation := annotate.File(file)
