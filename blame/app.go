@@ -1,6 +1,7 @@
 package blame
 
 import (
+	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
 	"github.com/jroimartin/gocui"
@@ -55,12 +56,13 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	}
 
 	lineworkitems := &widgets.UI{
-		Name:   "lineworkitems",
-		Startx: 0.5,
-		Starty: 0.4,
-		Endx:   1.0,
-		Endy:   0.7,
-		Gui:    a.Gui,
+		Name:    "lineworkitems",
+		Startx:  0.5,
+		Starty:  0.4,
+		Endx:    1.0,
+		Endy:    0.7,
+		Gui:     a.Gui,
+		FocusOn: gocui.KeyF3,
 	}
 
 	linecontributors := &widgets.UI{
@@ -91,16 +93,18 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		Gui:    a.Gui,
 	}
 
+	workitems := make(chan apis.WorkItem)
+
 	filein, lineout, sourceview := widgets.NewSourceCodeList(sourcecode)
 
 	commitin, commitview := widgets.NewCommitList(commits)
-	lineworkin, _, lineworkview := widgets.NewWorkItemsList(lineworkitems)
+	lineworkin, lineworkout, lineworkview := widgets.NewWorkItemsList(lineworkitems)
 	lineconin, lineconview := widgets.NewContributorsList(linecontributors)
 
-	workin, workout, workview := widgets.NewWorkItemsList(fileworkitems)
+	workin, fileworkout, workview := widgets.NewWorkItemsList(fileworkitems)
 	conin, conview := widgets.NewContributorsList(filecontributors)
 
-	workitemview := widgets.NewWorkItemDetails(workitem, workout)
+	workitemview := widgets.NewWorkItemDetails(workitem, workitems)
 
 	a.Gui.SetManager(
 		workitemview,
@@ -114,6 +118,17 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 
 	go func() {
 		filein <- file
+	}()
+
+	go func() {
+		for {
+			select {
+			case lineout := <-lineworkout:
+				workitems <- lineout
+			case fileout := <-fileworkout:
+				workitems <- fileout
+			}
+		}
 	}()
 
 	go func() {

@@ -122,6 +122,8 @@ func ToKeyString(key interface{}) (string, error) {
 			return "F1", nil
 		case gocui.KeyF2:
 			return "F2", nil
+		case gocui.KeyF3:
+			return "F3", nil
 		default:
 			return "", errors.New("unknown key")
 		}
