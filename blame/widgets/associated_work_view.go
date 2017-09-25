@@ -10,6 +10,7 @@ import (
 	"github.com/jroimartin/gocui"
 	"log"
 	"regexp"
+	"strconv"
 )
 
 type WorkItemDisplay struct {
@@ -50,6 +51,10 @@ func (c CommitDisplay) String() string {
 	)
 }
 
+type foo int
+
+func (f foo) String() string { return strconv.Itoa(int(f)) }
+
 func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Manager) {
 	files := make(chan *model.File)
 	onSelection := make(chan fmt.Stringer)
@@ -67,8 +72,8 @@ func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Ma
 			for i, line := range lines {
 				displays[i] = line
 			}
-			l.SetItems(displays)
-			l.SetSelection(file.Start - 1)
+
+			l.SetItems(displays, file.Start-1)
 			l.Focus()
 		}
 	}(l)
@@ -100,7 +105,7 @@ func NewWorkItemsList(ui *UI) (chan<- model.Annotation, <-chan apis.WorkItem, go
 			for i, item := range workitems {
 				displays[i] = WorkItemDisplay{item}
 			}
-			l.SetItems(displays)
+			l.SetItems(displays, 0)
 		}
 	}(l)
 
@@ -129,7 +134,7 @@ func NewContributorsList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 			for i, item := range contributors {
 				displays[i] = ContributorDisplay{item}
 			}
-			l.SetItems(displays)
+			l.SetItems(displays, 0)
 		}
 	}(l)
 
@@ -160,7 +165,7 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 			for i, item := range commits {
 				displays[i] = CommitDisplay{item}
 			}
-			l.SetItems(displays)
+			l.SetItems(displays, 0)
 		}
 	}(l)
 

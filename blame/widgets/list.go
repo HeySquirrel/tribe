@@ -37,19 +37,19 @@ func NewList(ui *UI, selectFire SelectionEvent, selected chan fmt.Stringer) *lis
 }
 
 func (l *list) SetSelection(index int) {
-	if len(l.items) == 0 {
-		return
-	}
-
-	if index < 0 || index >= len(l.items) {
-		fmt.Print("\a")
-		return
-	}
-
 	l.Update(func(v *gocui.View) {
+		if len(l.items) == 0 {
+			return
+		}
+
+		if index < 0 || index >= len(l.items) {
+			fmt.Print("\a")
+			return
+		}
+
 		if l.current == -1 {
 			l.current = index
-			v.SetOrigin(0, index)
+			v.SetOrigin(0, l.current)
 		} else {
 			moveDistance := index - l.current
 			l.current = index
@@ -69,16 +69,16 @@ func (l *list) fire(event SelectionEvent) {
 	}()
 }
 
-func (l *list) SetItems(items []fmt.Stringer) {
+func (l *list) SetItems(items []fmt.Stringer, index int) {
 	l.Update(func(v *gocui.View) {
 		v.Clear()
 
-		for _, item := range items {
+		l.items = items
+		for _, item := range l.items {
 			fmt.Fprintln(v, item)
 		}
 
-		l.items = items
-		l.SetSelection(0)
+		l.SetSelection(index)
 	})
 }
 
