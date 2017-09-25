@@ -36,6 +36,15 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		FocusOn: gocui.KeyF1,
 	}
 
+	workitem := &widgets.UI{
+		Name:   "workitem",
+		Startx: 0.2,
+		Starty: 0.2,
+		Endx:   0.8,
+		Endy:   0.8,
+		Gui:    a.Gui,
+	}
+
 	commits := &widgets.UI{
 		Name:   "commits",
 		Startx: 0.5,
@@ -88,10 +97,13 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	lineworkin, _, lineworkview := widgets.NewWorkItemsList(lineworkitems)
 	lineconin, lineconview := widgets.NewContributorsList(linecontributors)
 
-	workin, _, workview := widgets.NewWorkItemsList(fileworkitems)
+	workin, workout, workview := widgets.NewWorkItemsList(fileworkitems)
 	conin, conview := widgets.NewContributorsList(filecontributors)
 
+	workitemview := widgets.NewWorkItemDetails(workitem, workout)
+
 	a.Gui.SetManager(
+		workitemview,
 		sourceview,
 		commitview,
 		lineworkview,

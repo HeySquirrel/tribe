@@ -60,6 +60,18 @@ func (u *UI) Focus() {
 	})
 }
 
+func (u *UI) Hide() {
+	u.Update(func(v *gocui.View) {
+		u.Gui.SetViewOnBottom(u.Name)
+	})
+}
+
+func (u *UI) Show() {
+	u.Update(func(v *gocui.View) {
+		u.Gui.SetViewOnTop(u.Name)
+	})
+}
+
 func (u *UI) AddLocalKey(key interface{}, handler func()) {
 	u.keys = append(u.keys, keyBinding{u.Name, key, handler})
 }

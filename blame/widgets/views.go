@@ -110,3 +110,27 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 
 	return annotations, l
 }
+
+func NewWorkItemDetails(ui *UI, workitems <-chan apis.WorkItem) gocui.Manager {
+	ui.Hide()
+	ui.AddGlobalKey(gocui.KeyF9, ui.Hide)
+
+	go func() {
+		for workitem := range workitems {
+			ui.Update(func(v *gocui.View) {
+				v.Clear()
+				v.Wrap = true
+
+				ui.Title(fmt.Sprintf("%s - F9 to hide", workitem.GetId()))
+
+				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
+				fmt.Fprintln(v, workitem.GetDescription())
+
+				ui.Gui.SetCurrentView(ui.Name)
+			})
+			ui.Show()
+		}
+	}()
+
+	return ui
+}
