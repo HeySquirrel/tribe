@@ -5,6 +5,7 @@ import (
 	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/jroimartin/gocui"
+	"github.com/kennygrant/sanitize"
 	"log"
 )
 
@@ -124,7 +125,7 @@ func NewWorkItemDetails(ui *UI, workitems <-chan apis.WorkItem) gocui.Manager {
 				ui.Title(fmt.Sprintf("%s - F9 to hide", workitem.GetId()))
 
 				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
-				fmt.Fprintln(v, workitem.GetDescription())
+				fmt.Fprintln(v, sanitize.HTML(workitem.GetDescription()))
 
 				ui.Gui.SetCurrentView(ui.Name)
 			})
