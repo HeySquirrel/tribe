@@ -11,13 +11,14 @@ type keyBinding struct {
 }
 
 type UI struct {
-	Name   string
-	Startx float64
-	Starty float64
-	Endx   float64
-	Endy   float64
-	Gui    *gocui.Gui
-	keys   []keyBinding
+	Name    string
+	Startx  float64
+	Starty  float64
+	Endx    float64
+	Endy    float64
+	Gui     *gocui.Gui
+	FocusOn interface{}
+	keys    []keyBinding
 }
 
 func (u *UI) Update(f func(v *gocui.View)) {
@@ -73,6 +74,10 @@ func (u *UI) Layout(g *gocui.Gui) error {
 }
 
 func (u *UI) registerKeyBindings(g *gocui.Gui) error {
+	if u.FocusOn != nil {
+		u.AddGlobalKey(u.FocusOn, u.Focus)
+	}
+
 	for _, binding := range u.keys {
 		err := g.SetKeybinding(binding.view, binding.key, gocui.ModNone, ToBinding(binding.handler))
 		if err != nil {

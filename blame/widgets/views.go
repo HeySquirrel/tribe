@@ -13,7 +13,6 @@ func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Ma
 	selected := make(chan *model.Line)
 
 	l, selections := NewList(ui)
-	l.AddGlobalKey(gocui.KeyF1, l.Focus)
 
 	go func(l *list) {
 		for file := range files {
@@ -38,7 +37,6 @@ func NewWorkItemsList(ui *UI) (chan<- model.Annotation, <-chan apis.WorkItem, go
 	selected := make(chan apis.WorkItem)
 
 	l, selections := NewList(ui)
-	l.AddGlobalKey(gocui.KeyF2, l.Focus)
 
 	go func(l *list) {
 		for annotation := range annotations {

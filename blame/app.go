@@ -27,12 +27,13 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	a.Gui.Highlight = true
 
 	sourcecode := &widgets.UI{
-		Name:   "source",
-		Startx: 0.0,
-		Starty: 0.0,
-		Endx:   0.5,
-		Endy:   0.5,
-		Gui:    a.Gui,
+		Name:    "source",
+		Startx:  0.0,
+		Starty:  0.0,
+		Endx:    0.5,
+		Endy:    0.5,
+		Gui:     a.Gui,
+		FocusOn: gocui.KeyF1,
 	}
 
 	commits := &widgets.UI{
@@ -63,12 +64,13 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	}
 
 	fileworkitems := &widgets.UI{
-		Name:   "fileworkitems",
-		Startx: 0.0,
-		Starty: 0.5,
-		Endx:   0.5,
-		Endy:   0.75,
-		Gui:    a.Gui,
+		Name:    "fileworkitems",
+		Startx:  0.0,
+		Starty:  0.5,
+		Endx:    0.5,
+		Endy:    0.75,
+		Gui:     a.Gui,
+		FocusOn: gocui.KeyF2,
 	}
 
 	filecontributors := &widgets.UI{
