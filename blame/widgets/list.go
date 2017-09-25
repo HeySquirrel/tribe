@@ -3,16 +3,24 @@ package widgets
 import (
 	"fmt"
 	"github.com/jroimartin/gocui"
+	"io"
 )
 
-type SelectionEvent int
+type Items interface {
+	Display(w io.Writer)
+	Len() int
+}
 
-type list struct {
-	*UI
-	items      []fmt.Stringer
-	current    int
-	selectFire SelectionEvent
-	selected   chan fmt.Stringer
+type EmptyItems struct{}
+
+func (e *EmptyItems) Display(w io.Writer) {}
+func (e *EmptyItems) Len() int            { return 0 }
+
+type SelectionEvent int
+type Selected struct {
+	Type  SelectionEvent
+	Index int
+	Items Items
 }
 
 const (
@@ -20,12 +28,19 @@ const (
 	OnEnter
 )
 
-func NewList(ui *UI, selectFire SelectionEvent, selected chan fmt.Stringer) *list {
+type list struct {
+	*UI
+	items    Items
+	current  int
+	selected chan *Selected
+}
+
+func NewList(ui *UI) (*list, chan *Selected) {
+	selected := make(chan *Selected)
 	l := &list{
 		ui,
-		make([]fmt.Stringer, 0),
+		&EmptyItems{},
 		-1,
-		selectFire,
 		selected,
 	}
 
@@ -33,16 +48,18 @@ func NewList(ui *UI, selectFire SelectionEvent, selected chan fmt.Stringer) *lis
 	l.AddLocalKey(gocui.KeyArrowDown, l.Next)
 	l.AddLocalKey(gocui.KeyEnter, func() { l.fire(OnEnter) })
 
-	return l
+	return l, selected
 }
 
 func (l *list) SetSelection(index int) {
 	l.Update(func(v *gocui.View) {
-		if len(l.items) == 0 {
+		count := l.items.Len()
+
+		if count == 0 {
 			return
 		}
 
-		if index < 0 || index >= len(l.items) {
+		if index < 0 || index >= count {
 			fmt.Print("\a")
 			return
 		}
@@ -60,23 +77,17 @@ func (l *list) SetSelection(index int) {
 }
 
 func (l *list) fire(event SelectionEvent) {
-	if event != l.selectFire {
-		return
-	}
-
 	go func() {
-		l.selected <- l.items[l.current]
+		l.selected <- &Selected{event, l.current, l.items}
 	}()
 }
 
-func (l *list) SetItems(items []fmt.Stringer, index int) {
+func (l *list) SetItems(items Items, index int) {
 	l.Update(func(v *gocui.View) {
 		v.Clear()
-
 		l.items = items
-		for _, item := range l.items {
-			fmt.Fprintln(v, item)
-		}
+
+		items.Display(v)
 
 		l.SetSelection(index)
 	})

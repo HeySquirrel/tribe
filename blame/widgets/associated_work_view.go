@@ -8,80 +8,82 @@ import (
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/jroimartin/gocui"
+	"io"
 	"log"
 	"regexp"
-	"strconv"
 )
 
-type WorkItemDisplay struct {
-	item apis.WorkItem
-}
+type WorkItems []apis.WorkItem
 
-func (w WorkItemDisplay) String() string {
-	return fmt.Sprintf("%10s - %s", w.item.GetId(), w.item.GetName())
+func (w WorkItems) Display(writer io.Writer) {
+	for _, item := range w {
+		fmt.Fprintf(writer, "%10s - %s\n", item.GetId(), item.GetName())
+	}
 }
+func (w WorkItems) Len() int { return len(w) }
 
-type ContributorDisplay struct {
-	contributor *git.Contributor
+type ContributorItems []*git.Contributor
+
+func (c ContributorItems) Display(writer io.Writer) {
+	for _, contributor := range c {
+		fmt.Fprintf(writer, "  %-20s - %d Commits - %s\n",
+			contributor.Name,
+			contributor.Count,
+			humanize.Time(contributor.LastCommit.Date),
+		)
+	}
 }
+func (c ContributorItems) Len() int { return len(c) }
 
-func (c ContributorDisplay) String() string {
-	return fmt.Sprintf("  %-20s - %d Commits - %s",
-		c.contributor.Name,
-		c.contributor.Count,
-		humanize.Time(c.contributor.LastCommit.Date),
-	)
-}
+type CommitItems []*git.Commit
 
-type CommitDisplay struct {
-	commit *git.Commit
-}
-
-func (c CommitDisplay) String() string {
-	commit := c.commit
+func (c CommitItems) Display(writer io.Writer) {
 	re := regexp.MustCompile("(S|DE|F|s|de|f)[0-9][0-9]+")
 	revert := regexp.MustCompile("(r|R)evert")
+	magenta := func(s string) string { return color.MagentaString(s) }
+	cyan := func(s string) string { return color.CyanString(s) }
 
-	subject := re.ReplaceAllStringFunc(commit.Subject, func(workitem string) string { return color.MagentaString(workitem) })
-	subject = revert.ReplaceAllStringFunc(subject, func(revert string) string { return color.CyanString(revert) })
-	return fmt.Sprintf(" %10s - %s - %s",
-		commit.Sha[0:9],
-		subject,
-		humanize.Time(commit.Date),
-	)
+	for _, commit := range c {
+		subject := re.ReplaceAllStringFunc(commit.Subject, magenta)
+		subject = revert.ReplaceAllStringFunc(subject, cyan)
+
+		fmt.Fprintf(writer, " %10s - %s - %s\n",
+			commit.Sha[0:9],
+			subject,
+			humanize.Time(commit.Date),
+		)
+	}
 }
+func (c CommitItems) Len() int { return len(c) }
 
-type foo int
+type FileItems model.File
 
-func (f foo) String() string { return strconv.Itoa(int(f)) }
+func (f FileItems) Display(writer io.Writer) {
+	for _, line := range f.Lines {
+		fmt.Fprintf(writer, "%5d| %s\n", line.Number, line.Text)
+	}
+}
+func (f FileItems) Len() int { file := model.File(f); return file.Len() }
 
 func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Manager) {
 	files := make(chan *model.File)
-	onSelection := make(chan fmt.Stringer)
 	selected := make(chan *model.Line)
 
-	l := NewList(ui, OnSelect, onSelection)
+	l, selections := NewList(ui)
 	l.AddGlobalKey(gocui.KeyF1, l.Focus)
 
 	go func(l *list) {
 		for file := range files {
-			lines := file.Lines
-
 			l.Title(fmt.Sprintf(" Source: %s ", file.Name))
-			displays := make([]fmt.Stringer, len(lines))
-			for i, line := range lines {
-				displays[i] = line
-			}
-
-			l.SetItems(displays, file.Start-1)
+			l.SetItems(FileItems(*file), file.Start-1)
 			l.Focus()
 		}
 	}(l)
 
 	go func() {
-		for line := range onSelection {
-			l := line.(*model.Line)
-			selected <- l
+		for selection := range selections {
+			file := model.File(selection.Items.(FileItems))
+			selected <- file.GetLine(selection.Index)
 		}
 	}()
 
@@ -90,29 +92,26 @@ func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Ma
 
 func NewWorkItemsList(ui *UI) (chan<- model.Annotation, <-chan apis.WorkItem, gocui.Manager) {
 	annotations := make(chan model.Annotation)
-	onSelection := make(chan fmt.Stringer)
 	selected := make(chan apis.WorkItem)
 
-	l := NewList(ui, OnEnter, onSelection)
+	l, selections := NewList(ui)
 	l.AddGlobalKey(gocui.KeyF2, l.Focus)
 
 	go func(l *list) {
 		for annotation := range annotations {
 			workitems := annotation.GetWorkItems()
-
 			l.Title(fmt.Sprintf(" Associated Work: %s ", annotation.GetTitle()))
-			displays := make([]fmt.Stringer, len(workitems))
-			for i, item := range workitems {
-				displays[i] = WorkItemDisplay{item}
-			}
-			l.SetItems(displays, 0)
+			l.SetItems(WorkItems(workitems), 0)
 		}
 	}(l)
 
 	go func() {
-		for item := range onSelection {
-			wid := item.(WorkItemDisplay)
-			selected <- wid.item
+		for selection := range selections {
+			if selection.Type != OnEnter {
+				continue
+			}
+			workitems := selection.Items.(WorkItems)
+			selected <- workitems[selection.Index]
 		}
 	}()
 
@@ -121,26 +120,21 @@ func NewWorkItemsList(ui *UI) (chan<- model.Annotation, <-chan apis.WorkItem, go
 
 func NewContributorsList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 	annotations := make(chan model.Annotation)
-	onSelection := make(chan fmt.Stringer)
 
-	l := NewList(ui, OnEnter, onSelection)
+	l, selections := NewList(ui)
 
 	go func(l *list) {
 		for annotation := range annotations {
 			contributors := annotation.GetContributors()
 
 			l.Title(fmt.Sprintf(" Contributors: %s ", annotation.GetTitle()))
-			displays := make([]fmt.Stringer, len(contributors))
-			for i, item := range contributors {
-				displays[i] = ContributorDisplay{item}
-			}
-			l.SetItems(displays, 0)
+			l.SetItems(ContributorItems(contributors), 0)
 		}
 	}(l)
 
 	go func() {
-		for item := range onSelection {
-			_, ok := item.(ContributorDisplay)
+		for selection := range selections {
+			_, ok := selection.Items.(ContributorItems)
 			if !ok {
 				log.Panicln("Unknown selection")
 			}
@@ -152,26 +146,21 @@ func NewContributorsList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 
 func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 	annotations := make(chan model.Annotation)
-	onSelection := make(chan fmt.Stringer)
 
-	l := NewList(ui, OnEnter, onSelection)
+	l, selections := NewList(ui)
 
 	go func(l *list) {
 		for annotation := range annotations {
 			commits := annotation.GetCommits()
 
 			l.Title(fmt.Sprintf(" Commits: %s ", annotation.GetTitle()))
-			displays := make([]fmt.Stringer, len(commits))
-			for i, item := range commits {
-				displays[i] = CommitDisplay{item}
-			}
-			l.SetItems(displays, 0)
+			l.SetItems(CommitItems(commits), 0)
 		}
 	}(l)
 
 	go func() {
-		for item := range onSelection {
-			_, ok := item.(CommitDisplay)
+		for selection := range selections {
+			_, ok := selection.Items.(CommitItems)
 			if !ok {
 				log.Panicln("Unknown selection")
 			}
