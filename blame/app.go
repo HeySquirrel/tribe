@@ -8,9 +8,8 @@ import (
 )
 
 type BlameApp struct {
-	Gui       *gocui.Gui
-	Done      chan struct{}
-	Presenter *widgets.Presenter
+	Gui  *gocui.Gui
+	Done chan struct{}
 }
 
 func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
