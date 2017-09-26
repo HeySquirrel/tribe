@@ -14,8 +14,8 @@ var endpoints []int
 
 var blameCmd = &cobra.Command{
 	Use:   "blame",
-	Short: "Show a detailed history of each line of a file",
-	Long:  `Better long description here`,
+	Short: "Why the @*$% does this code exist?",
+	Long:  `Access historical work items or issues, frequent contributors and your entire git history with one simple command so that you quickly determine why a line of code exists.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		filename := args[0]
