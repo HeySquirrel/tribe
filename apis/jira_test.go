@@ -1,23 +1,22 @@
-package rally
+package apis
 
 import (
-	"github.com/heysquirrel/tribe/apis"
 	"testing"
 )
 
-func setup(t *testing.T) apis.WorkItemServer {
-	api, err := NewFromConfig("rally1")
+func setupJira(t *testing.T) WorkItemServer {
+	api, err := NewJiraFromConfig("rsjira")
 	if err != nil {
 		t.Fatal(err)
 	}
 	return api
 }
 
-func TestGetWorkItem(t *testing.T) {
-	api := setup(t)
-	expectedType := "HierarchicalRequirement"
+func TestJiraGetWorkItem(t *testing.T) {
+	api := setupJira(t)
+	expectedType := "Bug"
 
-	item, err := api.GetWorkItem("S113541")
+	item, err := api.GetWorkItem("HIL-78")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,12 +26,12 @@ func TestGetWorkItem(t *testing.T) {
 	}
 }
 
-func TestNotFoundWorkItem(t *testing.T) {
-	api := setup(t)
+func TestJiraNotFoundWorkItem(t *testing.T) {
+	api := setupJira(t)
 	itemid := "NOTID"
 
 	item, err := api.GetWorkItem(itemid)
-	if err == nil && err != apis.ItemNotFoundError(itemid) {
+	if err == nil || err != ItemNotFoundError(itemid) {
 		t.Fatal("Expected ItemNotFoundError")
 	}
 

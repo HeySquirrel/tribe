@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/heysquirrel/tribe/apis"
-	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/blame"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/spf13/cobra"
@@ -39,7 +38,7 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		server, err := rally.NewFromConfig("rally1")
+		server, err := apis.NewRallyFromConfig("rally1")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

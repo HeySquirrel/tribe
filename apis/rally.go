@@ -1,9 +1,8 @@
-package rally
+package apis
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/config"
 	"net/http"
 	"strings"
@@ -14,12 +13,12 @@ type Rally struct {
 	apikey string
 }
 
-type Result struct {
+type RallyResult struct {
 	QueryResult QueryResult `json:"QueryResult"`
 }
 
 type QueryResult struct {
-	Results []Artifact `json:"Results"`
+	Artifacts []Artifact `json:"Results"`
 }
 
 type Artifact struct {
@@ -35,13 +34,13 @@ func (a *Artifact) GetName() string        { return a.Name }
 func (a *Artifact) GetDescription() string { return a.Description }
 func (a *Artifact) GetId() string          { return a.FormattedID }
 
-func NewFromConfig(servername string) (*Rally, error) {
-	serverconfig := config.WorkItemServer(servername)
+func NewRallyFromConfig(servername string) (*Rally, error) {
+	serverconfig := config.WorkItemServer(config.ServerName(servername))
 
-	return New(serverconfig["host"], serverconfig["apikey"])
+	return NewRally(serverconfig["host"], serverconfig["apikey"])
 }
 
-func New(host, apikey string) (*Rally, error) {
+func NewRally(host, apikey string) (*Rally, error) {
 	if strings.TrimSpace(host) == "" {
 		return nil, fmt.Errorf("Invalid hostname: '%s'", host)
 	}
@@ -53,7 +52,7 @@ func New(host, apikey string) (*Rally, error) {
 	return &Rally{host, apikey}, nil
 }
 
-func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
+func (r *Rally) GetWorkItem(id string) (WorkItem, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/slm/webservice/v2.0/Artifact", r.host)
 	req, _ := http.NewRequest("GET", url, nil)
@@ -66,18 +65,18 @@ func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return apis.NullWorkItem(id), err
+		return NullWorkItem(id), err
 	}
 	defer res.Body.Close()
 
-	var queryResult Result
+	var queryResult RallyResult
 	json.NewDecoder(res.Body).Decode(&queryResult)
 
-	for _, result := range queryResult.QueryResult.Results {
+	for _, result := range queryResult.QueryResult.Artifacts {
 		if result.FormattedID == id {
 			return &result, nil
 		}
 	}
 
-	return apis.NullWorkItem(id), apis.ItemNotFoundError(id)
+	return NullWorkItem(id), ItemNotFoundError(id)
 }

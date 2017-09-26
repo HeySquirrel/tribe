@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"reflect"
 )
 
 func init() {
@@ -24,11 +25,21 @@ func SetConfigFile(cfgFile string) {
 	}
 }
 
-func WorkItemServer(servername string) map[string]string {
+type ServerName string
+
+func WorkItemServer(servername ServerName) map[string]string {
 	key := fmt.Sprintf("workitemservers.%s", servername)
 	return viper.GetStringMapString(key)
 }
 
-func RallyApiKey() string {
-	return viper.GetString("rally.key")
+func WorkItemServers() []ServerName {
+	servers := viper.GetStringMap("workitemservers")
+	keys := reflect.ValueOf(servers).MapKeys()
+	names := make([]ServerName, len(keys))
+
+	for i := 0; i < len(keys); i++ {
+		names[i] = ServerName(keys[i].String())
+	}
+
+	return names
 }

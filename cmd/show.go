@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/heysquirrel/tribe/apis"
-	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/kennygrant/sanitize"
 	"github.com/spf13/cobra"
 	"io"
@@ -18,7 +17,7 @@ var ShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		workitemid := args[0]
 
-		api, err := rally.NewFromConfig("rally1")
+		api, err := apis.NewRallyFromConfig("rally1")
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

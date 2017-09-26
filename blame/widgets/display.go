@@ -13,12 +13,12 @@ import (
 
 type WorkItems []apis.WorkItem
 
-func (w WorkItems) Display(writer io.Writer) {
-	for _, item := range w {
+func (items WorkItems) Display(writer io.Writer) {
+	for _, item := range items {
 		fmt.Fprintf(writer, "%10s - %s\n", item.GetId(), item.GetName())
 	}
 }
-func (w WorkItems) Len() int { return len(w) }
+func (items WorkItems) Len() int { return len(items) }
 
 type ContributorItems []*git.Contributor
 

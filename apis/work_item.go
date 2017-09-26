@@ -30,6 +30,15 @@ func (s ItemNotFoundError) Error() string {
 	return fmt.Sprintf("'%s' was not found.", string(s))
 }
 
+func IsItemNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	_, ok := err.(ItemNotFoundError)
+	return ok
+}
+
 type result struct {
 	workitem WorkItem
 	err      error
@@ -68,7 +77,7 @@ func fetchWorkItems(server WorkItemServer, ids ...string) <-chan result {
 		go func() {
 			for id := range remaining {
 				workitem, err := server.GetWorkItem(id)
-				if err != nil && err == ItemNotFoundError(id) {
+				if IsItemNotFoundError(err) {
 					items <- result{workitem, nil}
 				} else {
 					items <- result{workitem, err}

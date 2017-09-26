@@ -1,9 +1,8 @@
-package jira
+package apis
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/config"
 	"net/http"
 	"strings"
@@ -15,7 +14,7 @@ type jira struct {
 	password string
 }
 
-type Result struct {
+type JiraResult struct {
 	Issue Issue `json:"fields"`
 }
 
@@ -35,13 +34,13 @@ func (i *Issue) GetName() string        { return i.Summary }
 func (i *Issue) GetDescription() string { return i.Description }
 func (i *Issue) GetId() string          { return i.Key }
 
-func NewFromConfig(servername string) (*jira, error) {
-	serverconfig := config.WorkItemServer(servername)
+func NewJiraFromConfig(servername string) (*jira, error) {
+	serverconfig := config.WorkItemServer(config.ServerName(servername))
 
-	return New(serverconfig["host"], serverconfig["username"], serverconfig["password"])
+	return NewJira(serverconfig["host"], serverconfig["username"], serverconfig["password"])
 }
 
-func New(host, username, password string) (*jira, error) {
+func NewJira(host, username, password string) (*jira, error) {
 	if strings.TrimSpace(host) == "" {
 		return nil, fmt.Errorf("Invalid hostname: '%s'", host)
 	}
@@ -57,7 +56,7 @@ func New(host, username, password string) (*jira, error) {
 	return &jira{host, username, password}, nil
 }
 
-func (j *jira) GetWorkItem(id string) (apis.WorkItem, error) {
+func (j *jira) GetWorkItem(id string) (WorkItem, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/rest/api/2/issue/%s", j.host, id)
 
@@ -71,10 +70,10 @@ func (j *jira) GetWorkItem(id string) (apis.WorkItem, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return apis.NullWorkItem(id), apis.ItemNotFoundError(id)
+		return NullWorkItem(id), ItemNotFoundError(id)
 	}
 
-	var result Result
+	var result JiraResult
 	json.NewDecoder(res.Body).Decode(&result)
 
 	return &result.Issue, nil

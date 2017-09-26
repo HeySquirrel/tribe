@@ -13,15 +13,14 @@ type cache struct {
 func (c *cache) GetWorkItem(id string) (WorkItem, error) {
 	value, err := c.cache.Get(id)
 	if err != nil {
-		return nil, err
+		if IsItemNotFoundError(err) {
+			return NullWorkItem(id), nil
+		} else {
+			return NullWorkItem(id), err
+		}
 	}
 
-	workitem, ok := value.(WorkItem)
-	if ok {
-		return workitem, nil
-	}
-
-	return nil, errors.New("Unknown result")
+	return value.(WorkItem), nil
 }
 
 func NewCachingServer(server WorkItemServer) WorkItemServer {
