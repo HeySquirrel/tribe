@@ -1,0 +1,42 @@
+package cmd
+
+import (
+	"fmt"
+	"github.com/heysquirrel/tribe/apis"
+	"github.com/heysquirrel/tribe/apis/rally"
+	"github.com/kennygrant/sanitize"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"io"
+	"os"
+)
+
+var ShowCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show relevant information about a given work item",
+	Long:  `Lookup given work item and display relevant information about it`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		workitemid := args[0]
+
+		apikey := viper.GetString("rally.key")
+		api := rally.New(apikey)
+
+		workitem, err := api.GetWorkItem(workitemid)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		Display(os.Stdout, workitem)
+	},
+}
+
+func Display(writer io.Writer, workitem apis.WorkItem) {
+	fmt.Fprintf(writer, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
+	fmt.Fprintln(writer, sanitize.HTML(workitem.GetDescription()))
+}
+
+func init() {
+	RootCmd.AddCommand(ShowCmd)
+}
