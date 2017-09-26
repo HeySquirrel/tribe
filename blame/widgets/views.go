@@ -126,8 +126,6 @@ func NewWorkItemDetails(ui *UI, workitems <-chan apis.WorkItem) gocui.Manager {
 
 				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
 				fmt.Fprintln(v, sanitize.HTML(workitem.GetDescription()))
-
-				ui.Gui.SetCurrentView(ui.Name)
 			})
 			ui.Show()
 		}

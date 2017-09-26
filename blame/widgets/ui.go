@@ -68,6 +68,10 @@ func (u *UI) Hide() {
 
 func (u *UI) Show() {
 	u.Update(func(v *gocui.View) {
+		if u.Gui.CurrentView() != nil {
+			u.Gui.CurrentView().Highlight = false
+		}
+		u.Gui.SetCurrentView(u.Name)
 		u.Gui.SetViewOnTop(u.Name)
 	})
 }
