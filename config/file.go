@@ -24,6 +24,11 @@ func SetConfigFile(cfgFile string) {
 	}
 }
 
+func WorkItemServer(servername string) map[string]string {
+	key := fmt.Sprintf("workitemservers.%s", servername)
+	return viper.GetStringMapString(key)
+}
+
 func RallyApiKey() string {
 	return viper.GetString("rally.key")
 }

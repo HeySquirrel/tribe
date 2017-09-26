@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/heysquirrel/tribe/apis"
+	"github.com/heysquirrel/tribe/config"
 	"net/http"
+	"strings"
 )
 
 type Rally struct {
+	host   string
 	apikey string
 }
 
@@ -32,16 +35,28 @@ func (a *Artifact) GetName() string        { return a.Name }
 func (a *Artifact) GetDescription() string { return a.Description }
 func (a *Artifact) GetId() string          { return a.FormattedID }
 
-func New(apikey string) *Rally {
-	rally := new(Rally)
-	rally.apikey = apikey
+func NewFromConfig(servername string) (*Rally, error) {
+	serverconfig := config.WorkItemServer(servername)
 
-	return rally
+	return New(serverconfig["host"], serverconfig["apikey"])
+}
+
+func New(host, apikey string) (*Rally, error) {
+	if strings.TrimSpace(host) == "" {
+		return nil, fmt.Errorf("Invalid hostname: '%s'", host)
+	}
+
+	if strings.TrimSpace(apikey) == "" {
+		return nil, fmt.Errorf("Invalid apikey: '%s'", apikey)
+	}
+
+	return &Rally{host, apikey}, nil
 }
 
 func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "https://rally1.rallydev.com/slm/webservice/v2.0/Artifact", nil)
+	url := fmt.Sprintf("%s/slm/webservice/v2.0/Artifact", r.host)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("zsessionid", r.apikey)
 
 	q := req.URL.Query()
@@ -65,75 +80,4 @@ func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
 	}
 
 	return &Artifact{FormattedID: id}, nil
-}
-
-func (r *Rally) queryForArtifact(formattedid string) (*Artifact, error) {
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "https://rally1.rallydev.com/slm/webservice/v2.0/Artifact", nil)
-	req.Header.Set("zsessionid", r.apikey)
-
-	q := req.URL.Query()
-	q.Add("query", fmt.Sprintf("(FormattedID = %s)", formattedid))
-	q.Add("fetch", "FormattedID,Name,Description")
-	req.URL.RawQuery = q.Encode()
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	var queryResult Result
-	json.NewDecoder(res.Body).Decode(&queryResult)
-
-	for _, result := range queryResult.QueryResult.Results {
-		if result.FormattedID == formattedid {
-			return &result, nil
-		}
-	}
-
-	return nil, nil
-}
-
-func (r *Rally) GetByFormattedId(formattedId string) (*Artifact, error) {
-	client := &http.Client{}
-
-	req, _ := http.NewRequest("GET", "https://rally1.rallydev.com/slm/webservice/v2.0/Artifact", nil)
-	req.Header.Set("zsessionid", r.apikey)
-
-	q := req.URL.Query()
-	q.Add("query", fmt.Sprintf("(FormattedID = %s)", formattedId))
-	q.Add("fetch", "FormattedID,Name,Description")
-	req.URL.RawQuery = q.Encode()
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	var queryResult Result
-	json.NewDecoder(res.Body).Decode(&queryResult)
-
-	for _, result := range queryResult.QueryResult.Results {
-		if result.FormattedID == formattedId {
-			return &result, nil
-		}
-	}
-
-	return nil, nil
-}
-
-func (r *Rally) GetByFormattedIds(formattedIds ...string) ([]*Artifact, error) {
-	artifacts := make([]*Artifact, 0)
-
-	for _, formattedId := range formattedIds {
-		artifact, err := r.GetByFormattedId(formattedId)
-		if err != nil {
-			return artifacts, err
-		}
-		artifacts = append(artifacts, artifact)
-	}
-
-	return artifacts, nil
 }

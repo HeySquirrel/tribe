@@ -6,7 +6,6 @@ import (
 	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/blame"
 	"github.com/heysquirrel/tribe/blame/model"
-	"github.com/heysquirrel/tribe/config"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -40,8 +39,13 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		apikey := config.RallyApiKey()
-		api := apis.NewCachingServer(rally.New(apikey))
+		server, err := rally.NewFromConfig("rally1")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		api := apis.NewCachingServer(server)
 
 		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))
 

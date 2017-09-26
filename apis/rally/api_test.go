@@ -2,15 +2,16 @@ package rally
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/config"
 	"testing"
 )
 
 func TestGetByFormattedIds(t *testing.T) {
-	apikey := config.RallyApiKey()
-	api := New(apikey)
+	api, err := NewFromConfig("rally1")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	artifacts, _ := api.GetByFormattedIds("S144101")
+	artifacts, _ := api.GetWorkItem("S113541")
 
 	fmt.Printf("HERE: %v\n", artifacts)
 }

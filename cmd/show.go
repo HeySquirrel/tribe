@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/apis/rally"
-	"github.com/heysquirrel/tribe/config"
 	"github.com/kennygrant/sanitize"
 	"github.com/spf13/cobra"
 	"io"
@@ -19,8 +18,11 @@ var ShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		workitemid := args[0]
 
-		apikey := config.RallyApiKey()
-		api := rally.New(apikey)
+		api, err := rally.NewFromConfig("rally1")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		workitem, err := api.GetWorkItem(workitemid)
 		if err != nil {
