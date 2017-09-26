@@ -12,8 +12,8 @@ import (
 
 var ShowCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show relevant information about a given work item",
-	Long:  `Lookup given work item and display relevant information about it`,
+	Short: "Show relevant information about a given work item or issue",
+	Long:  `See the name, description and owner for relevant work items or issues in CA Agile Central or Jira.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		workitemid := args[0]

@@ -58,5 +58,5 @@ var blameCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(blameCmd)
-	blameCmd.Flags().IntSliceVarP(&endpoints, "lines", "L", []int{1, 20}, "Line numbers to blame")
+	blameCmd.Flags().IntSliceVarP(&endpoints, "lines", "L", []int{1, 20}, "line numbers to blame")
 }
