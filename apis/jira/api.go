@@ -71,7 +71,7 @@ func (j *jira) GetWorkItem(id string) (apis.WorkItem, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, apis.ItemNotFoundError(id)
+		return apis.NullWorkItem(id), apis.ItemNotFoundError(id)
 	}
 
 	var result Result

@@ -12,24 +12,23 @@ type WorkItem interface {
 	GetId() string
 }
 
-type NotFoundWorkItem string
+type WorkItems []WorkItem
+type NullWorkItem string
 
-func (s NotFoundWorkItem) GetType() string        { return "" }
-func (s NotFoundWorkItem) GetName() string        { return "" }
-func (s NotFoundWorkItem) GetDescription() string { return "" }
-func (s NotFoundWorkItem) GetId() string          { return string(s) }
+func (s NullWorkItem) GetType() string        { return "" }
+func (s NullWorkItem) GetName() string        { return "" }
+func (s NullWorkItem) GetDescription() string { return "" }
+func (s NullWorkItem) GetId() string          { return string(s) }
+
+type WorkItemServer interface {
+	GetWorkItem(id string) (WorkItem, error)
+}
 
 type ItemNotFoundError string
 
 func (s ItemNotFoundError) Error() string {
 	return fmt.Sprintf("'%s' was not found.", string(s))
 }
-
-type WorkItemServer interface {
-	GetWorkItem(id string) (WorkItem, error)
-}
-
-type WorkItems []WorkItem
 
 type result struct {
 	workitem WorkItem
@@ -70,7 +69,7 @@ func fetchWorkItems(server WorkItemServer, ids ...string) <-chan result {
 			for id := range remaining {
 				workitem, err := server.GetWorkItem(id)
 				if err != nil && err == ItemNotFoundError(id) {
-					items <- result{NotFoundWorkItem(id), nil}
+					items <- result{workitem, nil}
 				} else {
 					items <- result{workitem, err}
 				}

@@ -66,7 +66,7 @@ func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return apis.NullWorkItem(id), err
 	}
 	defer res.Body.Close()
 
@@ -79,5 +79,5 @@ func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
 		}
 	}
 
-	return nil, apis.ItemNotFoundError(id)
+	return apis.NullWorkItem(id), apis.ItemNotFoundError(id)
 }

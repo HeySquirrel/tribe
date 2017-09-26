@@ -31,8 +31,12 @@ func TestNotFoundWorkItem(t *testing.T) {
 	api := setup(t)
 	itemid := "NOTID"
 
-	_, err := api.GetWorkItem(itemid)
+	item, err := api.GetWorkItem(itemid)
 	if err == nil && err != apis.ItemNotFoundError(itemid) {
 		t.Fatal("Expected ItemNotFoundError")
+	}
+
+	if itemid != item.GetId() {
+		t.Fatalf("Expected '%s', but got '%s'", itemid, item.GetId())
 	}
 }
