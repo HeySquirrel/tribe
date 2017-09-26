@@ -79,5 +79,5 @@ func (r *Rally) GetWorkItem(id string) (apis.WorkItem, error) {
 		}
 	}
 
-	return &Artifact{FormattedID: id}, nil
+	return nil, apis.ItemNotFoundError(id)
 }

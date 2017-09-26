@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -9,6 +10,19 @@ type WorkItem interface {
 	GetName() string
 	GetDescription() string
 	GetId() string
+}
+
+type NotFoundWorkItem string
+
+func (s NotFoundWorkItem) GetType() string        { return "" }
+func (s NotFoundWorkItem) GetName() string        { return "" }
+func (s NotFoundWorkItem) GetDescription() string { return "" }
+func (s NotFoundWorkItem) GetId() string          { return string(s) }
+
+type ItemNotFoundError string
+
+func (s ItemNotFoundError) Error() string {
+	return fmt.Sprintf("'%s' was not found.", string(s))
 }
 
 type WorkItemServer interface {
@@ -55,7 +69,11 @@ func fetchWorkItems(server WorkItemServer, ids ...string) <-chan result {
 		go func() {
 			for id := range remaining {
 				workitem, err := server.GetWorkItem(id)
-				items <- result{workitem, err}
+				if err != nil && err == ItemNotFoundError(id) {
+					items <- result{NotFoundWorkItem(id), nil}
+				} else {
+					items <- result{workitem, err}
+				}
 			}
 			wg.Done()
 		}()

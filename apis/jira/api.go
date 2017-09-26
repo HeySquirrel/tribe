@@ -70,6 +70,10 @@ func (j *jira) GetWorkItem(id string) (apis.WorkItem, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode == 404 {
+		return nil, apis.ItemNotFoundError(id)
+	}
+
 	var result Result
 	json.NewDecoder(res.Body).Decode(&result)
 
