@@ -14,24 +14,24 @@ type jira struct {
 	password string
 }
 
-type JiraResult struct {
-	Issue Issue `json:"fields"`
+type Issue struct {
+	Fields Fields `json:"fields"`
+	Key    string `json:"key"`
+}
+
+type Fields struct {
+	Summary     string    `json:"summary"`
+	Description string    `json:"description"`
+	IssueType   IssueType `json:"issuetype"`
 }
 
 type IssueType struct {
 	Name string `json:"name"`
 }
 
-type Issue struct {
-	Key         string    `json:"key"`
-	Summary     string    `json:"summary"`
-	Description string    `json:"description"`
-	IssueType   IssueType `json:"issuetype"`
-}
-
-func (i *Issue) GetType() string        { return i.IssueType.Name }
-func (i *Issue) GetName() string        { return i.Summary }
-func (i *Issue) GetDescription() string { return i.Description }
+func (i *Issue) GetType() string        { return i.Fields.IssueType.Name }
+func (i *Issue) GetName() string        { return i.Fields.Summary }
+func (i *Issue) GetDescription() string { return i.Fields.Description }
 func (i *Issue) GetId() string          { return i.Key }
 
 func NewJiraFromConfig(servername string) (*jira, error) {
@@ -73,8 +73,8 @@ func (j *jira) GetWorkItem(id string) (WorkItem, error) {
 		return NullWorkItem(id), ItemNotFoundError(id)
 	}
 
-	var result JiraResult
-	json.NewDecoder(res.Body).Decode(&result)
+	var issue Issue
+	json.NewDecoder(res.Body).Decode(&issue)
 
-	return &result.Issue, nil
+	return &issue, nil
 }

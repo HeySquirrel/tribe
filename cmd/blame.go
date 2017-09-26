@@ -38,7 +38,7 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		server, err := apis.NewRallyFromConfig("rally1")
+		server, err := apis.NewWorkItemServer()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

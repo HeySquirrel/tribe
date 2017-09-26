@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"github.com/heysquirrel/tribe/config"
 	"sync"
 )
 
@@ -42,6 +43,35 @@ func IsItemNotFoundError(err error) bool {
 type result struct {
 	workitem WorkItem
 	err      error
+}
+
+func NewWorkItemServer() (WorkItemServer, error) {
+	servernames := config.WorkItemServers()
+	servers := make([]WorkItemServer, 0)
+
+	for _, name := range servernames {
+		serverconfig := config.WorkItemServer(name)
+		var server WorkItemServer
+		var err error
+
+		switch serverconfig["type"] {
+		case "rally":
+			server, err = NewRallyFromConfig(string(name))
+			if err != nil {
+				return nil, err
+			}
+		case "jira":
+			server, err = NewJiraFromConfig(string(name))
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		servers = append(servers, NewCachingServer(server))
+
+	}
+
+	return NewReplicaWorkItemServer(servers...), nil
 }
 
 func GetWorkItems(server WorkItemServer, ids ...string) (WorkItems, error) {

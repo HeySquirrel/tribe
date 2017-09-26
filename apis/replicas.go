@@ -8,10 +8,6 @@ type replicas struct {
 	replicas []WorkItemServer
 }
 
-func NewMultiFromConfig() {
-
-}
-
 func NewReplicaWorkItemServer(servers ...WorkItemServer) *replicas {
 	return &replicas{servers}
 }

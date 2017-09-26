@@ -17,7 +17,7 @@ var ShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		workitemid := args[0]
 
-		api, err := apis.NewRallyFromConfig("rally1")
+		api, err := apis.NewWorkItemServer()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
