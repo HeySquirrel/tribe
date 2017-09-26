@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/apis/rally"
+	"github.com/heysquirrel/tribe/config"
 	"github.com/kennygrant/sanitize"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"io"
 	"os"
 )
@@ -19,7 +19,7 @@ var ShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		workitemid := args[0]
 
-		apikey := viper.GetString("rally.key")
+		apikey := config.RallyApiKey()
 		api := rally.New(apikey)
 
 		workitem, err := api.GetWorkItem(workitemid)
@@ -33,6 +33,8 @@ var ShowCmd = &cobra.Command{
 }
 
 func Display(writer io.Writer, workitem apis.WorkItem) {
+	fmt.Fprintln(writer)
+
 	fmt.Fprintf(writer, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
 	fmt.Fprintln(writer, sanitize.HTML(workitem.GetDescription()))
 }

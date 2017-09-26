@@ -6,8 +6,8 @@ import (
 	"github.com/heysquirrel/tribe/apis/rally"
 	"github.com/heysquirrel/tribe/blame"
 	"github.com/heysquirrel/tribe/blame/model"
+	"github.com/heysquirrel/tribe/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -40,7 +40,7 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		apikey := viper.GetString("rally.key")
+		apikey := config.RallyApiKey()
 		api := apis.NewCachingServer(rally.New(apikey))
 
 		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))

@@ -2,25 +2,13 @@ package rally
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os/user"
-	"path/filepath"
+	"github.com/heysquirrel/tribe/config"
 	"testing"
 )
 
 func TestGetByFormattedIds(t *testing.T) {
-	usr, err := user.Current()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	configFile := filepath.Join(usr.HomeDir, ".tribe")
-	config, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	api := New(string(config))
+	apikey := config.RallyApiKey()
+	api := New(apikey)
 
 	artifacts, _ := api.GetByFormattedIds("S144101")
 
