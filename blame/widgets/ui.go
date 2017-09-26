@@ -60,20 +60,26 @@ func (u *UI) Focus() {
 	})
 }
 
-func (u *UI) Hide() {
-	u.Update(func(v *gocui.View) {
-		u.Gui.SetViewOnBottom(u.Name)
-	})
-}
+func (u *UI) Show() func() {
+	previousView := u.Gui.CurrentView()
 
-func (u *UI) Show() {
 	u.Update(func(v *gocui.View) {
-		if u.Gui.CurrentView() != nil {
-			u.Gui.CurrentView().Highlight = false
+		if previousView != nil {
+			previousView.Highlight = false
 		}
 		u.Gui.SetCurrentView(u.Name)
 		u.Gui.SetViewOnTop(u.Name)
 	})
+
+	return func() {
+		u.Update(func(v *gocui.View) {
+			v.Highlight = false
+			u.Gui.SetViewOnBottom(u.Name)
+
+			u.Gui.SetCurrentView(previousView.Name())
+			previousView.Highlight = true
+		})
+	}
 }
 
 func (u *UI) AddLocalKey(key interface{}, handler func()) {
@@ -82,6 +88,16 @@ func (u *UI) AddLocalKey(key interface{}, handler func()) {
 
 func (u *UI) AddGlobalKey(key interface{}, handler func()) {
 	u.keys = append(u.keys, keyBinding{"", key, handler})
+}
+
+func (u *UI) AddOneUseGlobalKey(key interface{}, handler func()) {
+	u.Update(func(v *gocui.View) {
+		oneUseHandler := func() {
+			u.Gui.DeleteKeybinding("", key, gocui.ModNone)
+			handler()
+		}
+		u.Gui.SetKeybinding("", key, gocui.ModNone, ToBinding(oneUseHandler))
+	})
 }
 
 func (u *UI) Layout(g *gocui.Gui) error {

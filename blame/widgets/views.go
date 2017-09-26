@@ -113,8 +113,7 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 }
 
 func NewWorkItemDetails(ui *UI, workitems <-chan apis.WorkItem) gocui.Manager {
-	ui.Hide()
-	ui.AddGlobalKey(gocui.KeyF9, ui.Hide)
+	ui.Gui.SetViewOnBottom(ui.Name)
 
 	go func() {
 		for workitem := range workitems {
@@ -127,7 +126,8 @@ func NewWorkItemDetails(ui *UI, workitems <-chan apis.WorkItem) gocui.Manager {
 				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
 				fmt.Fprintln(v, sanitize.HTML(workitem.GetDescription()))
 			})
-			ui.Show()
+			hide := ui.Show()
+			ui.AddOneUseGlobalKey(gocui.KeyF9, hide)
 		}
 	}()
 
