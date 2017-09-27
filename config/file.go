@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"reflect"
+	"regexp"
 )
 
 func init() {
@@ -42,4 +43,15 @@ func ItemServers() []ServerName {
 	}
 
 	return names
+}
+
+func Matchers() []*regexp.Regexp {
+	matchers := make([]*regexp.Regexp, 0)
+
+	for _, name := range ItemServers() {
+		server := ItemServer(name)
+		matchers = append(matchers, regexp.MustCompile(server["matcher"]))
+	}
+
+	return matchers
 }

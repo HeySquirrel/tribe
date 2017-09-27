@@ -5,6 +5,7 @@ import (
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
 	"github.com/heysquirrel/tribe/blame/model"
+	"github.com/heysquirrel/tribe/config"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/heysquirrel/tribe/work"
 	"io"
@@ -36,13 +37,15 @@ func (c ContributorItems) Len() int { return len(c) }
 type CommitItems []*git.Commit
 
 func (c CommitItems) Display(writer io.Writer) {
-	re := regexp.MustCompile("(S|DE|F|s|de|f)[0-9][0-9]+")
 	revert := regexp.MustCompile("(r|R)evert")
 	magenta := func(s string) string { return color.MagentaString(s) }
 	cyan := func(s string) string { return color.CyanString(s) }
 
 	for _, commit := range c {
-		subject := re.ReplaceAllStringFunc(commit.Subject, magenta)
+		subject := commit.Subject
+		for _, re := range config.Matchers() {
+			subject = re.ReplaceAllStringFunc(subject, magenta)
+		}
 		subject = revert.ReplaceAllStringFunc(subject, cyan)
 
 		fmt.Fprintf(writer, " %10s - %s - %s\n",

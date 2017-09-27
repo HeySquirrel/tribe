@@ -38,13 +38,11 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		server, err := work.NewItemServer()
+		api, err := work.NewItemServer()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
-		api := work.NewCachingServer(server)
 
 		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))
 

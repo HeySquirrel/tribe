@@ -1,6 +1,7 @@
 package git
 
 import (
+	"github.com/heysquirrel/tribe/config"
 	"regexp"
 	"sort"
 	"time"
@@ -31,16 +32,16 @@ func (commits *Commits) RelatedItems() []string {
 	workItems := make([]string, 0)
 	seen := make(map[string]string)
 
-	re := regexp.MustCompile("(S|DE|F|s|de|f)[0-9][0-9]+")
-
 	for _, commit := range *commits {
-		found := re.FindAllString(commit.Subject, -1)
-		if found != nil {
-			for _, item := range found {
-				_, ok := seen[item]
-				if !ok {
-					workItems = append(workItems, item)
-					seen[item] = item
+		for _, re := range config.Matchers() {
+			found := re.FindAllString(commit.Subject, -1)
+			if found != nil {
+				for _, item := range found {
+					_, ok := seen[item]
+					if !ok {
+						workItems = append(workItems, item)
+						seen[item] = item
+					}
 				}
 			}
 		}
