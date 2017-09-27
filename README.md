@@ -25,14 +25,14 @@ The configuration for tribe is stored in $HOME/.tribe.json. Currently the only c
     "rally1": {
       "type": "rally",
       "host": "https://<cool rally server>",
-      "apikey": "<rally api key here>"
+      "apikey": "<rally api key here>",
       "matcher": "(S|DE|F|s|de|f)[0-9][0-9]+"
     },
     "myjira": {
       "type": "jira",
       "host": "https://<cool jira server>",
       "username": "<jira username>",
-      "password": "<jira password>"
+      "password": "<jira password>",
       "matcher": "HIL-[0-9]+"
     }
   }
