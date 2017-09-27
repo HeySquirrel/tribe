@@ -47,7 +47,7 @@ The configuration for tribe is stored in $HOME/.tribe.json. Currently the only c
 4. Rebase your local changes against the master branch
 5. Run test suite with the `go test ./...` command and confirm that it passes
 6. Run `gofmt -s`
-7. Create new Pull Request
+7. Create new pull request
 
 ## Installation
 
