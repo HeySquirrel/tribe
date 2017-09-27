@@ -45,14 +45,6 @@ func NewJira(host, username, password string) (*jira, error) {
 		return nil, fmt.Errorf("Invalid hostname: '%s'", host)
 	}
 
-	if strings.TrimSpace(username) == "" {
-		return nil, fmt.Errorf("Invalid username: '%s'", username)
-	}
-
-	if strings.TrimSpace(password) == "" {
-		return nil, fmt.Errorf("Invalid password: '%s'", password)
-	}
-
 	return &jira{host, username, password}, nil
 }
 
@@ -61,7 +53,9 @@ func (j *jira) GetItem(id string) (Item, error) {
 	url := fmt.Sprintf("%s/rest/api/2/issue/%s", j.host, id)
 
 	req, _ := http.NewRequest("GET", url, nil)
-	req.SetBasicAuth(j.username, j.password)
+	if strings.TrimSpace(j.username) != "" {
+		req.SetBasicAuth(j.username, j.password)
+	}
 
 	res, err := client.Do(req)
 	if err != nil {

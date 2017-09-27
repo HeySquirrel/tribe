@@ -39,3 +39,20 @@ func TestJiraNotFoundItem(t *testing.T) {
 		t.Fatalf("Expected '%s', but got '%s'", itemid, item.GetId())
 	}
 }
+
+func TestJiraGetItemWhenNoLoginRequired(t *testing.T) {
+	api, err := NewJiraFromConfig("jboss")
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedType := "Feature Request"
+
+	item, err := api.GetItem("FURNACE-37")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expectedType != item.GetType() {
+		t.Fatalf("Expected workitem to be of type '%s', but was: '%s'", expectedType, item.GetType())
+	}
+}
