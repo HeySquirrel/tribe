@@ -19,7 +19,10 @@ func (m *replicas) GetWorkItem(id string) (WorkItem, error) {
 	serverReplica := func(i int, id string) {
 		item, err := m.replicas[i].GetWorkItem(id)
 		if err == nil {
-			c <- item
+			_, ok := item.(NullWorkItem)
+			if !ok {
+				c <- item
+			}
 		}
 	}
 
