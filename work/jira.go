@@ -1,4 +1,4 @@
-package apis
+package work
 
 import (
 	"encoding/json"
@@ -35,7 +35,7 @@ func (i *Issue) GetDescription() string { return i.Fields.Description }
 func (i *Issue) GetId() string          { return i.Key }
 
 func NewJiraFromConfig(servername string) (*jira, error) {
-	serverconfig := config.WorkItemServer(config.ServerName(servername))
+	serverconfig := config.ItemServer(config.ServerName(servername))
 
 	return NewJira(serverconfig["host"], serverconfig["username"], serverconfig["password"])
 }
@@ -56,7 +56,7 @@ func NewJira(host, username, password string) (*jira, error) {
 	return &jira{host, username, password}, nil
 }
 
-func (j *jira) GetWorkItem(id string) (WorkItem, error) {
+func (j *jira) GetItem(id string) (Item, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/rest/api/2/issue/%s", j.host, id)
 
@@ -70,7 +70,7 @@ func (j *jira) GetWorkItem(id string) (WorkItem, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return NullWorkItem(id), ItemNotFoundError(id)
+		return NullItem(id), ItemNotFoundError(id)
 	}
 
 	var issue Issue

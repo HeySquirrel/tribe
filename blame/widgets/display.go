@@ -4,14 +4,14 @@ import (
 	"fmt"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/git"
+	"github.com/heysquirrel/tribe/work"
 	"io"
 	"regexp"
 )
 
-type WorkItems []apis.WorkItem
+type WorkItems []work.Item
 
 func (items WorkItems) Display(writer io.Writer) {
 	for _, item := range items {

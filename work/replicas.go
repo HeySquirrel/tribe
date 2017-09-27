@@ -1,25 +1,25 @@
-package apis
+package work
 
 import (
 	"time"
 )
 
 type replicas struct {
-	replicas []WorkItemServer
+	replicas []ItemServer
 }
 
-func NewReplicaWorkItemServer(servers ...WorkItemServer) *replicas {
+func NewReplicaItemServer(servers ...ItemServer) *replicas {
 	return &replicas{servers}
 }
 
-func (m *replicas) GetWorkItem(id string) (WorkItem, error) {
-	c := make(chan WorkItem)
+func (m *replicas) GetItem(id string) (Item, error) {
+	c := make(chan Item)
 	timeout := time.After(5 * time.Second)
 
 	serverReplica := func(i int, id string) {
-		item, err := m.replicas[i].GetWorkItem(id)
+		item, err := m.replicas[i].GetItem(id)
 		if err == nil {
-			_, ok := item.(NullWorkItem)
+			_, ok := item.(NullItem)
 			if !ok {
 				c <- item
 			}
@@ -34,6 +34,6 @@ func (m *replicas) GetWorkItem(id string) (WorkItem, error) {
 	case item := <-c:
 		return item, nil
 	case <-timeout:
-		return NullWorkItem(id), ItemNotFoundError(id)
+		return NullItem(id), ItemNotFoundError(id)
 	}
 }

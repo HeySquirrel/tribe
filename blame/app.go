@@ -1,9 +1,9 @@
 package blame
 
 import (
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
+	"github.com/heysquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
 	"log"
 )
@@ -93,18 +93,18 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		Gui:    a.Gui,
 	}
 
-	workitems := make(chan apis.WorkItem)
+	workitems := make(chan work.Item)
 
 	filein, lineout, sourceview := widgets.NewSourceCodeList(sourcecode)
 
 	commitin, commitview := widgets.NewCommitList(commits)
-	lineworkin, lineworkout, lineworkview := widgets.NewWorkItemsList(lineworkitems)
+	lineworkin, lineworkout, lineworkview := widgets.NewItemsList(lineworkitems)
 	lineconin, lineconview := widgets.NewContributorsList(linecontributors)
 
-	workin, fileworkout, workview := widgets.NewWorkItemsList(fileworkitems)
+	workin, fileworkout, workview := widgets.NewItemsList(fileworkitems)
 	conin, conview := widgets.NewContributorsList(filecontributors)
 
-	workitemview := widgets.NewWorkItemDetails(workitem, workitems)
+	workitemview := widgets.NewItemDetails(workitem, workitems)
 
 	a.Gui.SetManager(
 		workitemview,

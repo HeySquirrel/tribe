@@ -27,7 +27,7 @@ func NewContributor(name string, lastCommit *Commit) *Contributor {
 	return contributor
 }
 
-func (commits *Commits) RelatedWorkItems() []string {
+func (commits *Commits) RelatedItems() []string {
 	workItems := make([]string, 0)
 	seen := make(map[string]string)
 

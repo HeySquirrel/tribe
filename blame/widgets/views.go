@@ -2,8 +2,8 @@ package widgets
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame/model"
+	"github.com/heysquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
 	"github.com/kennygrant/sanitize"
 	"log"
@@ -26,22 +26,22 @@ func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Ma
 	go func() {
 		for selection := range selections {
 			file := model.File(selection.Items.(FileItems))
-			selected <- file.GetLine(selection.Index)
+			selected <- file.GetLine(selection.Index + 1)
 		}
 	}()
 
 	return files, selected, l
 }
 
-func NewWorkItemsList(ui *UI) (chan<- model.Annotation, <-chan apis.WorkItem, gocui.Manager) {
+func NewItemsList(ui *UI) (chan<- model.Annotation, <-chan work.Item, gocui.Manager) {
 	annotations := make(chan model.Annotation)
-	selected := make(chan apis.WorkItem)
+	selected := make(chan work.Item)
 
 	l, selections := NewList(ui)
 
 	go func(l *list) {
 		for annotation := range annotations {
-			workitems := annotation.GetWorkItems()
+			workitems := annotation.GetItems()
 			l.Title(fmt.Sprintf("Associated Work: %s ", annotation.GetTitle()))
 			l.SetItems(WorkItems(workitems), 0)
 		}
@@ -112,7 +112,7 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 	return annotations, l
 }
 
-func NewWorkItemDetails(ui *UI, workitems <-chan apis.WorkItem) gocui.Manager {
+func NewItemDetails(ui *UI, workitems <-chan work.Item) gocui.Manager {
 	ui.Gui.SetViewOnBottom(ui.Name)
 
 	go func() {

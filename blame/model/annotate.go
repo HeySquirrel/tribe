@@ -4,22 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bluele/gcache"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/git"
+	"github.com/heysquirrel/tribe/work"
 	"log"
 	"time"
 )
 
 type Annotation interface {
 	GetCommits() git.Commits
-	GetWorkItems() []apis.WorkItem
+	GetItems() []work.Item
 	GetContributors() git.Contributors
 	GetTitle() string
 }
 
 type annotation struct {
 	commits   git.Commits
-	workItems []apis.WorkItem
+	workItems []work.Item
 }
 
 type FileAnnotation struct {
@@ -35,7 +35,7 @@ type LineAnnotation struct {
 }
 
 func (a *annotation) GetCommits() git.Commits           { return a.commits }
-func (a *annotation) GetWorkItems() []apis.WorkItem     { return a.workItems }
+func (a *annotation) GetItems() []work.Item             { return a.workItems }
 func (a *annotation) GetContributors() git.Contributors { return a.commits.RelatedContributors() }
 
 func (f *FileAnnotation) GetTitle() string { return f.File.Name }
@@ -49,10 +49,10 @@ type Annotate interface {
 }
 
 type annotate struct {
-	server apis.WorkItemServer
+	server work.ItemServer
 }
 
-func NewAnnotate(server apis.WorkItemServer) Annotate {
+func NewAnnotate(server work.ItemServer) Annotate {
 	return &annotate{server}
 }
 
@@ -63,7 +63,7 @@ func (a *annotate) File(file *File) *FileAnnotation {
 	}
 
 	fileCommits := commits.ContainsFile(file.RelPath)
-	workItems, err := apis.GetWorkItems(a.server, fileCommits.RelatedWorkItems()...)
+	workItems, err := work.GetItems(a.server, fileCommits.RelatedItems()...)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -80,7 +80,7 @@ func (a *annotate) Line(line *Line) *LineAnnotation {
 	}
 
 	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.File.RelPath))
-	workItems, err := apis.GetWorkItems(a.server, commits.RelatedWorkItems()...)
+	workItems, err := work.GetItems(a.server, commits.RelatedItems()...)
 	if err != nil {
 		log.Panicln(err)
 	}

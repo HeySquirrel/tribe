@@ -1,22 +1,22 @@
-package apis
+package work
 
 import (
 	"testing"
 )
 
-func setupRally(t *testing.T) WorkItemServer {
-	api, err := NewRallyFromConfig("rally1")
+func setupJira(t *testing.T) ItemServer {
+	api, err := NewJiraFromConfig("rsjira")
 	if err != nil {
 		t.Fatal(err)
 	}
 	return api
 }
 
-func TestRallyGetWorkItem(t *testing.T) {
-	api := setupRally(t)
-	expectedType := "HierarchicalRequirement"
+func TestJiraGetItem(t *testing.T) {
+	api := setupJira(t)
+	expectedType := "Bug"
 
-	item, err := api.GetWorkItem("S113541")
+	item, err := api.GetItem("HIL-78")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,11 +26,11 @@ func TestRallyGetWorkItem(t *testing.T) {
 	}
 }
 
-func TestRallyNotFoundWorkItem(t *testing.T) {
-	api := setupRally(t)
+func TestJiraNotFoundItem(t *testing.T) {
+	api := setupJira(t)
 	itemid := "NOTID"
 
-	item, err := api.GetWorkItem(itemid)
+	item, err := api.GetItem(itemid)
 	if err == nil || err != ItemNotFoundError(itemid) {
 		t.Fatal("Expected ItemNotFoundError")
 	}

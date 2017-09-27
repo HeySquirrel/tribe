@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestRelatedWorkItems(t *testing.T) {
+func TestRelatedItems(t *testing.T) {
 	cases := []struct {
 		Subject  string
 		Expected []string
@@ -22,7 +22,7 @@ func TestRelatedWorkItems(t *testing.T) {
 		commit.Subject = c.Subject
 
 		entries := Commits{commit}
-		actual := entries.RelatedWorkItems()
+		actual := entries.RelatedItems()
 
 		if len(actual) != len(c.Expected) {
 			t.Fatalf("'%v' not equal '%v'", actual, c.Expected)

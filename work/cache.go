@@ -1,4 +1,4 @@
-package apis
+package work
 
 import (
 	"errors"
@@ -6,30 +6,30 @@ import (
 )
 
 type cache struct {
-	server WorkItemServer
+	server ItemServer
 	cache  gcache.Cache
 }
 
-func (c *cache) GetWorkItem(id string) (WorkItem, error) {
+func (c *cache) GetItem(id string) (Item, error) {
 	value, err := c.cache.Get(id)
 	if err != nil {
 		if IsItemNotFoundError(err) {
-			return NullWorkItem(id), nil
+			return NullItem(id), nil
 		} else {
-			return NullWorkItem(id), err
+			return NullItem(id), err
 		}
 	}
 
-	return value.(WorkItem), nil
+	return value.(Item), nil
 }
 
-func NewCachingServer(server WorkItemServer) WorkItemServer {
+func NewCachingServer(server ItemServer) ItemServer {
 	gc := gcache.New(100).
 		LRU().
 		LoaderFunc(func(key interface{}) (interface{}, error) {
 			id, ok := key.(string)
 			if ok {
-				return server.GetWorkItem(id)
+				return server.GetItem(id)
 			}
 			return nil, errors.New("Unknown key")
 		}).

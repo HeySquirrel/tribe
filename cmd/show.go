@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/apis"
+	"github.com/heysquirrel/tribe/work"
 	"github.com/kennygrant/sanitize"
 	"github.com/spf13/cobra"
 	"io"
@@ -17,13 +17,13 @@ var ShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		workitemid := args[0]
 
-		api, err := apis.NewWorkItemServer()
+		api, err := work.NewItemServer()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		workitem, err := api.GetWorkItem(workitemid)
+		workitem, err := api.GetItem(workitemid)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -33,7 +33,7 @@ var ShowCmd = &cobra.Command{
 	},
 }
 
-func Display(writer io.Writer, workitem apis.WorkItem) {
+func Display(writer io.Writer, workitem work.Item) {
 	fmt.Fprintln(writer)
 
 	fmt.Fprintf(writer, "%s - %s\n\n", workitem.GetId(), workitem.GetName())

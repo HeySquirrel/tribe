@@ -1,4 +1,4 @@
-package apis
+package work
 
 import (
 	"fmt"
@@ -6,23 +6,23 @@ import (
 	"sync"
 )
 
-type WorkItem interface {
+type Item interface {
 	GetType() string
 	GetName() string
 	GetDescription() string
 	GetId() string
 }
 
-type WorkItems []WorkItem
-type NullWorkItem string
+type Items []Item
+type NullItem string
 
-func (s NullWorkItem) GetType() string        { return "" }
-func (s NullWorkItem) GetName() string        { return "" }
-func (s NullWorkItem) GetDescription() string { return "" }
-func (s NullWorkItem) GetId() string          { return string(s) }
+func (s NullItem) GetType() string        { return "" }
+func (s NullItem) GetName() string        { return "" }
+func (s NullItem) GetDescription() string { return "" }
+func (s NullItem) GetId() string          { return string(s) }
 
-type WorkItemServer interface {
-	GetWorkItem(id string) (WorkItem, error)
+type ItemServer interface {
+	GetItem(id string) (Item, error)
 }
 
 type ItemNotFoundError string
@@ -41,17 +41,17 @@ func IsItemNotFoundError(err error) bool {
 }
 
 type result struct {
-	workitem WorkItem
+	workitem Item
 	err      error
 }
 
-func NewWorkItemServer() (WorkItemServer, error) {
-	servernames := config.WorkItemServers()
-	servers := make([]WorkItemServer, 0)
+func NewItemServer() (ItemServer, error) {
+	servernames := config.ItemServers()
+	servers := make([]ItemServer, 0)
 
 	for _, name := range servernames {
-		serverconfig := config.WorkItemServer(name)
-		var server WorkItemServer
+		serverconfig := config.ItemServer(name)
+		var server ItemServer
 		var err error
 
 		switch serverconfig["type"] {
@@ -71,12 +71,12 @@ func NewWorkItemServer() (WorkItemServer, error) {
 
 	}
 
-	return NewReplicaWorkItemServer(servers...), nil
+	return NewReplicaItemServer(servers...), nil
 }
 
-func GetWorkItems(server WorkItemServer, ids ...string) (WorkItems, error) {
-	results := make([]WorkItem, 0)
-	c := fetchWorkItems(server, ids...)
+func GetItems(server ItemServer, ids ...string) (Items, error) {
+	results := make([]Item, 0)
+	c := fetchItems(server, ids...)
 
 	for result := range c {
 		if result.err != nil {
@@ -88,7 +88,7 @@ func GetWorkItems(server WorkItemServer, ids ...string) (WorkItems, error) {
 	return results, nil
 }
 
-func fetchWorkItems(server WorkItemServer, ids ...string) <-chan result {
+func fetchItems(server ItemServer, ids ...string) <-chan result {
 	items := make(chan result)
 	remaining := make(chan string)
 
@@ -106,7 +106,7 @@ func fetchWorkItems(server WorkItemServer, ids ...string) <-chan result {
 	for i := 0; i < numFetchers; i++ {
 		go func() {
 			for id := range remaining {
-				workitem, err := server.GetWorkItem(id)
+				workitem, err := server.GetItem(id)
 				if IsItemNotFoundError(err) {
 					items <- result{workitem, nil}
 				} else {

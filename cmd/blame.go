@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/apis"
 	"github.com/heysquirrel/tribe/blame"
 	"github.com/heysquirrel/tribe/blame/model"
+	"github.com/heysquirrel/tribe/work"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -38,13 +38,13 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		server, err := apis.NewWorkItemServer()
+		server, err := work.NewItemServer()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		api := apis.NewCachingServer(server)
+		api := work.NewCachingServer(server)
 
 		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))
 

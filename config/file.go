@@ -27,12 +27,12 @@ func SetConfigFile(cfgFile string) {
 
 type ServerName string
 
-func WorkItemServer(servername ServerName) map[string]string {
+func ItemServer(servername ServerName) map[string]string {
 	key := fmt.Sprintf("workitemservers.%s", servername)
 	return viper.GetStringMapString(key)
 }
 
-func WorkItemServers() []ServerName {
+func ItemServers() []ServerName {
 	servers := viper.GetStringMap("workitemservers")
 	keys := reflect.ValueOf(servers).MapKeys()
 	names := make([]ServerName, len(keys))

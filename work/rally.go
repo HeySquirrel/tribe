@@ -1,4 +1,4 @@
-package apis
+package work
 
 import (
 	"encoding/json"
@@ -35,7 +35,7 @@ func (a *Artifact) GetDescription() string { return a.Description }
 func (a *Artifact) GetId() string          { return a.FormattedID }
 
 func NewRallyFromConfig(servername string) (*Rally, error) {
-	serverconfig := config.WorkItemServer(config.ServerName(servername))
+	serverconfig := config.ItemServer(config.ServerName(servername))
 
 	return NewRally(serverconfig["host"], serverconfig["apikey"])
 }
@@ -52,7 +52,7 @@ func NewRally(host, apikey string) (*Rally, error) {
 	return &Rally{host, apikey}, nil
 }
 
-func (r *Rally) GetWorkItem(id string) (WorkItem, error) {
+func (r *Rally) GetItem(id string) (Item, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/slm/webservice/v2.0/Artifact", r.host)
 	req, _ := http.NewRequest("GET", url, nil)
@@ -65,7 +65,7 @@ func (r *Rally) GetWorkItem(id string) (WorkItem, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return NullWorkItem(id), err
+		return NullItem(id), err
 	}
 	defer res.Body.Close()
 
@@ -78,5 +78,5 @@ func (r *Rally) GetWorkItem(id string) (WorkItem, error) {
 		}
 	}
 
-	return NullWorkItem(id), ItemNotFoundError(id)
+	return NullItem(id), ItemNotFoundError(id)
 }
