@@ -56,3 +56,6 @@ The configuration for tribe is stored in $HOME/.tribe.json. Currently the only c
 ```sh
 $ go get -u github.com/heysquirrel/tribe
 ```
+
+## License
+[MIT](https://github.com/heysquirrel/tribe/blob/master/LICENSE)
