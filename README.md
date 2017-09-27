@@ -1,9 +1,10 @@
 # tribe
-Tag line goes here.
+Quickly answer the question “Why the @*$% does this code exist?”
 
 ## Features
-- Feature one
-- Feature two
+- Integration with Jira or CA Agile Central to quickly access historical work items or issues
+- Frequent contributors
+- Commits across the last year of the file
 
 ## Usage
 
