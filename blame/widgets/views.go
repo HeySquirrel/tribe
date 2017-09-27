@@ -41,7 +41,7 @@ func NewItemsList(ui *UI) (chan<- model.Annotation, <-chan work.Item, gocui.Mana
 
 	go func(l *list) {
 		for annotation := range annotations {
-			workitems := annotation.GetItems()
+			workitems := annotation.GetWorkItems()
 			l.Title(fmt.Sprintf("Associated Work: %s ", annotation.GetTitle()))
 			l.SetItems(WorkItems(workitems), 0)
 		}

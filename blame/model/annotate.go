@@ -12,7 +12,7 @@ import (
 
 type Annotation interface {
 	GetCommits() git.Commits
-	GetItems() []work.Item
+	GetWorkItems() []work.Item
 	GetContributors() git.Contributors
 	GetTitle() string
 }
@@ -35,7 +35,7 @@ type LineAnnotation struct {
 }
 
 func (a *annotation) GetCommits() git.Commits           { return a.commits }
-func (a *annotation) GetItems() []work.Item             { return a.workItems }
+func (a *annotation) GetWorkItems() []work.Item         { return a.workItems }
 func (a *annotation) GetContributors() git.Contributors { return a.commits.RelatedContributors() }
 
 func (f *FileAnnotation) GetTitle() string { return f.File.Name }
