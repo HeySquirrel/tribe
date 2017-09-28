@@ -3,9 +3,9 @@ package blame
 import (
 	"log"
 
-	"github.com/heysquirrel/tribe/blame/model"
-	"github.com/heysquirrel/tribe/blame/widgets"
-	"github.com/heysquirrel/tribe/work"
+	"github.com/HeySquirrel/tribe/blame/model"
+	"github.com/HeySquirrel/tribe/blame/widgets"
+	"github.com/HeySquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
 )
 

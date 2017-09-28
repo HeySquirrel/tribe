@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/blame"
-	"github.com/heysquirrel/tribe/blame/model"
-	"github.com/heysquirrel/tribe/work"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/HeySquirrel/tribe/blame"
+	"github.com/HeySquirrel/tribe/blame/model"
+	"github.com/HeySquirrel/tribe/work"
+	"github.com/spf13/cobra"
 )
 
 var endpoints []int

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/work"
+	"github.com/HeySquirrel/tribe/work"
 	"github.com/kennygrant/sanitize"
 	"github.com/spf13/cobra"
 	"io"

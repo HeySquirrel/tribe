@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/heysquirrel/tribe/cmd"
+	"github.com/HeySquirrel/tribe/cmd"
 )
 
 func main() {

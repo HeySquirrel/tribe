@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/bluele/gcache"
-	"github.com/heysquirrel/tribe/git"
-	"github.com/heysquirrel/tribe/work"
+	"github.com/HeySquirrel/tribe/git"
+	"github.com/HeySquirrel/tribe/work"
 )
 
 type Annotation interface {

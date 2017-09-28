@@ -1,7 +1,7 @@
 package git
 
 import (
-	"github.com/heysquirrel/tribe/config"
+	"github.com/HeySquirrel/tribe/config"
 	"regexp"
 	"sort"
 	"time"

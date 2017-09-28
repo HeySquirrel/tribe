@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/heysquirrel/tribe/config"
+	"github.com/HeySquirrel/tribe/config"
 )
 
 type Item interface {
