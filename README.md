@@ -66,8 +66,8 @@ You can have as many `workitemservers` as you want. Tribe will search through al
 ### Developer
 
 ```sh
-$ go get -u github.com/heysquirrel/tribe
+$ go get -u github.com/HeySquirrel/tribe
 ```
 
 ## License
-[MIT](https://github.com/heysquirrel/tribe/blob/master/LICENSE)
+[MIT](https://github.com/HeySquirrel/tribe/blob/master/LICENSE)

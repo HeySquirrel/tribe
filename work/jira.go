@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/heysquirrel/tribe/config"
+	"github.com/HeySquirrel/tribe/config"
 )
 
 type jira struct {

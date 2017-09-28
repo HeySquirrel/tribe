@@ -1,1 +1,4 @@
 .DS_Store
+
+# Exclude built binaries
+tribe

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/heysquirrel/tribe/config"
+	"github.com/HeySquirrel/tribe/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -7,10 +7,10 @@ import (
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
-	"github.com/heysquirrel/tribe/blame/model"
-	"github.com/heysquirrel/tribe/config"
-	"github.com/heysquirrel/tribe/git"
-	"github.com/heysquirrel/tribe/work"
+	"github.com/HeySquirrel/tribe/blame/model"
+	"github.com/HeySquirrel/tribe/config"
+	"github.com/HeySquirrel/tribe/git"
+	"github.com/HeySquirrel/tribe/work"
 )
 
 type WorkItems []*work.FetchedItem

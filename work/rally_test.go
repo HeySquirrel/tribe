@@ -35,7 +35,7 @@ func TestRallyNotFoundItem(t *testing.T) {
 		t.Fatal("Expected ItemNotFoundError")
 	}
 
-	if itemid != item.GetId() {
-		t.Fatalf("Expected '%s', but got '%s'", itemid, item.GetId())
+	if item != nil {
+		t.Fatalf("Not found item should have been nil, got item with id '%s'", item.GetId())
 	}
 }

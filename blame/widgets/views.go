@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/heysquirrel/tribe/blame/model"
-	"github.com/heysquirrel/tribe/work"
+	"github.com/HeySquirrel/tribe/blame/model"
+	"github.com/HeySquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
 	"github.com/kennygrant/sanitize"
 )
