@@ -44,11 +44,11 @@ You can have as many `workitemservers` as you want. Tribe will search through al
 ### Rally Details
 * As the code is currently implemented, you will need to obtain an API Key from Rally. You can access your API Key at - https://rally1.rallydev.com/login/ on the API KEYS tab.
 * The `matcher` for your Rally subscription depends on how your workspaces are setup in Rally. The starting letters of your Artifacts can be changed by your workspace administrator. See above for an example matcher.
-* Work items many not display correctly if the work item has been deleted or in a closed project or you don't have permissions to read that work item.
+* Work items may not display correctly if the work item has been deleted or in a closed project or you don't have permissions to read that work item.
 
 ### JIRA Details
 * If the JIRA server is public, you can leave off the username/password from it's configuration.
-* Work items many not display correctly if the work item has been deleted or you don't have permissions to read that work item.
+* Work items may not display correctly if the work item has been deleted or you don't have permissions to read that work item.
 
 
 ## Contribution
