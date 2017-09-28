@@ -3,9 +3,10 @@ package work
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/heysquirrel/tribe/config"
 	"net/http"
 	"strings"
+
+	"github.com/heysquirrel/tribe/config"
 )
 
 type Rally struct {
@@ -65,7 +66,7 @@ func (r *Rally) GetItem(id string) (Item, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return NullItem(id), err
+		return nil, err
 	}
 	defer res.Body.Close()
 
@@ -78,5 +79,5 @@ func (r *Rally) GetItem(id string) (Item, error) {
 		}
 	}
 
-	return NullItem(id), ItemNotFoundError(id)
+	return nil, ItemNotFoundError(id)
 }

@@ -2,21 +2,22 @@ package widgets
 
 import (
 	"fmt"
+	"io"
+	"regexp"
+
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/config"
 	"github.com/heysquirrel/tribe/git"
 	"github.com/heysquirrel/tribe/work"
-	"io"
-	"regexp"
 )
 
-type WorkItems []work.Item
+type WorkItems []*work.FetchedItem
 
 func (items WorkItems) Display(writer io.Writer) {
 	for _, item := range items {
-		fmt.Fprintf(writer, "%10s - %s\n", item.GetId(), item.GetName())
+		fmt.Fprintf(writer, "%10s - %s\n", item.GetId(), item.GetSummary())
 	}
 }
 func (items WorkItems) Len() int { return len(items) }

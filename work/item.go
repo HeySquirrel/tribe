@@ -2,8 +2,10 @@ package work
 
 import (
 	"fmt"
-	"github.com/heysquirrel/tribe/config"
+	"sort"
 	"sync"
+
+	"github.com/heysquirrel/tribe/config"
 )
 
 type Item interface {
@@ -12,14 +14,6 @@ type Item interface {
 	GetDescription() string
 	GetId() string
 }
-
-type Items []Item
-type NullItem string
-
-func (s NullItem) GetType() string        { return "" }
-func (s NullItem) GetName() string        { return "" }
-func (s NullItem) GetDescription() string { return "" }
-func (s NullItem) GetId() string          { return string(s) }
 
 type ItemServer interface {
 	GetItem(id string) (Item, error)
@@ -38,11 +32,6 @@ func IsItemNotFoundError(err error) bool {
 
 	_, ok := err.(ItemNotFoundError)
 	return ok
-}
-
-type result struct {
-	workitem Item
-	err      error
 }
 
 func NewItemServer() (ItemServer, error) {
@@ -74,22 +63,53 @@ func NewItemServer() (ItemServer, error) {
 	return NewReplicaItemServer(servers...), nil
 }
 
-func GetItems(server ItemServer, ids ...string) (Items, error) {
-	results := make([]Item, 0)
-	c := fetchItems(server, ids...)
-
-	for result := range c {
-		if result.err != nil {
-			return results, result.err
-		}
-		results = append(results, result.workitem)
-	}
-
-	return results, nil
+type FetchedItem struct {
+	id       string
+	workitem Item
+	err      error
 }
 
-func fetchItems(server ItemServer, ids ...string) <-chan result {
-	items := make(chan result)
+func (f *FetchedItem) GetId() string { return f.id }
+func (f *FetchedItem) GetSummary() string {
+	if f.err != nil {
+		return f.err.Error()
+	}
+
+	return f.workitem.GetName()
+}
+
+func (f *FetchedItem) GetDescription() string {
+	if f.err != nil {
+		return f.err.Error()
+	}
+
+	return f.workitem.GetDescription()
+}
+
+type byId []*FetchedItem
+
+func (r byId) Len() int      { return len(r) }
+func (r byId) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+func (r byId) Less(i, j int) bool {
+	return r[i].id < r[j].id
+}
+
+func FetchItems(server ItemServer, ids ...string) []*FetchedItem {
+	results := make([]*FetchedItem, len(ids))
+	i := 0
+
+	c := getItems(server, ids...)
+
+	for result := range c {
+		results[i], i = result, i+1
+	}
+
+	sort.Sort(sort.Reverse(byId(results)))
+	return results
+}
+
+func getItems(server ItemServer, ids ...string) <-chan *FetchedItem {
+	items := make(chan *FetchedItem)
 	remaining := make(chan string)
 
 	go func() {
@@ -107,11 +127,7 @@ func fetchItems(server ItemServer, ids ...string) <-chan result {
 		go func() {
 			for id := range remaining {
 				workitem, err := server.GetItem(id)
-				if IsItemNotFoundError(err) {
-					items <- result{workitem, nil}
-				} else {
-					items <- result{workitem, err}
-				}
+				items <- &FetchedItem{id, workitem, err}
 			}
 			wg.Done()
 		}()

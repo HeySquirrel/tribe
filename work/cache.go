@@ -2,6 +2,7 @@ package work
 
 import (
 	"errors"
+
 	"github.com/bluele/gcache"
 )
 
@@ -13,11 +14,7 @@ type cache struct {
 func (c *cache) GetItem(id string) (Item, error) {
 	value, err := c.cache.Get(id)
 	if err != nil {
-		if IsItemNotFoundError(err) {
-			return NullItem(id), nil
-		} else {
-			return NullItem(id), err
-		}
+		return nil, err
 	}
 
 	return value.(Item), nil

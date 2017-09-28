@@ -19,10 +19,7 @@ func (m *replicas) GetItem(id string) (Item, error) {
 	serverReplica := func(i int, id string) {
 		item, err := m.replicas[i].GetItem(id)
 		if err == nil {
-			_, ok := item.(NullItem)
-			if !ok {
-				c <- item
-			}
+			c <- item
 		}
 	}
 
@@ -34,6 +31,6 @@ func (m *replicas) GetItem(id string) (Item, error) {
 	case item := <-c:
 		return item, nil
 	case <-timeout:
-		return NullItem(id), ItemNotFoundError(id)
+		return nil, ItemNotFoundError(id)
 	}
 }

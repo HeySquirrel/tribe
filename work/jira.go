@@ -3,9 +3,10 @@ package work
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/heysquirrel/tribe/config"
 	"net/http"
 	"strings"
+
+	"github.com/heysquirrel/tribe/config"
 )
 
 type jira struct {
@@ -64,7 +65,7 @@ func (j *jira) GetItem(id string) (Item, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return NullItem(id), ItemNotFoundError(id)
+		return nil, ItemNotFoundError(id)
 	}
 
 	var issue Issue

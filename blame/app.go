@@ -1,11 +1,12 @@
 package blame
 
 import (
+	"log"
+
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/blame/widgets"
 	"github.com/heysquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
-	"log"
 )
 
 type BlameApp struct {
@@ -93,7 +94,7 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 		Gui:    a.Gui,
 	}
 
-	workitems := make(chan work.Item)
+	workitems := make(chan *work.FetchedItem)
 
 	filein, lineout, sourceview := widgets.NewSourceCodeList(sourcecode)
 

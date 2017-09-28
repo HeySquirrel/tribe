@@ -2,11 +2,12 @@ package widgets
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/heysquirrel/tribe/blame/model"
 	"github.com/heysquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
 	"github.com/kennygrant/sanitize"
-	"log"
 )
 
 func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Manager) {
@@ -33,9 +34,9 @@ func NewSourceCodeList(ui *UI) (chan<- *model.File, <-chan *model.Line, gocui.Ma
 	return files, selected, l
 }
 
-func NewItemsList(ui *UI) (chan<- model.Annotation, <-chan work.Item, gocui.Manager) {
+func NewItemsList(ui *UI) (chan<- model.Annotation, <-chan *work.FetchedItem, gocui.Manager) {
 	annotations := make(chan model.Annotation)
-	selected := make(chan work.Item)
+	selected := make(chan *work.FetchedItem)
 
 	l, selections := NewList(ui)
 
@@ -112,7 +113,7 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 	return annotations, l
 }
 
-func NewItemDetails(ui *UI, workitems <-chan work.Item) gocui.Manager {
+func NewItemDetails(ui *UI, workitems <-chan *work.FetchedItem) gocui.Manager {
 	ui.Gui.SetViewOnBottom(ui.Name)
 
 	go func() {
@@ -123,7 +124,7 @@ func NewItemDetails(ui *UI, workitems <-chan work.Item) gocui.Manager {
 
 				ui.Title(fmt.Sprintf("%s - F9 to hide", workitem.GetId()))
 
-				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetName())
+				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetSummary())
 				fmt.Fprintln(v, sanitize.HTML(workitem.GetDescription()))
 			})
 			hide := ui.Show()
