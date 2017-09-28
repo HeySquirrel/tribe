@@ -1,0 +1,10 @@
+version: 2
+jobs:
+   build:
+     docker:
+       - image: circleci/golang:latest
+     steps:
+       - checkout
+       - run:
+           name: Run tests
+           command: 'make test'

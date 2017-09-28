@@ -4,19 +4,13 @@ import (
 	"testing"
 )
 
-func setupJira(t *testing.T) ItemServer {
-	api, err := NewJiraFromConfig("rsjira")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return api
-}
+const UNAUTHENTICATED_JIRA = "jboss"
 
 func TestJiraGetItem(t *testing.T) {
-	api := setupJira(t)
-	expectedType := "Bug"
+	api := SetupServer(t, UNAUTHENTICATED_JIRA)
+	expectedType := "Feature Request"
 
-	item, err := api.GetItem("HIL-78")
+	item, err := api.GetItem("FURNACE-37")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +21,7 @@ func TestJiraGetItem(t *testing.T) {
 }
 
 func TestJiraNotFoundItem(t *testing.T) {
-	api := setupJira(t)
+	api := SetupServer(t, UNAUTHENTICATED_JIRA)
 	itemid := "NOTID"
 
 	item, err := api.GetItem(itemid)
@@ -37,22 +31,5 @@ func TestJiraNotFoundItem(t *testing.T) {
 
 	if item != nil {
 		t.Fatalf("Not found item should have been nil, got item with id '%s'", item.GetId())
-	}
-}
-
-func TestJiraGetItemWhenNoLoginRequired(t *testing.T) {
-	api, err := NewJiraFromConfig("jboss")
-	if err != nil {
-		t.Fatal(err)
-	}
-	expectedType := "Feature Request"
-
-	item, err := api.GetItem("FURNACE-37")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if expectedType != item.GetType() {
-		t.Fatalf("Expected workitem to be of type '%s', but was: '%s'", expectedType, item.GetType())
 	}
 }

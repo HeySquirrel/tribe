@@ -1,19 +1,15 @@
-package work
+// +build authenticated
+
+package authenticatedtests
 
 import (
 	"testing"
+
+	"github.com/HeySquirrel/tribe/work"
 )
 
-func setupRally(t *testing.T) ItemServer {
-	api, err := NewRallyFromConfig("rally1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return api
-}
-
 func TestRallyGetItem(t *testing.T) {
-	api := setupRally(t)
+	api := work.SetupServer(t, "rally1")
 	expectedType := "HierarchicalRequirement"
 
 	item, err := api.GetItem("S113541")
@@ -27,11 +23,11 @@ func TestRallyGetItem(t *testing.T) {
 }
 
 func TestRallyNotFoundItem(t *testing.T) {
-	api := setupRally(t)
+	api := work.SetupServer(t, "rally1")
 	itemid := "NOTID"
 
 	item, err := api.GetItem(itemid)
-	if err == nil || err != ItemNotFoundError(itemid) {
+	if err == nil || err != work.ItemNotFoundError(itemid) {
 		t.Fatal("Expected ItemNotFoundError")
 	}
 

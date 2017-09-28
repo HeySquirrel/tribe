@@ -2,13 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"reflect"
 	"regexp"
+
+	"github.com/spf13/viper"
 )
 
 func init() {
 	viper.SetConfigName(".tribe") // name of config file (without extension)
+	viper.AddConfigPath(".")      // look into the current directory
 	viper.AddConfigPath("$HOME")  // adding home directory as first search path
 	viper.AutomaticEnv()          // read in environment variables that match
 

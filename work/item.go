@@ -34,26 +34,27 @@ func IsItemNotFoundError(err error) bool {
 	return ok
 }
 
+func NewItemServerFromConfig(name config.ServerName) (ItemServer, error) {
+	serverconfig := config.ItemServer(name)
+
+	switch serverconfig["type"] {
+	case "rally":
+		return NewRallyFromConfig(string(name))
+	case "jira":
+		return NewJiraFromConfig(string(name))
+	default:
+		return nil, fmt.Errorf("Unknown server type '%s'", serverconfig["type"])
+	}
+}
+
 func NewItemServer() (ItemServer, error) {
 	servernames := config.ItemServers()
 	servers := make([]ItemServer, 0)
 
 	for _, name := range servernames {
-		serverconfig := config.ItemServer(name)
-		var server ItemServer
-		var err error
-
-		switch serverconfig["type"] {
-		case "rally":
-			server, err = NewRallyFromConfig(string(name))
-			if err != nil {
-				return nil, err
-			}
-		case "jira":
-			server, err = NewJiraFromConfig(string(name))
-			if err != nil {
-				return nil, err
-			}
+		server, err := NewItemServerFromConfig(name)
+		if err != nil {
+			return nil, err
 		}
 
 		servers = append(servers, NewCachingServer(server))
