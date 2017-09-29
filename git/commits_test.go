@@ -86,7 +86,7 @@ func TestLogContainsDiff(t *testing.T) {
 func TestLogsAfter(t *testing.T) {
 	logs, err := CommitsAfter(time.Now().AddDate(0, -6, 0))
 	if err != nil {
-		t.Fatal("unable to get logs")
+		t.Fatalf("unable to get logs: %v", err)
 	}
 
 	if len(logs) == 0 {
