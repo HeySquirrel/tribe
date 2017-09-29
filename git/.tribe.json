@@ -1,0 +1,9 @@
+{
+  "workitemservers": {
+    "jboss": {
+      "type": "jira",
+      "host": "https://issues.jboss.org",
+      "matcher": "(HIL)-[0-9]+"
+    }
+  }
+}

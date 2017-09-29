@@ -10,10 +10,10 @@ func TestRelatedItems(t *testing.T) {
 		Subject  string
 		Expected []string
 	}{
-		{"F198234_team_coolness- scope coolness by user", []string{"F198234"}},
-		{"S9028: Make something cool", []string{"S9028"}},
-		{"DE9283: user is uncool", []string{"DE9283"}},
-		{"S28973: Remove F2938_uncool_users", []string{"S28973", "F2938"}},
+		{"HIL-123_team_coolness- scope coolness by user", []string{"HIL-123"}},
+		{"HIL-345: Make something cool", []string{"HIL-345"}},
+		{"HIL-987: user is uncool", []string{"HIL-987"}},
+		{"HIL-654: Remove HIL-872_uncool_users", []string{"HIL-654", "HIL-872"}},
 		{"No related work", []string{}},
 	}
 
