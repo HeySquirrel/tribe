@@ -170,5 +170,10 @@ func (a *BlameApp) setKeyBindings() error {
 	if err != nil {
 		log.Panicln(err)
 	}
+
+	err = a.Gui.SetKeybinding("", 'q', gocui.ModNone, quit)
+	if err != nil {
+		log.Panicln(err)
+	}
 	return nil
 }
