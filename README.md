@@ -1,6 +1,7 @@
 <p align="center">
   <a href="https://circleci.com/gh/HeySquirrel/tribe"><img src="https://circleci.com/gh/HeySquirrel/tribe.svg?style=svg" alt="Build Status"></img></a>
 </p>
+
 # tribe
 Quickly answer the question “Why the @*$% does this code exist?”
 
