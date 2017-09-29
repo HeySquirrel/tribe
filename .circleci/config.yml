@@ -11,6 +11,4 @@ jobs:
     working_directory: /go/src/github.com/HeySquirrel/tribe
     steps:
       - checkout
-
-      - run: go get -v -t -d ./...
       - run: make test
