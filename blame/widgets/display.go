@@ -5,12 +5,12 @@ import (
 	"io"
 	"regexp"
 
-	humanize "github.com/dustin/go-humanize"
-	"github.com/fatih/color"
 	"github.com/HeySquirrel/tribe/blame/model"
 	"github.com/HeySquirrel/tribe/config"
 	"github.com/HeySquirrel/tribe/git"
 	"github.com/HeySquirrel/tribe/work"
+	humanize "github.com/dustin/go-humanize"
+	"github.com/fatih/color"
 )
 
 type WorkItems []*work.FetchedItem

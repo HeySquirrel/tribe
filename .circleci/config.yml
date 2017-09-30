@@ -11,4 +11,4 @@ jobs:
     working_directory: /go/src/github.com/HeySquirrel/tribe
     steps:
       - checkout
-      - run: make test
+      - run: make test-xml

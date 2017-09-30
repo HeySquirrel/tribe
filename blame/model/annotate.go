@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/bluele/gcache"
 	"github.com/HeySquirrel/tribe/git"
 	"github.com/HeySquirrel/tribe/work"
+	"github.com/bluele/gcache"
 )
 
 type Annotation interface {

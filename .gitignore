@@ -2,3 +2,4 @@
 
 # Exclude built binaries
 tribe
+.target
