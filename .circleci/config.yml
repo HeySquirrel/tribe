@@ -12,8 +12,10 @@ jobs:
     steps:
       - checkout
       - run: make test-xml
+      - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      - run: chmod +x ./cc-test-reporter
+      - run: ./cc-test-reporter before-build
+      - run: make test-coverage
+      - run: ./cc-test-reporter after-build --exit-code $?
       - store_test_results:
           path: test-results/
-      - store_artifacts:
-          path: test-results/test.xml
-          prefix: tests
