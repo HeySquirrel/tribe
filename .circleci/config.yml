@@ -16,6 +16,6 @@ jobs:
       - run: chmod +x ./cc-test-reporter
       - run: ./cc-test-reporter before-build
       - run: make test-coverage
-      - run: ./cc-test-reporter after-build -t gocov --exit-code $?
+      - run: ./cc-test-reporter after-build -t gocov p test-results/coverage --exit-code $?
       - store_test_results:
           path: test-results/

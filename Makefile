@@ -70,7 +70,7 @@ COVERAGE_XML = $(COVERAGE_DIR)/coverage.xml
 COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
 test-coverage-tools: | $(GOCOVMERGE) $(GOCOV) $(GOCOVXML)
-test-coverage: COVERAGE_DIR := $(TEST_DIR)/coverage.$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+test-coverage: COVERAGE_DIR := $(TEST_DIR)/coverage
 test-coverage: fmt vendor test-coverage-tools | $(BASE) ; $(info $(M) running coverage tests…) @ ## Run coverage tests
 	$Q mkdir -p $(COVERAGE_DIR)/coverage
 	$Q cd $(BASE) && for pkg in $(TESTPKGS); do \
