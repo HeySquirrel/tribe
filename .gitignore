@@ -3,3 +3,4 @@
 # Exclude built binaries
 tribe
 test-results
+*.out
