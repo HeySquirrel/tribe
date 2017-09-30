@@ -65,7 +65,7 @@ test-xml: fmt vendor | $(GO2XUNIT) ; $(info $(M) running $(NAME:%=% )tests…) @
 	$(GO2XUNIT) -fail -input $(TEST_DIR)/tests.output -output $(TEST_DIR)/tests.xml
 
 COVERAGE_MODE = atomic
-COVERAGE_PROFILE = $(COVERAGE_DIR)/profile.out
+COVERAGE_PROFILE = $(COVERAGE_DIR)/c.out
 COVERAGE_XML = $(COVERAGE_DIR)/coverage.xml
 COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
