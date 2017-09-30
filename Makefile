@@ -46,7 +46,7 @@ $(BIN)/go2xunit: | $(BASE) ; $(info $(M) building go2xunit…)
 
 # Tests
 
-TEST_DIR = $(CURDIR)/.target
+TEST_DIR = $(CURDIR)/test-results
 TEST_TARGETS := test-default test-bench test-short test-verbose test-race test-pr
 .PHONY: $(TEST_TARGETS) test-xml check test tests
 test-bench:   ARGS=-run=__absolutelynothing__ -bench=. ## Run benchmarks

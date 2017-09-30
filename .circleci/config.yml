@@ -12,3 +12,5 @@ jobs:
     steps:
       - checkout
       - run: make test-xml
+      - store_test_results:
+          path: test-results/
