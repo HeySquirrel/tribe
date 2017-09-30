@@ -14,3 +14,6 @@ jobs:
       - run: make test-xml
       - store_test_results:
           path: test-results/
+      - store_artifacts:
+          path: test-results/test.xml
+          prefix: tests
