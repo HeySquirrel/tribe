@@ -24,7 +24,7 @@ var blameCmd = &cobra.Command{
 		switch len(endpoints) {
 		case 1:
 			start = endpoints[0]
-			end = start + 20
+			end = endpoints[0]
 		case 2:
 			start = endpoints[0]
 			end = endpoints[1]
@@ -47,7 +47,7 @@ var blameCmd = &cobra.Command{
 
 		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))
 
-		blame := blame.NewBlameApp(file, annotate)
+		blame := blame.NewApp(file, annotate)
 		defer blame.Close()
 
 		blame.Loop()
@@ -56,5 +56,5 @@ var blameCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(blameCmd)
-	blameCmd.Flags().IntSliceVarP(&endpoints, "lines", "L", []int{1, 20}, "line numbers to blame")
+	blameCmd.Flags().IntSliceVarP(&endpoints, "lines", "L", []int{1, 1}, "line numbers to blame")
 }

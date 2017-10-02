@@ -9,13 +9,16 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-type BlameApp struct {
+// App is the entry point into the tribe blame app
+type App struct {
 	Gui  *gocui.Gui
 	Done chan struct{}
 }
 
-func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
-	a := new(BlameApp)
+// NewApp creates an instance of the App struct for the given model.File.
+// This will create the CUI for blame.
+func NewApp(file *model.File, annotate model.Annotate) *App {
+	a := new(App)
 	a.Done = make(chan struct{})
 	var err error
 
@@ -152,19 +155,19 @@ func NewBlameApp(file *model.File, annotate model.Annotate) *BlameApp {
 	return a
 }
 
-func (a *BlameApp) Loop() {
+func (a *App) Loop() {
 	err := a.Gui.MainLoop()
 	if err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
 }
 
-func (a *BlameApp) Close() {
+func (a *App) Close() {
 	close(a.Done)
 	a.Gui.Close()
 }
 
-func (a *BlameApp) setKeyBindings() error {
+func (a *App) setKeyBindings() error {
 	quit := func(g *gocui.Gui, v *gocui.View) error { return gocui.ErrQuit }
 	err := a.Gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
 	if err != nil {
