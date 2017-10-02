@@ -1,3 +1,4 @@
+<p align="center"><img src="docs/img/squirrel.png" width="360"></p>
 <p align="center">
   <a href="https://circleci.com/gh/HeySquirrel/tribe"><img src="https://circleci.com/gh/HeySquirrel/tribe.svg?style=svg" alt="Build Status"></img></a>
   <a href="https://codeclimate.com/github/HeySquirrel/tribe"><img src="https://codeclimate.com/github/HeySquirrel/tribe/badges/gpa.svg" alt="Code Climate"></img></a>
