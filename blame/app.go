@@ -5,31 +5,33 @@ import (
 
 	"github.com/HeySquirrel/tribe/blame/model"
 	"github.com/HeySquirrel/tribe/blame/widgets"
-	"github.com/HeySquirrel/tribe/work"
+	"github.com/cskr/pubsub"
 	"github.com/jroimartin/gocui"
 )
 
 // App is the entry point into the tribe blame app
 type App struct {
-	Gui  *gocui.Gui
-	Done chan struct{}
+	gui    *gocui.Gui
+	done   chan struct{}
+	pubsub *pubsub.PubSub
 }
 
 // NewApp creates an instance of the App struct for the given model.File.
 // This will create the CUI for blame.
 func NewApp(file *model.File, annotate model.Annotate) *App {
 	a := new(App)
-	a.Done = make(chan struct{})
+	a.done = make(chan struct{})
+	a.pubsub = pubsub.New(1)
 	var err error
 
-	a.Gui, err = gocui.NewGui(gocui.OutputNormal)
+	a.gui, err = gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	a.Gui.SelFgColor = gocui.ColorGreen | gocui.AttrBold
-	a.Gui.BgColor = gocui.ColorDefault
-	a.Gui.Highlight = true
+	a.gui.SelFgColor = gocui.ColorGreen | gocui.AttrBold
+	a.gui.BgColor = gocui.ColorDefault
+	a.gui.Highlight = true
 
 	sourcecode := &widgets.UI{
 		Name:    "source",
@@ -37,7 +39,7 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty:  0.0,
 		Endx:    0.5,
 		Endy:    0.5,
-		Gui:     a.Gui,
+		Gui:     a.gui,
 		FocusOn: gocui.KeyF1,
 	}
 
@@ -47,7 +49,7 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty: 0.2,
 		Endx:   0.8,
 		Endy:   0.8,
-		Gui:    a.Gui,
+		Gui:    a.gui,
 	}
 
 	commits := &widgets.UI{
@@ -56,7 +58,7 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty: 0.0,
 		Endx:   1.0,
 		Endy:   0.4,
-		Gui:    a.Gui,
+		Gui:    a.gui,
 	}
 
 	lineworkitems := &widgets.UI{
@@ -65,7 +67,7 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty:  0.4,
 		Endx:    1.0,
 		Endy:    0.7,
-		Gui:     a.Gui,
+		Gui:     a.gui,
 		FocusOn: gocui.KeyF3,
 	}
 
@@ -75,7 +77,7 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty: 0.7,
 		Endx:   1.0,
 		Endy:   1.0,
-		Gui:    a.Gui,
+		Gui:    a.gui,
 	}
 
 	fileworkitems := &widgets.UI{
@@ -84,7 +86,7 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty:  0.5,
 		Endx:    0.5,
 		Endy:    0.75,
-		Gui:     a.Gui,
+		Gui:     a.gui,
 		FocusOn: gocui.KeyF2,
 	}
 
@@ -94,10 +96,8 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Starty: 0.75,
 		Endx:   0.5,
 		Endy:   1.0,
-		Gui:    a.Gui,
+		Gui:    a.gui,
 	}
-
-	workitems := make(chan *work.FetchedItem)
 
 	filein, lineout, sourceview := widgets.NewSourceCodeList(sourcecode)
 
@@ -108,9 +108,9 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 	workin, fileworkout, workview := widgets.NewItemsList(fileworkitems)
 	conin, conview := widgets.NewContributorsList(filecontributors)
 
-	workitemview := widgets.NewItemDetails(workitem, workitems)
+	workitems, workitemview := widgets.NewItemDetails(workitem)
 
-	a.Gui.SetManager(
+	a.gui.SetManager(
 		workitemview,
 		sourceview,
 		commitview,
@@ -156,25 +156,25 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 }
 
 func (a *App) Loop() {
-	err := a.Gui.MainLoop()
+	err := a.gui.MainLoop()
 	if err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
 	}
 }
 
 func (a *App) Close() {
-	close(a.Done)
-	a.Gui.Close()
+	close(a.done)
+	a.gui.Close()
 }
 
 func (a *App) setKeyBindings() error {
 	quit := func(g *gocui.Gui, v *gocui.View) error { return gocui.ErrQuit }
-	err := a.Gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
+	err := a.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit)
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	err = a.Gui.SetKeybinding("", 'q', gocui.ModNone, quit)
+	err = a.gui.SetKeybinding("", 'q', gocui.ModNone, quit)
 	if err != nil {
 		log.Panicln(err)
 	}

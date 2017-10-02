@@ -113,8 +113,9 @@ func NewCommitList(ui *UI) (chan<- model.Annotation, gocui.Manager) {
 	return annotations, l
 }
 
-func NewItemDetails(ui *UI, workitems <-chan *work.FetchedItem) gocui.Manager {
+func NewItemDetails(ui *UI) (chan<- *work.FetchedItem, gocui.Manager) {
 	ui.Gui.SetViewOnBottom(ui.Name)
+	workitems := make(chan *work.FetchedItem)
 
 	go func() {
 		for workitem := range workitems {
@@ -132,5 +133,5 @@ func NewItemDetails(ui *UI, workitems <-chan *work.FetchedItem) gocui.Manager {
 		}
 	}()
 
-	return ui
+	return workitems, ui
 }
