@@ -8,20 +8,21 @@ import (
 func TestRelatedItems(t *testing.T) {
 	cases := []struct {
 		Subject  string
+		Body     string
 		Expected []string
 	}{
-		{"HIL-123_team_coolness- scope coolness by user", []string{"HIL-123"}},
-		{"HIL-345: Make something cool", []string{"HIL-345"}},
-		{"HIL-987: user is uncool", []string{"HIL-987"}},
-		{"HIL-654: Remove HIL-872_uncool_users", []string{"HIL-654", "HIL-872"}},
-		{"No related work", []string{}},
+		{"HIL-123_team_coolness- scope coolness by user", "", []string{"HIL-123"}},
+		{"HIL-345: Make something cool", "", []string{"HIL-345"}},
+		{"HIL-987: user is uncool", "", []string{"HIL-987"}},
+		{"HIL-654: Remove HIL-872_uncool_users", "", []string{"HIL-654", "HIL-872"}},
+		{"No related work", "", []string{}},
+		{"No related work in the subject", "Issue: HIL-19200", []string{"HIL-19200"}},
 	}
 
 	for _, c := range cases {
-		commit := new(Commit)
-		commit.Subject = c.Subject
-
+		commit := &Commit{Subject: c.Subject, Body: c.Body}
 		entries := Commits{commit}
+
 		actual := entries.RelatedItems()
 
 		if len(actual) != len(c.Expected) {

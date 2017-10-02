@@ -1,10 +1,12 @@
 package git
 
 import (
-	"github.com/HeySquirrel/tribe/config"
+	"fmt"
 	"regexp"
 	"sort"
 	"time"
+
+	"github.com/HeySquirrel/tribe/config"
 )
 
 type Contributor struct {
@@ -34,7 +36,8 @@ func (commits *Commits) RelatedItems() []string {
 
 	for _, commit := range *commits {
 		for _, re := range config.Matchers() {
-			found := re.FindAllString(commit.Subject, -1)
+			search := fmt.Sprintf("%s %s", commit.Subject, commit.Body)
+			found := re.FindAllString(search, -1)
 			if found != nil {
 				for _, item := range found {
 					_, ok := seen[item]
