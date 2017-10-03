@@ -3,8 +3,9 @@ package widgets
 import (
 	"errors"
 	"fmt"
-	"github.com/jroimartin/gocui"
 	"log"
+
+	"github.com/jroimartin/gocui"
 )
 
 type keyBinding struct {
@@ -13,6 +14,20 @@ type keyBinding struct {
 	handler func()
 }
 
+// Focusable allows callers to work with ui widgets that can be focused
+type Focusable interface {
+	// Focus ensures the ui is updated to show that this widget is focused.
+	// Focused widgets will also receive key events. If a widget isn't focused local key event handlers will not fire.
+	Focus()
+
+	// CanFocus will return true when a widget can be focused, false otherwise.
+	CanFocus() bool
+
+	// IsFocused will return true if the widget is currently focused, false otherwise.
+	IsFocused() bool
+}
+
+// UI is the base cui widget that all other ui widgets should extend
 type UI struct {
 	Name    string
 	Startx  float64
@@ -24,6 +39,8 @@ type UI struct {
 	keys    []keyBinding
 }
 
+// Update this ui widget in a goroutine safe way. If the ui widget is updated with this
+// method it is guarenteed to safe.
 func (u *UI) Update(f func(v *gocui.View)) {
 	u.Gui.Update(func(g *gocui.Gui) error {
 		v, err := g.View(u.Name)
@@ -36,6 +53,7 @@ func (u *UI) Update(f func(v *gocui.View)) {
 	})
 }
 
+// Title changes the title of this ui widget
 func (u *UI) Title(title string) {
 	u.Update(func(v *gocui.View) {
 		if u.FocusOn != nil {
@@ -50,6 +68,8 @@ func (u *UI) Title(title string) {
 	})
 }
 
+// Focus ensures the ui is updated to show that this widget is focused.
+// Focused widgets will also receive key events. If a widget isn't focused local key event handlers will not fire.
 func (u *UI) Focus() {
 	u.Update(func(v *gocui.View) {
 		if u.Gui.CurrentView() != nil {
@@ -60,6 +80,18 @@ func (u *UI) Focus() {
 	})
 }
 
+// CanFocus will return true when a widget can be focused, false otherwise.
+func (u *UI) CanFocus() bool {
+	return u.FocusOn != nil
+}
+
+// IsFocused will return true if the widget is currently focused, false otherwise.
+func (u *UI) IsFocused() bool {
+	return u.Name == u.Gui.CurrentView().Name()
+}
+
+// Show ensures this widget is visible with respect to other widgets. Show will also make sure this widget
+// is focused
 func (u *UI) Show() func() {
 	previousView := u.Gui.CurrentView()
 
@@ -82,14 +114,20 @@ func (u *UI) Show() func() {
 	}
 }
 
+// AddLocalKey will add a key binding for this widget only. No other widgets will respond to
+// this key's event handler
 func (u *UI) AddLocalKey(key interface{}, handler func()) {
 	u.keys = append(u.keys, keyBinding{u.Name, key, handler})
 }
 
+// AddGlobalKey will add a key binding for the entire app. It will respond no matter which
+// widget is focused
 func (u *UI) AddGlobalKey(key interface{}, handler func()) {
 	u.keys = append(u.keys, keyBinding{"", key, handler})
 }
 
+// AddOneUseGlobalKey will add a global key binding that will only work the first time the key is pressed. As soon as the
+// key handler executes the key binding is removed.
 func (u *UI) AddOneUseGlobalKey(key interface{}, handler func()) {
 	u.Update(func(v *gocui.View) {
 		oneUseHandler := func() {
@@ -100,7 +138,9 @@ func (u *UI) AddOneUseGlobalKey(key interface{}, handler func()) {
 	})
 }
 
-func (u *UI) Layout(g *gocui.Gui) error {
+// Layout positions this widget in the cui based on the Startx, Starty, Endx and Endy. It also registers
+// all the key bindings that have been added to this widget
+func (u UI) Layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
 	x1 := int(u.Startx * float64(maxX))
@@ -130,10 +170,13 @@ func (u *UI) registerKeyBindings(g *gocui.Gui) error {
 	return nil
 }
 
+// ToBinding is a convenience method used to create keybinding methods from plain methods.
+// This allows users to ignore details of the underlying cui framework
 func ToBinding(f func()) func(g *gocui.Gui, v *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error { f(); return nil }
 }
 
+// ToKeyString converts a key to it's string representation
 func ToKeyString(key interface{}) (string, error) {
 	switch t := key.(type) {
 	case gocui.Key:

@@ -103,6 +103,32 @@ func (a *App) SetFile(filename string, start, end int) {
 	}()
 }
 
+// CycleToNextView will Focus the next view in the list of views that can be focused. A view can be focused
+// if it contains a FocusOn key
+func (a *App) CycleToNextView() {
+	var afterFocused bool
+	var nextView widgets.Focusable
+
+	for _, view := range a.views {
+		ui := view.(widgets.Focusable)
+		if ui.CanFocus() && nextView == nil {
+			nextView = ui
+		}
+
+		if ui.CanFocus() && afterFocused {
+			nextView = ui
+			break
+		}
+
+		if ui.IsFocused() {
+			afterFocused = true
+			continue
+		}
+	}
+
+	nextView.Focus()
+}
+
 // NewApp creates an instance of the App struct for the given model.File.
 // This will create the CUI for blame.
 func NewApp(annotate model.Annotate) *App {
@@ -120,11 +146,11 @@ func NewApp(annotate model.Annotate) *App {
 
 	a.addWorkItemDetailView()
 	a.addSourceCodeView()
+	a.addFileWorkItemsView()
+	a.addFileContributorsView()
 	a.addLineCommitsView()
 	a.addLineContributorsView()
 	a.addLineWorkItemsView()
-	a.addFileWorkItemsView()
-	a.addFileContributorsView()
 
 	a.gui.SetManager(a.views...)
 
@@ -285,5 +311,11 @@ func (a *App) setKeyBindings() error {
 	if err != nil {
 		log.Panicln(err)
 	}
+
+	err = a.gui.SetKeybinding("", gocui.KeyTab, gocui.ModNone, widgets.ToBinding(a.CycleToNextView))
+	if err != nil {
+		log.Panicln(err)
+	}
+
 	return nil
 }
