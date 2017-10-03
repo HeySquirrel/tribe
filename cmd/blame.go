@@ -33,12 +33,6 @@ var blameCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		file, err := model.NewFile(filename, start, end)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
 		api, err := work.NewItemServer()
 		if err != nil {
 			fmt.Println(err)
@@ -47,9 +41,10 @@ var blameCmd = &cobra.Command{
 
 		annotate := model.NewCachingAnnotate(model.NewAnnotate(api))
 
-		blame := blame.NewApp(file, annotate)
+		blame := blame.NewApp(annotate)
 		defer blame.Close()
 
+		blame.SetFile(filename, start, end)
 		blame.Loop()
 	},
 }

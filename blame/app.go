@@ -1,27 +1,112 @@
 package blame
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/HeySquirrel/tribe/blame/model"
 	"github.com/HeySquirrel/tribe/blame/widgets"
-	"github.com/cskr/pubsub"
+	"github.com/HeySquirrel/tribe/work"
 	"github.com/jroimartin/gocui"
 )
 
-// App is the entry point into the tribe blame app
+const (
+	newfile          = "newfile"
+	newline          = "newline"
+	selectedworkitem = "selectedworkitem"
+	lineannotation   = "lineannotation"
+	fileannotation   = "fileannotation"
+)
+
+// App is the entry point into the tribe blame app. It manages the state of all the views
+// that make up the entirity of the blame app.
 type App struct {
-	gui    *gocui.Gui
-	done   chan struct{}
-	pubsub *pubsub.PubSub
+	gui                     *gocui.Gui
+	done                    chan struct{}
+	annotate                model.Annotate
+	views                   []gocui.Manager
+	fileListeners           []chan<- *model.File
+	fileAnnotationListeners []chan<- model.Annotation
+	lineAnnotationListeners []chan<- model.Annotation
+	workItemListeners       []chan<- *work.FetchedItem
+}
+
+// AddView adds a new view to blame.App. Every view added to the app will be added to
+// to the underlying CUI system. blame.App also keeps track of the currently "focused" view and
+// allows use of the TAB key to cycle between focusable views.
+func (a *App) AddView(view gocui.Manager) {
+	a.views = append(a.views, view)
+}
+
+// AddFileListener adds a channel that will get notified every time a new file
+// is available for display
+func (a *App) AddFileListener(c chan<- *model.File) {
+	a.fileListeners = append(a.fileListeners, c)
+}
+
+// AddFileAnnotationListener adds a channel that will get notified every time a new file based
+// annotation is available for display
+func (a *App) AddFileAnnotationListener(c chan<- model.Annotation) {
+	a.fileAnnotationListeners = append(a.fileAnnotationListeners, c)
+}
+
+// AddLineAnnotationListener adds a channel that will get notified every time a new line based
+// annotation is available for display
+func (a *App) AddLineAnnotationListener(c chan<- model.Annotation) {
+	a.lineAnnotationListeners = append(a.lineAnnotationListeners, c)
+}
+
+// AddWorkItemListener adds a channel that will get notified every time a new work item
+// is available for display
+func (a *App) AddWorkItemListener(c chan<- *work.FetchedItem) {
+	a.workItemListeners = append(a.workItemListeners, c)
+}
+
+// SetHighlightedLine changes the current hightlighted line in blame app. This will trigger any view changes
+// that are driven by line changes
+func (a *App) SetHighlightedLine(line *model.Line) {
+	go func() {
+		annotation := a.annotate.Line(line)
+		for _, listener := range a.lineAnnotationListeners {
+			listener <- annotation
+		}
+	}()
+}
+
+// SetSelectedWorkItem changes the currently selected work item in the blame app
+func (a *App) SetSelectedWorkItem(item *work.FetchedItem) {
+	go func() {
+		for _, listener := range a.workItemListeners {
+			listener <- item
+		}
+	}()
+}
+
+// SetFile sets the current file for the blame app
+func (a *App) SetFile(filename string, start, end int) {
+	go func() {
+		file, err := model.NewFile(filename, start, end)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		for _, listener := range a.fileListeners {
+			listener <- file
+		}
+
+		annotation := a.annotate.File(file)
+		for _, listener := range a.fileAnnotationListeners {
+			listener <- annotation
+		}
+	}()
 }
 
 // NewApp creates an instance of the App struct for the given model.File.
 // This will create the CUI for blame.
-func NewApp(file *model.File, annotate model.Annotate) *App {
-	a := new(App)
-	a.done = make(chan struct{})
-	a.pubsub = pubsub.New(1)
+func NewApp(annotate model.Annotate) *App {
+	a := &App{done: make(chan struct{}), annotate: annotate}
 	var err error
 
 	a.gui, err = gocui.NewGui(gocui.OutputNormal)
@@ -33,6 +118,36 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 	a.gui.BgColor = gocui.ColorDefault
 	a.gui.Highlight = true
 
+	a.addWorkItemDetailView()
+	a.addSourceCodeView()
+	a.addLineCommitsView()
+	a.addLineContributorsView()
+	a.addLineWorkItemsView()
+	a.addFileWorkItemsView()
+	a.addFileContributorsView()
+
+	a.gui.SetManager(a.views...)
+
+	a.setKeyBindings()
+
+	return a
+}
+
+// Loop starts to CUI loop for the blame app. This function will hang until Close is called on this App.
+func (a *App) Loop() {
+	err := a.gui.MainLoop()
+	if err != nil && err != gocui.ErrQuit {
+		log.Panicln(err)
+	}
+}
+
+// Close stops the blame app and returns control back to the console
+func (a *App) Close() {
+	close(a.done)
+	a.gui.Close()
+}
+
+func (a *App) addSourceCodeView() {
 	sourcecode := &widgets.UI{
 		Name:    "source",
 		Startx:  0.0,
@@ -43,6 +158,19 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		FocusOn: gocui.KeyF1,
 	}
 
+	filelistener, linechanges, sourceview := widgets.NewSourceCodeList(sourcecode)
+
+	a.AddView(sourceview)
+	a.AddFileListener(filelistener)
+
+	go func() {
+		for line := range linechanges {
+			a.SetHighlightedLine(line)
+		}
+	}()
+}
+
+func (a *App) addWorkItemDetailView() {
 	workitem := &widgets.UI{
 		Name:   "workitem",
 		Startx: 0.2,
@@ -52,6 +180,12 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Gui:    a.gui,
 	}
 
+	workitemlistener, workitemview := widgets.NewItemDetails(workitem)
+	a.AddView(workitemview)
+	a.AddWorkItemListener(workitemlistener)
+}
+
+func (a *App) addLineCommitsView() {
 	commits := &widgets.UI{
 		Name:   "commits",
 		Startx: 0.5,
@@ -61,6 +195,12 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Gui:    a.gui,
 	}
 
+	commitlistener, commitview := widgets.NewCommitList(commits)
+	a.AddView(commitview)
+	a.AddLineAnnotationListener(commitlistener)
+}
+
+func (a *App) addLineWorkItemsView() {
 	lineworkitems := &widgets.UI{
 		Name:    "lineworkitems",
 		Startx:  0.5,
@@ -71,6 +211,18 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		FocusOn: gocui.KeyF3,
 	}
 
+	workitemlistener, selectedworkitems, lineworkview := widgets.NewItemsList(lineworkitems)
+	a.AddView(lineworkview)
+	a.AddLineAnnotationListener(workitemlistener)
+
+	go func() {
+		for workitem := range selectedworkitems {
+			a.SetSelectedWorkItem(workitem)
+		}
+	}()
+}
+
+func (a *App) addLineContributorsView() {
 	linecontributors := &widgets.UI{
 		Name:   "linecontributors",
 		Startx: 0.5,
@@ -80,6 +232,12 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Gui:    a.gui,
 	}
 
+	contributorlistener, lineconview := widgets.NewContributorsList(linecontributors)
+	a.AddView(lineconview)
+	a.AddLineAnnotationListener(contributorlistener)
+}
+
+func (a *App) addFileWorkItemsView() {
 	fileworkitems := &widgets.UI{
 		Name:    "fileworkitems",
 		Startx:  0.0,
@@ -90,6 +248,18 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		FocusOn: gocui.KeyF2,
 	}
 
+	workitemslistener, selectedworkitems, workview := widgets.NewItemsList(fileworkitems)
+	a.AddView(workview)
+	a.AddFileAnnotationListener(workitemslistener)
+
+	go func() {
+		for workitem := range selectedworkitems {
+			a.SetSelectedWorkItem(workitem)
+		}
+	}()
+}
+
+func (a *App) addFileContributorsView() {
 	filecontributors := &widgets.UI{
 		Name:   "filecontributors",
 		Startx: 0.0,
@@ -99,72 +269,9 @@ func NewApp(file *model.File, annotate model.Annotate) *App {
 		Gui:    a.gui,
 	}
 
-	filein, lineout, sourceview := widgets.NewSourceCodeList(sourcecode)
-
-	commitin, commitview := widgets.NewCommitList(commits)
-	lineworkin, lineworkout, lineworkview := widgets.NewItemsList(lineworkitems)
-	lineconin, lineconview := widgets.NewContributorsList(linecontributors)
-
-	workin, fileworkout, workview := widgets.NewItemsList(fileworkitems)
-	conin, conview := widgets.NewContributorsList(filecontributors)
-
-	workitems, workitemview := widgets.NewItemDetails(workitem)
-
-	a.gui.SetManager(
-		workitemview,
-		sourceview,
-		commitview,
-		lineworkview,
-		lineconview,
-		workview,
-		conview,
-	)
-
-	go func() {
-		filein <- file
-	}()
-
-	go func() {
-		for {
-			select {
-			case lineout := <-lineworkout:
-				workitems <- lineout
-			case fileout := <-fileworkout:
-				workitems <- fileout
-			}
-		}
-	}()
-
-	go func() {
-		for line := range lineout {
-			annotation := annotate.Line(line)
-			commitin <- annotation
-			lineworkin <- annotation
-			lineconin <- annotation
-		}
-	}()
-
-	go func() {
-		annotation := annotate.File(file)
-		workin <- annotation
-		conin <- annotation
-	}()
-
-	a.setKeyBindings()
-
-	return a
-}
-
-func (a *App) Loop() {
-	err := a.gui.MainLoop()
-	if err != nil && err != gocui.ErrQuit {
-		log.Panicln(err)
-	}
-}
-
-func (a *App) Close() {
-	close(a.done)
-	a.gui.Close()
+	contributorlistener, conview := widgets.NewContributorsList(filecontributors)
+	a.AddView(conview)
+	a.AddFileAnnotationListener(contributorlistener)
 }
 
 func (a *App) setKeyBindings() error {
