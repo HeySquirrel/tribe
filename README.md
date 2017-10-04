@@ -76,5 +76,9 @@ You can have as many `workitemservers` as you want. Tribe will search through al
 $ go get -u github.com/HeySquirrel/tribe
 ```
 
+## Like the idea?
+
+:star: this repo to show support. Let us know you liked it on [Twitter](https://twitter.com/heysquirrelco).
+
 ## License
 [MIT](https://github.com/HeySquirrel/tribe/blob/master/LICENSE)
