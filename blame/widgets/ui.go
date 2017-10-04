@@ -3,15 +3,17 @@ package widgets
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/jroimartin/gocui"
 )
 
 type keyBinding struct {
-	view    string
-	key     interface{}
-	handler func()
+	view        string
+	key         interface{}
+	description string
+	handler     func()
 }
 
 // Focusable allows callers to work with ui widgets that can be focused
@@ -25,6 +27,12 @@ type Focusable interface {
 
 	// IsFocused will return true if the widget is currently focused, false otherwise.
 	IsFocused() bool
+}
+
+// HelpDocumenter allows callers to ask ui widgets to give help about their functionality.
+type HelpDocumenter interface {
+	// PrintHelp prints help information for this widget
+	PrintHelp(writer io.Writer)
 }
 
 // UI is the base cui widget that all other ui widgets should extend
@@ -116,14 +124,14 @@ func (u *UI) Show() func() {
 
 // AddLocalKey will add a key binding for this widget only. No other widgets will respond to
 // this key's event handler
-func (u *UI) AddLocalKey(key interface{}, handler func()) {
-	u.keys = append(u.keys, keyBinding{u.Name, key, handler})
+func (u *UI) AddLocalKey(key interface{}, description string, handler func()) {
+	u.keys = append(u.keys, keyBinding{u.Name, key, description, handler})
 }
 
 // AddGlobalKey will add a key binding for the entire app. It will respond no matter which
 // widget is focused
-func (u *UI) AddGlobalKey(key interface{}, handler func()) {
-	u.keys = append(u.keys, keyBinding{"", key, handler})
+func (u *UI) AddGlobalKey(key interface{}, description string, handler func()) {
+	u.keys = append(u.keys, keyBinding{"", key, description, handler})
 }
 
 // AddOneUseGlobalKey will add a global key binding that will only work the first time the key is pressed. As soon as the
@@ -156,9 +164,22 @@ func (u UI) Layout(g *gocui.Gui) error {
 	return u.registerKeyBindings(g)
 }
 
+// PrintHelp prints information about this ui's keybindings
+func (u *UI) PrintHelp(writer io.Writer) {
+	fmt.Fprintf(writer, "Shortcuts for %s\n", u.Name)
+	for _, keybinding := range u.keys {
+		keystring, err := ToKeyString(keybinding.key)
+		if err != nil {
+			continue
+		}
+		fmt.Fprintf(writer, "%10s - %s\n", keystring, keybinding.description)
+	}
+	fmt.Fprintln(writer)
+}
+
 func (u *UI) registerKeyBindings(g *gocui.Gui) error {
 	if u.FocusOn != nil {
-		u.AddGlobalKey(u.FocusOn, u.Focus)
+		u.AddGlobalKey(u.FocusOn, "Give focus to this view", u.Focus)
 	}
 
 	for _, binding := range u.keys {
@@ -187,6 +208,18 @@ func ToKeyString(key interface{}) (string, error) {
 			return "F2", nil
 		case gocui.KeyF3:
 			return "F3", nil
+		case gocui.KeyF9:
+			return "F9", nil
+		case gocui.KeyArrowUp:
+			return "Up", nil
+		case gocui.KeyArrowDown:
+			return "Down", nil
+		case gocui.KeyTab:
+			return "Tab", nil
+		case gocui.KeyEnter:
+			return "Enter", nil
+		case gocui.KeyCtrlC:
+			return "Ctrl-C", nil
 		default:
 			return "", errors.New("unknown key")
 		}

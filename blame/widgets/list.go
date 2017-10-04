@@ -2,8 +2,9 @@ package widgets
 
 import (
 	"fmt"
-	"github.com/jroimartin/gocui"
 	"io"
+
+	"github.com/jroimartin/gocui"
 )
 
 type Items interface {
@@ -44,9 +45,9 @@ func NewList(ui *UI) (*list, chan *Selected) {
 		selected,
 	}
 
-	l.AddLocalKey(gocui.KeyArrowUp, l.Previous)
-	l.AddLocalKey(gocui.KeyArrowDown, l.Next)
-	l.AddLocalKey(gocui.KeyEnter, func() { l.fire(OnEnter) })
+	l.AddLocalKey(gocui.KeyArrowUp, "Move selection up one line", l.Previous)
+	l.AddLocalKey(gocui.KeyArrowDown, "Move selection down one line", l.Next)
+	l.AddLocalKey(gocui.KeyEnter, "Select current line", func() { l.fire(OnEnter) })
 
 	return l, selected
 }

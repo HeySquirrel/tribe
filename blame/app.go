@@ -145,6 +145,7 @@ func NewApp(annotate model.Annotate) *App {
 	a.gui.Highlight = true
 
 	a.addWorkItemDetailView()
+	a.addHelpView()
 	a.addSourceCodeView()
 	a.addFileWorkItemsView()
 	a.addFileContributorsView()
@@ -175,7 +176,7 @@ func (a *App) Close() {
 
 func (a *App) addSourceCodeView() {
 	sourcecode := &widgets.UI{
-		Name:    "source",
+		Name:    "Source View",
 		Startx:  0.0,
 		Starty:  0.0,
 		Endx:    0.5,
@@ -198,7 +199,7 @@ func (a *App) addSourceCodeView() {
 
 func (a *App) addWorkItemDetailView() {
 	workitem := &widgets.UI{
-		Name:   "workitem",
+		Name:   "WorkItem Detail View",
 		Startx: 0.2,
 		Starty: 0.2,
 		Endx:   0.8,
@@ -211,9 +212,49 @@ func (a *App) addWorkItemDetailView() {
 	a.AddWorkItemListener(workitemlistener)
 }
 
+func (a *App) addHelpView() {
+	help := &widgets.UI{
+		Name:   "Help View",
+		Startx: 0.2,
+		Starty: 0.2,
+		Endx:   0.8,
+		Endy:   0.8,
+		Gui:    a.gui,
+	}
+
+	a.gui.SetViewOnBottom(help.Name)
+
+	show := func() {
+		help.Update(func(v *gocui.View) {
+			v.Clear()
+			help.Title("Shortcuts - F9 to hide")
+
+			help.PrintHelp(v)
+			for _, view := range a.views {
+				focusable := view.(widgets.Focusable)
+				if focusable.CanFocus() {
+					documenter := view.(widgets.HelpDocumenter)
+					documenter.PrintHelp(v)
+				}
+			}
+
+			fmt.Fprintln(v, "Global Shortcuts")
+			fmt.Fprintf(v, "%10s - Focus next selectable view\n", "Tab")
+			fmt.Fprintf(v, "%10s - Quit blame\n", "q")
+			fmt.Fprintf(v, "%10s - Quit blame\n", "Ctrl-C")
+		})
+		hide := help.Show()
+		help.AddOneUseGlobalKey(gocui.KeyF9, hide)
+	}
+
+	help.AddGlobalKey('h', "Show help", show)
+
+	a.AddView(help)
+}
+
 func (a *App) addLineCommitsView() {
 	commits := &widgets.UI{
-		Name:   "commits",
+		Name:   "Current Line Commit View",
 		Startx: 0.5,
 		Starty: 0.0,
 		Endx:   1.0,
@@ -228,7 +269,7 @@ func (a *App) addLineCommitsView() {
 
 func (a *App) addLineWorkItemsView() {
 	lineworkitems := &widgets.UI{
-		Name:    "lineworkitems",
+		Name:    "Current Line WorkItem View",
 		Startx:  0.5,
 		Starty:  0.4,
 		Endx:    1.0,
@@ -250,7 +291,7 @@ func (a *App) addLineWorkItemsView() {
 
 func (a *App) addLineContributorsView() {
 	linecontributors := &widgets.UI{
-		Name:   "linecontributors",
+		Name:   "Current Line Contributor View",
 		Startx: 0.5,
 		Starty: 0.7,
 		Endx:   1.0,
@@ -265,7 +306,7 @@ func (a *App) addLineContributorsView() {
 
 func (a *App) addFileWorkItemsView() {
 	fileworkitems := &widgets.UI{
-		Name:    "fileworkitems",
+		Name:    "Current File WorkItem View",
 		Startx:  0.0,
 		Starty:  0.5,
 		Endx:    0.5,
@@ -287,7 +328,7 @@ func (a *App) addFileWorkItemsView() {
 
 func (a *App) addFileContributorsView() {
 	filecontributors := &widgets.UI{
-		Name:   "filecontributors",
+		Name:   "Current File Contributor View",
 		Startx: 0.0,
 		Starty: 0.75,
 		Endx:   0.5,
