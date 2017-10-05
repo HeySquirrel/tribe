@@ -82,7 +82,9 @@ func (l *list) SetSelection(index int) {
 
 func (l *list) fire(event SelectionEvent) {
 	go func() {
-		l.selected <- &Selected{event, l.current, l.items}
+		if l.current != -1 { // keep users from selecting items before they have been populated
+			l.selected <- &Selected{event, l.current, l.items}
+		}
 	}()
 }
 
