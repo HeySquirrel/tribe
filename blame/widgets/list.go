@@ -46,7 +46,10 @@ func NewList(ui *UI) (*list, chan *Selected) {
 	}
 
 	l.AddLocalKey(gocui.KeyArrowUp, "Move selection up one line", l.Previous)
+	l.AddLocalKey('k', "Move selection up one line", l.Previous)
 	l.AddLocalKey(gocui.KeyArrowDown, "Move selection down one line", l.Next)
+	l.AddLocalKey('j', "Move selection down one line", l.Next)
+
 	l.AddLocalKey(gocui.KeyEnter, "Select current line", func() { l.fire(OnEnter) })
 
 	return l, selected
