@@ -72,9 +72,14 @@ func (a *annotate) File(file *File) *FileAnnotation {
 func (a *annotate) Line(line *Line) *LineAnnotation {
 	start := 1
 	end := line.Number + 1
+	lineCount := line.File.Len()
 
 	if line.Number > 1 {
 		start = line.Number - 1
+	}
+
+	if end > lineCount {
+		end = lineCount
 	}
 
 	commits, err := git.Log(fmt.Sprintf("-L%d,%d:%s", start, end, line.File.RelPath))
