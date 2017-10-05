@@ -248,6 +248,8 @@ func (a *App) addHelpView() {
 	}
 
 	help.AddGlobalKey('h', "Show help", show)
+	help.AddGlobalKey('?', "Show help", show)
+	help.AddGlobalKey('H', "Show help", show)
 
 	a.AddView(help)
 }
