@@ -123,13 +123,13 @@ func NewItemDetails(ui *UI) (chan<- *work.FetchedItem, gocui.Manager) {
 				v.Clear()
 				v.Wrap = true
 
-				ui.Title(fmt.Sprintf("%s - F9 to hide", workitem.GetId()))
+				ui.Title(fmt.Sprintf("%s - ESC to hide", workitem.GetId()))
 
 				fmt.Fprintf(v, "%s - %s\n\n", workitem.GetId(), workitem.GetSummary())
 				fmt.Fprintln(v, sanitize.HTML(workitem.GetDescription()))
 			})
 			hide := ui.Show()
-			ui.AddOneUseGlobalKey(gocui.KeyF9, hide)
+			ui.AddOneUseGlobalKey(gocui.KeyEsc, hide)
 		}
 	}()
 

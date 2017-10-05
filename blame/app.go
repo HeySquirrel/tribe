@@ -143,6 +143,7 @@ func NewApp(annotate model.Annotate) *App {
 	a.gui.SelFgColor = gocui.ColorGreen | gocui.AttrBold
 	a.gui.BgColor = gocui.ColorDefault
 	a.gui.Highlight = true
+	a.gui.InputEsc = true
 
 	a.addWorkItemDetailView()
 	a.addHelpView()
@@ -227,7 +228,7 @@ func (a *App) addHelpView() {
 	show := func() {
 		help.Update(func(v *gocui.View) {
 			v.Clear()
-			help.Title("Shortcuts - F9 to hide")
+			help.Title("Shortcuts - ESC to hide")
 
 			help.PrintHelp(v)
 			for _, view := range a.views {
@@ -244,7 +245,7 @@ func (a *App) addHelpView() {
 			fmt.Fprintf(v, "%10s - Quit blame\n", "Ctrl-C")
 		})
 		hide := help.Show()
-		help.AddOneUseGlobalKey(gocui.KeyF9, hide)
+		help.AddOneUseGlobalKey(gocui.KeyEsc, hide)
 	}
 
 	help.AddGlobalKey('h', "Show help", show)
