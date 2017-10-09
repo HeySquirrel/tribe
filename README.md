@@ -13,6 +13,21 @@ Quickly answer the question “Why the @*$% does this code exist?”
 - Frequent contributors
 - Commits across the last year of the file
 
+## Installation
+
+### Homebrew
+```sh
+$ brew tap HeySquirrel/tribe
+$ brew install tribe
+```
+
+### Developer
+
+```sh
+$ go get -u github.com/HeySquirrel/tribe
+```
+
+
 ## Usage
 
 ```sh
@@ -67,14 +82,6 @@ You can have as many `workitemservers` as you want. Tribe will search through al
 5. Run test suite with the `go test ./...` command and confirm that it passes
 6. Run `gofmt -s`
 7. Create new pull request
-
-## Installation
-
-### Developer
-
-```sh
-$ go get -u github.com/HeySquirrel/tribe
-```
 
 ## Like the idea?
 
