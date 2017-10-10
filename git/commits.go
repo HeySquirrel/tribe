@@ -50,6 +50,21 @@ func (l *Commits) ContainsFile(filename string) Commits {
 	return commits
 }
 
+// CountAfter counts the number of commits after a time
+func (l *Commits) CountAfter(time time.Time) int {
+	count := 0
+
+	for _, commit := range *l {
+		if commit.Date.After(time) {
+			count++
+		} else {
+			break
+		}
+	}
+
+	return count
+}
+
 func CommitsAfter(after time.Time) (Commits, error) {
 	afterArg := fmt.Sprintf("--after=%s", after.Format("2006/01/02"))
 	return Log(afterArg)
