@@ -31,11 +31,23 @@ $ go get -u github.com/HeySquirrel/tribe
 ## Usage
 
 ```sh
-$ # Why do these lines of code exist
+$ # Why do these lines of code exist?
 $ tribe blame -L100,105 model/user.rb
 
 $ # See basic information about your work items or issues
 $ tribe show HIL-78
+
+$ How risky is it to make a change to this file?
+$ tribe risk app/models/user.rb
+
+Risk for 'app/models/user.rb'
+
+         1 month ago - Last commit
+                 491 - Commit count
+                   7 - Commits last six months
+                  20 - Work items
+                  37 - Contributors
+                0.99 - Risk
 ```
 
 ## Configuration
